@@ -205,9 +205,10 @@ export interface UserNotification {
   read: boolean;
   type?: "info" | "success" | "warning";
   link?: string;
-  category?: "crops" | "labour" | "expert" | "wallet" | "kcc" | "account" | "mandi" | "machinery" | "orders" | "soil";
+  category?: "crops" | "labour" | "expert" | "wallet" | "kcc" | "account" | "mandi" | "machinery" | "orders" | "soil" | "services" | "system" | "finance" | "promotion";
   pdfDataUrl?: string;
   pdfFileName?: string;
+  createdAt?: string;
 }
 
 export interface WalletTransaction {
@@ -306,6 +307,7 @@ interface AppContextType {
   markAllNotificationsAsRead: () => void;
   deleteNotification: (id: string) => void;
   clearAllNotifications: () => void;
+  refreshNotifications: () => Promise<void>;
   addNotification: (
     title: string,
     message: string,
@@ -357,6 +359,17 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const INITIAL_MANDI_RATES: MandiRate[] = [];
 const INITIAL_CROPS: CropListing[] = [];
 const INITIAL_LABOUR_TYPES: string[] = [];
+
+export function safeJsonParse<T>(key: string, fallback: T): T {
+  try {
+    const item = localStorage.getItem(key);
+    if (!item || item === "undefined" || item === "null") return fallback;
+    return JSON.parse(item) as T;
+  } catch (e) {
+    console.warn(`[safeJsonParse] Corrupted localStorage key "${key}", resetting to fallback:`, e);
+    return fallback;
+  }
+}
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // MongoDB Connection State
@@ -560,8 +573,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Crop Listings State
   const [cropListings, setCropListings] = useState<CropListing[]>(() => {
-    const saved = localStorage.getItem("krivexa_crop_listings");
-    return saved ? JSON.parse(saved) : INITIAL_CROPS;
+    return safeJsonParse("krivexa_crop_listings", INITIAL_CROPS);
   });
 
   useEffect(() => {
@@ -612,8 +624,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Machinery Booking State
   const [machineryBookings, setMachineryBookings] = useState<MachineryBookingRequest[]>(() => {
-    const saved = localStorage.getItem("krivexa_machinery_bookings");
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse("krivexa_machinery_bookings", []);
   });
 
   useEffect(() => {
@@ -674,8 +685,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Labour Booking & Types State
   const [labourTypes, setLabourTypes] = useState<string[]>(() => {
-    const saved = localStorage.getItem("krivexa_labour_types");
-    return saved ? JSON.parse(saved) : INITIAL_LABOUR_TYPES;
+    return safeJsonParse("krivexa_labour_types", INITIAL_LABOUR_TYPES);
   });
 
   useEffect(() => {
@@ -694,8 +704,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const [labourBookings, setLabourBookings] = useState<LabourBookingRequest[]>(() => {
-    const saved = localStorage.getItem("krivexa_labour_bookings");
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse("krivexa_labour_bookings", []);
   });
 
   useEffect(() => {
@@ -744,8 +753,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Expert Advice State
   const [expertAdviceQueries, setExpertAdviceQueries] = useState<ExpertAdviceQuery[]>(() => {
-    const saved = localStorage.getItem("krivexa_expert_queries");
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse("krivexa_expert_queries", []);
   });
 
   useEffect(() => {
@@ -800,8 +808,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Mandi Rates State
   const [mandiRates, setMandiRates] = useState<MandiRate[]>(() => {
-    const saved = localStorage.getItem("krivexa_mandi_rates");
-    return saved ? JSON.parse(saved) : INITIAL_MANDI_RATES;
+    return safeJsonParse("krivexa_mandi_rates", INITIAL_MANDI_RATES);
   });
 
   useEffect(() => {
@@ -831,19 +838,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // User Profile Session State
   const [user, setUser] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem("krivexa_user_profile");
-    if (saved) return JSON.parse(saved);
-    return null;
+    return safeJsonParse<UserProfile | null>("krivexa_user_profile", null);
   });
 
   const [notifications, setNotifications] = useState<UserNotification[]>(() => {
-    const saved = localStorage.getItem("krivexa_user_notifications");
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse<UserNotification[]>("krivexa_user_notifications", []);
   });
 
   const [registeredAccounts, setRegisteredAccounts] = useState<RegisteredAccount[]>(() => {
-    const saved = localStorage.getItem("krivexa_registered_accounts");
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse<RegisteredAccount[]>("krivexa_registered_accounts", []);
   });
 
   useEffect(() => {
@@ -863,8 +866,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [notifications]);
 
   const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>(() => {
-    const saved = localStorage.getItem("krivexa_wallet_txns");
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse<WalletTransaction[]>("krivexa_wallet_txns", []);
   });
 
   useEffect(() => {
@@ -1002,6 +1004,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.clearAllNotifications();
   };
 
+  const refreshNotifications = async () => {
+    try {
+      const res = await api.getNotifications();
+      if (Array.isArray(res)) {
+        setNotifications(res);
+      }
+    } catch (err) {
+      console.warn("[AppContext] Failed to refresh notifications:", err);
+    }
+  };
+
   // User-specific KCC Application Lookup
   const currentUserKccApp = user
     ? kccApplications.find(
@@ -1122,8 +1135,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Dealer Product / Service Listings State (Point 4)
   const [dealerListings, setDealerListings] = useState<DealerListing[]>(() => {
-    const saved = localStorage.getItem("krivexa_dealer_listings");
-    return saved ? JSON.parse(saved) : [
+    return safeJsonParse<DealerListing[]>("krivexa_dealer_listings", [
       {
         id: "dl-101",
         dealerId: "usr-dealer-1",
@@ -1138,7 +1150,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         status: "approved",
         createdAt: new Date().toISOString(),
       }
-    ];
+    ]);
   });
 
   useEffect(() => {
@@ -1205,8 +1217,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Kisan Pathshala Videos State & Actions
   const [pathshalaVideos, setPathshalaVideos] = useState<PathshalaVideo[]>(() => {
-    const saved = localStorage.getItem("krivexa_pathshala_videos");
-    return saved ? JSON.parse(saved) : [
+    return safeJsonParse<PathshalaVideo[]>("krivexa_pathshala_videos", [
       {
         id: "vid-1",
         title: "वैज्ञानिक विधि से गेहूं की खेती | Scientific Wheat Farming Techniques",
@@ -1231,7 +1242,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         description: "केंचुआ खाद (Vermicompost) और अन्य जैविक खाद बनाने की विधि तथा खेतों में इसके उपयोग।",
         createdAt: new Date().toISOString()
       }
-    ];
+    ]);
   });
 
   useEffect(() => {
@@ -1257,8 +1268,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Dealer Registered Farmers State (Point 1.iii)
   const [registeredFarmers, setRegisteredFarmers] = useState<RegisteredFarmer[]>(() => {
-    const saved = localStorage.getItem("krivexa_registered_farmers");
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse<RegisteredFarmer[]>("krivexa_registered_farmers", []);
   });
 
   useEffect(() => {
@@ -1353,18 +1363,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Cart & Order State Management (Personal per user)
   const cartStorageKey = user ? `krivexa_cart_${user.phone || user.id}` : "krivexa_cart_guest";
   const [cart, setCart] = useState<CartItem[]>(() => {
-    const saved = localStorage.getItem(cartStorageKey);
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse<CartItem[]>(cartStorageKey, []);
   });
 
   const [orders, setOrders] = useState<CartOrder[]>(() => {
-    const saved = localStorage.getItem("krivexa_cart_orders");
-    return saved ? JSON.parse(saved) : [];
+    return safeJsonParse<CartOrder[]>("krivexa_cart_orders", []);
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem(cartStorageKey);
-    setCart(saved ? JSON.parse(saved) : []);
+    setCart(safeJsonParse<CartItem[]>(cartStorageKey, []));
   }, [cartStorageKey]);
 
   useEffect(() => {
@@ -1548,6 +1555,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markAllNotificationsAsRead,
         deleteNotification,
         clearAllNotifications,
+        refreshNotifications,
         addNotification,
 
         kccApplications,

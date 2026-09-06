@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   RotateCcw, CheckCircle2, Clock, XCircle, Search, Filter,
   Download, Eye, Calendar, ChevronRight, Headphones, AlertCircle,
-  TrendingUp, Check, Sliders
+  TrendingUp, Check, Sliders, X, Save, Plus, FileText, Settings, Phone
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -11,23 +11,24 @@ interface RefundItem {
   orderId: string;
   user: string;
   amount: string;
+  amountNum: number;
   reason: string;
   method: string;
   status: "Processed" | "Pending" | "Failed" | "Cancelled";
   date: string;
 }
 
-const REFUNDS_DATA: RefundItem[] = [
-  { id: "RFN2505250001", orderId: "ORD2505250001", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 2,450.00", reason: "Order Cancelled by User", method: "UPI\nramesh@upi", status: "Processed", date: "25 May 2025\n10:30 AM" },
-  { id: "RFN2505250002", orderId: "ORD2505250002", user: "Suresh Yadav\n(Farmer)", amount: "₹ 5,000.00", reason: "Product Not Delivered", method: "Bank Transfer\nSBI **** 5678", status: "Processed", date: "25 May 2025\n09:45 AM" },
-  { id: "RFN2505240003", orderId: "ORD2505240003", user: "Anita Devi\n(Farmer)", amount: "₹ 1,230.00", reason: "Wrong Product Received", method: "Wallet", status: "Pending", date: "24 May 2025\n04:20 PM" },
-  { id: "RFN2505240004", orderId: "ORD2505240004", user: "Vikash Singh\n(Farmer)", amount: "₹ 7,500.00", reason: "Product Damaged", method: "UPI\nvikash@upi", status: "Processed", date: "24 May 2025\n11:15 AM" },
-  { id: "RFN2505230005", orderId: "ORD2505230005", user: "Pooja Kumari\n(Farmer)", amount: "₹ 2,000.00", reason: "Payment Failed (Auto Refund)", method: "Wallet", status: "Processed", date: "23 May 2025\n02:30 PM" },
-  { id: "RFN2505230006", orderId: "ORD2505230006", user: "Manoj Thakur\n(Farmer)", amount: "₹ 1,080.00", reason: "Order Cancelled by User", method: "Net Banking\nHDFC **** 2345", status: "Failed", date: "23 May 2025\n12:05 PM" },
-  { id: "RFN2505220007", orderId: "ORD2505220007", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 3,000.00", reason: "Service Not Satisfactory", method: "Bank Transfer\nPNB **** 4567", status: "Pending", date: "22 May 2025\n05:40 PM" },
-  { id: "RFN2505220008", orderId: "ORD2505220008", user: "Sunil Kumar\n(Farmer)", amount: "₹ 1,500.00", reason: "Duplicate Payment", method: "UPI\nsunil@upi", status: "Processed", date: "22 May 2025\n01:20 PM" },
-  { id: "RFN2505210009", orderId: "ORD2505210009", user: "Neha Kumari\n(Farmer)", amount: "₹ 4,500.00", reason: "Order Cancelled by Admin", method: "Wallet", status: "Processed", date: "21 May 2025\n03:15 PM" },
-  { id: "RFN2505210010", orderId: "ORD2505210010", user: "Ajay Kumar\n(Farmer)", amount: "₹ 1,000.00", reason: "Payment Gateway Failure", method: "UPI\najay@upi", status: "Pending", date: "21 May 2025\n11:10 AM" },
+const INITIAL_REFUNDS_DATA: RefundItem[] = [
+  { id: "RFN2505250001", orderId: "ORD2505250001", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 2,450.00", amountNum: 2450, reason: "Order Cancelled by User", method: "UPI\nramesh@upi", status: "Processed", date: "25 May 2025\n10:30 AM" },
+  { id: "RFN2505250002", orderId: "ORD2505250002", user: "Suresh Yadav\n(Farmer)", amount: "₹ 5,000.00", amountNum: 5000, reason: "Product Not Delivered", method: "Bank Transfer\nSBI **** 5678", status: "Processed", date: "25 May 2025\n09:45 AM" },
+  { id: "RFN2505240003", orderId: "ORD2505240003", user: "Anita Devi\n(Farmer)", amount: "₹ 1,230.00", amountNum: 1230, reason: "Wrong Product Received", method: "Wallet", status: "Pending", date: "24 May 2025\n04:20 PM" },
+  { id: "RFN2505240004", orderId: "ORD2505240004", user: "Vikash Singh\n(Farmer)", amount: "₹ 7,500.00", amountNum: 7500, reason: "Product Damaged", method: "UPI\nvikash@upi", status: "Processed", date: "24 May 2025\n11:15 AM" },
+  { id: "RFN2505230005", orderId: "ORD2505230005", user: "Pooja Kumari\n(Farmer)", amount: "₹ 2,000.00", amountNum: 2000, reason: "Payment Failed (Auto Refund)", method: "Wallet", status: "Processed", date: "23 May 2025\n02:30 PM" },
+  { id: "RFN2505230006", orderId: "ORD2505230006", user: "Manoj Thakur\n(Farmer)", amount: "₹ 1,080.00", amountNum: 1080, reason: "Order Cancelled by User", method: "Net Banking\nHDFC **** 2345", status: "Failed", date: "23 May 2025\n12:05 PM" },
+  { id: "RFN2505220007", orderId: "ORD2505220007", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 3,000.00", amountNum: 3000, reason: "Service Not Satisfactory", method: "Bank Transfer\nPNB **** 4567", status: "Pending", date: "22 May 2025\n05:40 PM" },
+  { id: "RFN2505220008", orderId: "ORD2505220008", user: "Sunil Kumar\n(Farmer)", amount: "₹ 1,500.00", amountNum: 1500, reason: "Duplicate Payment", method: "UPI\nsunil@upi", status: "Processed", date: "22 May 2025\n01:20 PM" },
+  { id: "RFN2505210009", orderId: "ORD2505210009", user: "Neha Kumari\n(Farmer)", amount: "₹ 4,500.00", amountNum: 4500, reason: "Order Cancelled by Admin", method: "Wallet", status: "Processed", date: "21 May 2025\n03:15 PM" },
+  { id: "RFN2505210010", orderId: "ORD2505210010", user: "Ajay Kumar\n(Farmer)", amount: "₹ 1,000.00", amountNum: 1000, reason: "Payment Gateway Failure", method: "UPI\najay@upi", status: "Pending", date: "21 May 2025\n11:10 AM" },
 ];
 
 const REFUND_REASONS = [
@@ -39,10 +40,53 @@ const REFUND_REASONS = [
 ];
 
 export default function RefundsView() {
+  const [refunds, setRefunds] = useState<RefundItem[]>(INITIAL_REFUNDS_DATA);
   const [filterTab, setFilterTab] = useState<string>("All Refunds");
   const [search, setSearch] = useState("");
 
-  const filtered = REFUNDS_DATA.filter((r) => {
+  // Date range
+  const [dateRange, setDateRange] = useState("01 May 2025 - 31 May 2025");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const datePickerRef = useRef<HTMLDivElement>(null);
+  const DATE_RANGES = [
+    { label: "Today", value: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) + " - " + new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) },
+    { label: "Last 7 Days", value: "Last 7 Days" },
+    { label: "This Month", value: new Date().toLocaleDateString("en-GB", { month: "long", year: "numeric" }) },
+    { label: "May 2025", value: "01 May 2025 - 31 May 2025" },
+    { label: "Apr 2025", value: "01 Apr 2025 - 30 Apr 2025" },
+    { label: "Mar 2025", value: "01 Mar 2025 - 31 Mar 2025" },
+    { label: "All Time", value: "All Time" },
+  ];
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node)) {
+        setShowDatePicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Filters modal
+  const [showFiltersModal, setShowFiltersModal] = useState(false);
+  const [filterMethod, setFilterMethod] = useState("All");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterMinAmount, setFilterMinAmount] = useState("");
+  const [filterMaxAmount, setFilterMaxAmount] = useState("");
+  const [appliedFilters, setAppliedFilters] = useState({ method: "All", status: "All", minAmount: "", maxAmount: "" });
+  const [filtersActive, setFiltersActive] = useState(false);
+
+  // Quick Action modals
+  const [showManualRefundModal, setShowManualRefundModal] = useState(false);
+  const [showPoliciesModal, setShowPoliciesModal] = useState(false);
+  const [showRefundSettingsModal, setShowRefundSettingsModal] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
+  const [manualRefundForm, setManualRefundForm] = useState({ orderId: "", user: "", amount: "", method: "UPI", reason: "" });
+  const [refundSettings, setRefundSettings] = useState({ autoProcess: true, processingDays: 3, allowWalletRefund: true, maxRefundAmt: 50000 });
+  const [supportMessage, setSupportMessage] = useState("");
+
+  const filtered = useMemo(() => refunds.filter((r) => {
     const matchSearch =
       r.id.toLowerCase().includes(search.toLowerCase()) ||
       r.orderId.toLowerCase().includes(search.toLowerCase()) ||
@@ -53,8 +97,15 @@ export default function RefundsView() {
       filterTab === "All Refunds" ||
       r.status === filterTab;
 
-    return matchSearch && matchTab;
-  });
+    const matchMethod = appliedFilters.method === "All" || r.method.toLowerCase().includes(appliedFilters.method.toLowerCase());
+    const matchStatus2 = appliedFilters.status === "All" || r.status.toLowerCase() === appliedFilters.status.toLowerCase();
+    const matchMin = !appliedFilters.minAmount || r.amountNum >= Number(appliedFilters.minAmount);
+    const matchMax = !appliedFilters.maxAmount || r.amountNum <= Number(appliedFilters.maxAmount);
+
+    return matchSearch && matchTab && matchMethod && matchStatus2 && matchMin && matchMax;
+  }), [refunds, search, filterTab, appliedFilters]);
+
+
 
   const getStatusBadge = (status: string) => {
     if (status === "Processed") {
@@ -94,12 +145,39 @@ export default function RefundsView() {
             <span>›</span>
             <span className="text-emerald-600 font-semibold">Refunds</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-xs text-gray-600 shadow-sm">
-            <Calendar className="h-3.5 w-3.5 text-gray-400" />
-            <span>01 May 2025 - 31 May 2025</span>
+          {/* Date Range Picker */}
+          <div className="relative" ref={datePickerRef}>
+            <button
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              className={`flex items-center gap-1.5 bg-white border rounded-xl px-3 py-1.5 text-xs text-gray-600 shadow-sm transition-all hover:border-emerald-500 hover:text-emerald-700 ${showDatePicker ? 'border-emerald-500 text-emerald-700' : 'border-gray-200'}`}
+            >
+              <Calendar className="h-3.5 w-3.5 text-gray-400" />
+              <span>{dateRange}</span>
+            </button>
+            {showDatePicker && (
+              <div className="absolute right-0 top-full mt-1 z-30 bg-white border border-gray-200 rounded-2xl shadow-xl p-2 w-52 animate-in fade-in zoom-in-95 duration-150">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-2 py-1">Select Period</p>
+                {DATE_RANGES.map((dr) => (
+                  <button
+                    key={dr.value}
+                    onClick={() => { setDateRange(dr.value); setShowDatePicker(false); toast.success(`Period set: ${dr.label}`); }}
+                    className={`w-full text-left px-3 py-1.5 text-xs rounded-xl transition-colors ${dateRange === dr.value ? 'bg-emerald-600 text-white font-semibold' : 'text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    {dr.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <button
-            onClick={() => toast.success("Downloading refund report...")}
+            onClick={() => {
+              const csv = ["ID,Order,User,Amount,Reason,Method,Status,Date", ...filtered.map(r => `${r.id},${r.orderId},"${r.user.replace('\n',' ')}",${r.amount},"${r.reason}","${r.method.replace('\n',' ')}",${r.status},"${r.date.replace('\n',' ')}"`)].join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a"); a.href = url; a.download = `refunds-${dateRange.replace(/\s/g,'-')}.csv`; a.click();
+              URL.revokeObjectURL(url);
+              toast.success(`Refund report exported!`);
+            }}
             className="flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-sm transition-colors"
           >
             <Download className="h-3.5 w-3.5" />
@@ -189,11 +267,12 @@ export default function RefundsView() {
             />
           </div>
           <button
-            onClick={() => toast.info("Filter modal")}
-            className="flex items-center gap-1 h-8 px-2.5 rounded-xl border border-gray-200 bg-white text-xs text-gray-600 hover:bg-gray-50 shadow-xs"
+            onClick={() => setShowFiltersModal(true)}
+            className={`flex items-center gap-1 h-8 px-2.5 rounded-xl border bg-white text-xs text-gray-600 hover:bg-gray-50 shadow-xs transition-all ${filtersActive ? 'border-emerald-500 text-emerald-700 ring-1 ring-emerald-300' : 'border-gray-200'}`}
           >
             <Filter className="h-3.5 w-3.5" />
             <span>Filters</span>
+            {filtersActive && <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center">✓</span>}
           </button>
         </div>
       </div>
@@ -468,18 +547,23 @@ export default function RefundsView() {
           <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2">
             <h3 className="text-xs font-bold text-gray-800 mb-2.5">Quick Actions</h3>
             <button
-              onClick={() => toast.info("Processing pending refunds...")}
+              onClick={() => {
+                const pendingCount = refunds.filter(r => r.status === "Pending").length;
+                if (pendingCount === 0) { toast.info("No pending refunds to process."); return; }
+                setRefunds(prev => prev.map(r => r.status === "Pending" ? { ...r, status: "Processed" } : r));
+                toast.success(`✅ ${pendingCount} pending refund(s) processed successfully!`);
+              }}
               className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 border border-gray-100 text-left transition-colors group"
             >
               <div>
                 <p className="text-xs font-bold text-gray-800">Process Pending Refunds</p>
-                <p className="text-[10px] text-gray-400">Approve and process pending refunds</p>
+                <p className="text-[10px] text-gray-400">{refunds.filter(r => r.status === "Pending").length} pending · Approve and process</p>
               </div>
               <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-emerald-600" />
             </button>
 
             <button
-              onClick={() => toast.info("Opening manual refund form...")}
+              onClick={() => setShowManualRefundModal(true)}
               className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 border border-gray-100 text-left transition-colors group"
             >
               <div>
@@ -490,7 +574,7 @@ export default function RefundsView() {
             </button>
 
             <button
-              onClick={() => toast.info("Opening refund policies...")}
+              onClick={() => setShowPoliciesModal(true)}
               className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 border border-gray-100 text-left transition-colors group"
             >
               <div>
@@ -501,7 +585,7 @@ export default function RefundsView() {
             </button>
 
             <button
-              onClick={() => toast.info("Configuring refund settings...")}
+              onClick={() => setShowRefundSettingsModal(true)}
               className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 border border-gray-100 text-left transition-colors group"
             >
               <div>
@@ -522,7 +606,7 @@ export default function RefundsView() {
             </div>
 
             <button
-              onClick={() => toast.info("Contacting support...")}
+              onClick={() => setShowSupportModal(true)}
               className="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
             >
               <Headphones className="h-3.5 w-3.5" />
@@ -531,6 +615,190 @@ export default function RefundsView() {
           </div>
         </div>
       </div>
+
+      {/* ── Filters Modal ── */}
+      {showFiltersModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowFiltersModal(false); }}>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-emerald-50 flex items-center justify-center"><Filter className="h-3.5 w-3.5 text-emerald-600" /></div>
+                <h3 className="text-sm font-bold text-gray-900">Filter Refunds</h3>
+              </div>
+              <button onClick={() => setShowFiltersModal(false)} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1">Refund Method</label>
+                <select value={filterMethod} onChange={(e) => setFilterMethod(e.target.value)} className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium">
+                  <option value="All">All Methods</option>
+                  <option value="UPI">UPI</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Wallet">Wallet</option>
+                  <option value="Net Banking">Net Banking</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1">Status</label>
+                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium">
+                  <option value="All">All Statuses</option>
+                  <option value="Processed">Processed</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Failed">Failed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">Min Amount (₹)</label>
+                  <input type="number" value={filterMinAmount} onChange={(e) => setFilterMinAmount(e.target.value)} placeholder="0" className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 text-xs" />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">Max Amount (₹)</label>
+                  <input type="number" value={filterMaxAmount} onChange={(e) => setFilterMaxAmount(e.target.value)} placeholder="∞" className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 text-xs" />
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+              <button onClick={() => { setFilterMethod("All"); setFilterStatus("All"); setFilterMinAmount(""); setFilterMaxAmount(""); setAppliedFilters({ method: "All", status: "All", minAmount: "", maxAmount: "" }); setFiltersActive(false); setShowFiltersModal(false); toast.success("Filters cleared"); }} className="h-8 px-3 text-xs rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50">Clear</button>
+              <button onClick={() => { setAppliedFilters({ method: filterMethod, status: filterStatus, minAmount: filterMinAmount, maxAmount: filterMaxAmount }); setFiltersActive(filterMethod !== "All" || filterStatus !== "All" || !!filterMinAmount || !!filterMaxAmount); setShowFiltersModal(false); toast.success("Filters applied!"); }} className="h-8 px-4 text-xs rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">Apply Filters</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Manual Refund Modal ── */}
+      {showManualRefundModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowManualRefundModal(false); }}>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-blue-50 flex items-center justify-center"><Plus className="h-3.5 w-3.5 text-blue-600" /></div>
+                <h3 className="text-sm font-bold text-gray-900">Initiate Manual Refund</h3>
+              </div>
+              <button onClick={() => setShowManualRefundModal(false)} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-2">
+                <div><label className="block text-gray-700 font-semibold mb-1">Order ID</label><input value={manualRefundForm.orderId} onChange={(e) => setManualRefundForm(p => ({...p, orderId: e.target.value}))} placeholder="ORD2505250001" className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
+                <div><label className="block text-gray-700 font-semibold mb-1">Amount (₹)</label><input type="number" value={manualRefundForm.amount} onChange={(e) => setManualRefundForm(p => ({...p, amount: e.target.value}))} placeholder="0.00" className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
+              </div>
+              <div><label className="block text-gray-700 font-semibold mb-1">Customer Name</label><input value={manualRefundForm.user} onChange={(e) => setManualRefundForm(p => ({...p, user: e.target.value}))} placeholder="Farmer / Customer Name" className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
+              <div><label className="block text-gray-700 font-semibold mb-1">Refund Method</label><select value={manualRefundForm.method} onChange={(e) => setManualRefundForm(p => ({...p, method: e.target.value}))} className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 text-xs font-medium"><option>UPI</option><option>Bank Transfer</option><option>Wallet</option><option>Net Banking</option></select></div>
+              <div><label className="block text-gray-700 font-semibold mb-1">Reason</label><input value={manualRefundForm.reason} onChange={(e) => setManualRefundForm(p => ({...p, reason: e.target.value}))} placeholder="Reason for refund" className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+              <button onClick={() => setShowManualRefundModal(false)} className="h-8 px-3 text-xs rounded-xl border border-gray-200 text-gray-500">Cancel</button>
+              <button onClick={() => {
+                if (!manualRefundForm.orderId || !manualRefundForm.amount || !manualRefundForm.user) { toast.error("Please fill all required fields"); return; }
+                const newId = `RFN${Date.now().toString().slice(-10)}`;
+                const newRefund: RefundItem = { id: newId, orderId: manualRefundForm.orderId, user: manualRefundForm.user + "\n(Manual)", amount: `₹ ${Number(manualRefundForm.amount).toLocaleString("en-IN", {minimumFractionDigits: 2})}`, amountNum: Number(manualRefundForm.amount), reason: manualRefundForm.reason || "Manual Refund", method: manualRefundForm.method, status: "Pending", date: new Date().toLocaleDateString("en-IN", {day:"2-digit",month:"short",year:"numeric"}) + "\n" + new Date().toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"}) };
+                setRefunds(prev => [newRefund, ...prev]);
+                toast.success(`Manual refund ${newId} created!`);
+                setShowManualRefundModal(false);
+                setManualRefundForm({ orderId: "", user: "", amount: "", method: "UPI", reason: "" });
+              }} className="h-8 px-4 text-xs rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">Create Refund</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Refund Policies Modal ── */}
+      {showPoliciesModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowPoliciesModal(false); }}>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-purple-50 flex items-center justify-center"><FileText className="h-3.5 w-3.5 text-purple-600" /></div>
+                <h3 className="text-sm font-bold text-gray-900">Refund Policies</h3>
+              </div>
+              <button onClick={() => setShowPoliciesModal(false)} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="space-y-3 text-xs text-gray-700">
+              {[
+                { title: "Standard Refund Window", desc: "Refunds can be initiated within 7 days of delivery for damaged/wrong products and within 24 hours for payment failures." },
+                { title: "Eligible Refund Reasons", desc: "Order cancellation, wrong product, product damage, payment failure (auto-refund), service dissatisfaction, duplicate charge." },
+                { title: "Refund Processing Time", desc: "UPI & Wallet: 24 hours. Bank Transfer: 3–5 business days. Net Banking: 5–7 business days." },
+                { title: "Non-Refundable Items", desc: "Seeds once opened, fertilizers after usage, custom-order items, and perishable goods are not eligible for refund." },
+                { title: "Partial Refunds", desc: "Partial refunds may be issued for partially delivered or partially damaged orders upon admin approval." },
+              ].map(p => (
+                <div key={p.title} className="p-3 rounded-xl bg-gray-50 border border-gray-100">
+                  <p className="font-bold text-gray-800 mb-0.5">{p.title}</p>
+                  <p className="text-gray-500 leading-relaxed">{p.desc}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end pt-1"><button onClick={() => setShowPoliciesModal(false)} className="h-8 px-4 text-xs rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">Got It</button></div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Refund Settings Modal ── */}
+      {showRefundSettingsModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowRefundSettingsModal(false); }}>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-amber-50 flex items-center justify-center"><Settings className="h-3.5 w-3.5 text-amber-600" /></div>
+                <h3 className="text-sm font-bold text-gray-900">Refund Settings</h3>
+              </div>
+              <button onClick={() => setShowRefundSettingsModal(false)} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="space-y-3 text-xs">
+              {[
+                { key: "autoProcess" as keyof typeof refundSettings, label: "Auto-Process Eligible Refunds", desc: "Automatically approve payment failure refunds" },
+                { key: "allowWalletRefund" as keyof typeof refundSettings, label: "Allow Wallet Refunds", desc: "Let users receive refunds into their Krivexa wallet" },
+              ].map(({ key, label, desc }) => (
+                <div key={key} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                  <div><p className="font-semibold text-gray-800">{label}</p><p className="text-[10px] text-gray-400">{desc}</p></div>
+                  <button type="button" onClick={() => setRefundSettings(p => ({ ...p, [key]: !p[key] }))} className={`relative w-10 h-5 rounded-full transition-colors ${refundSettings[key] ? 'bg-emerald-600' : 'bg-gray-300'}`}>
+                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${refundSettings[key] ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+              ))}
+              <div><label className="block text-gray-700 font-semibold mb-1">Processing Time (days)</label><input type="number" min={1} max={30} value={refundSettings.processingDays} onChange={(e) => setRefundSettings(p => ({ ...p, processingDays: Number(e.target.value) }))} className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
+              <div><label className="block text-gray-700 font-semibold mb-1">Max Refund Amount (₹)</label><input type="number" min={0} value={refundSettings.maxRefundAmt} onChange={(e) => setRefundSettings(p => ({ ...p, maxRefundAmt: Number(e.target.value) }))} className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+              <button onClick={() => setShowRefundSettingsModal(false)} className="h-8 px-3 text-xs rounded-xl border border-gray-200 text-gray-500">Cancel</button>
+              <button onClick={() => { setShowRefundSettingsModal(false); toast.success("Refund settings saved!"); }} className="h-8 px-4 text-xs rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">Save Settings</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Contact Support Modal ── */}
+      {showSupportModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowSupportModal(false); }}>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-emerald-50 flex items-center justify-center"><Headphones className="h-3.5 w-3.5 text-emerald-600" /></div>
+                <h3 className="text-sm font-bold text-gray-900">Contact Support</h3>
+              </div>
+              <button onClick={() => setShowSupportModal(false)} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="space-y-3 text-xs">
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800">
+                <p className="font-bold">Support Hours</p>
+                <p>Monday – Saturday, 9:00 AM – 7:00 PM IST</p>
+              </div>
+              <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                <Phone className="h-4 w-4 text-emerald-600" />
+                <div><p className="font-bold text-gray-800">+91 1800-XXX-XXXX</p><p className="text-[10px] text-gray-400">Toll-free helpline</p></div>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1">Your Message</label>
+                <textarea value={supportMessage} onChange={(e) => setSupportMessage(e.target.value)} rows={3} placeholder="Describe your refund issue..." className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs resize-none" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+              <button onClick={() => setShowSupportModal(false)} className="h-8 px-3 text-xs rounded-xl border border-gray-200 text-gray-500">Cancel</button>
+              <button onClick={() => { if (!supportMessage.trim()) { toast.error("Please enter a message"); return; } toast.success("Support ticket created! We'll respond in 24h."); setSupportMessage(""); setShowSupportModal(false); }} className="h-8 px-4 text-xs rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">Send Message</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

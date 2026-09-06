@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Plus, Send, Download, History, ChevronRight, Eye,
   CreditCard, ArrowRight, Headphones, TrendingUp, TrendingDown,
   Calendar, CheckCircle2, Lock, Clock, Users, ArrowUpRight, ArrowDownLeft,
-  ShoppingBag, ShieldCheck, UserCheck, Store, Loader2
+  ShoppingBag, ShieldCheck, UserCheck, Store, Loader2,
+  ChevronDown, Check, X, Filter
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/services/api";
@@ -40,25 +41,86 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
     return () => { mounted = false; };
   }, []);
 
-  // Real calculations directly from database records
-  const totalVolume = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || Number(o.amount) || 0), 0);
-  const deliveredOrders = orders.filter(o => {
+  // Date Filter State
+  const [dateFilter, setDateFilter] = useState<{
+    type: "all" | "today" | "yesterday" | "last7" | "thisMonth" | "lastMonth" | "thisYear" | "custom";
+    label: string;
+    startDate?: string;
+    endDate?: string;
+  }>({
+    type: "all",
+    label: "All Time",
+  });
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
+  const datePickerRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (datePickerRef.current && !datePickerRef.current.contains(e.target as Node)) {
+        setIsDatePickerOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const isDateInFilter = (dStr?: string) => {
+    if (dateFilter.type === "all") return true;
+    if (!dStr) return true;
+    const d = new Date(dStr);
+    if (isNaN(d.getTime())) return true;
+    const now = new Date();
+
+    if (dateFilter.type === "today") return d.toDateString() === now.toDateString();
+    if (dateFilter.type === "yesterday") {
+      const y = new Date(now);
+      y.setDate(y.getDate() - 1);
+      return d.toDateString() === y.toDateString();
+    }
+    if (dateFilter.type === "last7") {
+      return now.getTime() - d.getTime() <= 7 * 24 * 3600 * 1000;
+    }
+    if (dateFilter.type === "thisMonth") {
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }
+    if (dateFilter.type === "lastMonth") {
+      const lastM = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      return d.getMonth() === lastM.getMonth() && d.getFullYear() === lastM.getFullYear();
+    }
+    if (dateFilter.type === "thisYear") {
+      return d.getFullYear() === now.getFullYear();
+    }
+    if (dateFilter.type === "custom") {
+      const dTime = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      if (dateFilter.startDate && dTime < new Date(dateFilter.startDate).getTime()) return false;
+      if (dateFilter.endDate && dTime > new Date(dateFilter.endDate).getTime()) return false;
+      return true;
+    }
+    return true;
+  };
+
+  // Real calculations directly from filtered database records
+  const filteredOrders = orders.filter((o) => isDateInFilter(o.createdAt || o.date));
+  const totalVolume = filteredOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || Number(o.amount) || 0), 0);
+  const deliveredOrders = filteredOrders.filter(o => {
     const s = (o.status || "").toLowerCase();
     return s === "delivered" || s === "completed";
   });
   const availableBalance = deliveredOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || Number(o.amount) || 0), 0);
 
-  const pendingOrders = orders.filter(o => {
+  const pendingOrders = filteredOrders.filter(o => {
     const s = (o.status || "").toLowerCase();
     return s === "processing" || s === "pending" || s === "shipped";
   });
   const onHoldBalance = pendingOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || Number(o.amount) || 0), 0);
 
-  const cancelledOrders = orders.filter(o => (o.status || "").toLowerCase() === "cancelled");
+  const cancelledOrders = filteredOrders.filter(o => (o.status || "").toLowerCase() === "cancelled");
   const totalWithdrawn = cancelledOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || Number(o.amount) || 0), 0);
 
   const totalUsersCount = users.length;
-  const currentMonthLabel = new Date().toLocaleDateString("en-IN", { month: "short", year: "numeric" });
 
   // Recent transactions strictly from real orders
   const recentTransactions = orders.slice(0, 5).map((o, idx) => {
@@ -146,9 +208,120 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
             <span>Finance &amp; Wallet</span><span>›</span>
             <span className="text-emerald-600 font-semibold">Wallet Overview</span>
           </div>
-          <div className="flex items-center gap-1.5 border border-gray-200 rounded-xl h-9 px-3 text-xs text-gray-600 bg-white shadow-2xs">
-            <Calendar className="h-3.5 w-3.5 text-gray-400" />
-            <span>{currentMonthLabel} (Live Database)</span>
+          {/* Interactive Date Range Selector Pill */}
+          <div className="relative" ref={datePickerRef}>
+            <button
+              type="button"
+              onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+              className="flex items-center gap-2 border border-gray-200 hover:border-emerald-500 rounded-xl h-9 px-3 text-xs text-gray-700 bg-white hover:bg-gray-50 shadow-2xs cursor-pointer transition-all"
+              title="Select timeframe"
+            >
+              <Calendar className="h-3.5 w-3.5 text-emerald-600" />
+              <span className="font-semibold">{dateFilter.label}</span>
+              <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${isDatePickerOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isDatePickerOpen && (
+              <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 p-4 text-xs animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between pb-2.5 border-b border-gray-100">
+                  <div className="font-bold text-gray-900 flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-emerald-600" />
+                    Select Date Range
+                  </div>
+                  {dateFilter.type !== "all" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDateFilter({ type: "all", label: "All Time" });
+                        setIsDatePickerOpen(false);
+                      }}
+                      className="text-[11px] text-emerald-600 hover:underline font-semibold cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+
+                <div className="py-3 grid grid-cols-2 gap-1.5">
+                  {[
+                    { type: "all" as const, label: "All Time" },
+                    { type: "today" as const, label: "Today" },
+                    { type: "yesterday" as const, label: "Yesterday" },
+                    { type: "last7" as const, label: "Last 7 Days" },
+                    { type: "thisMonth" as const, label: "This Month" },
+                    { type: "lastMonth" as const, label: "Last Month" },
+                    { type: "thisYear" as const, label: "This Year" },
+                  ].map((preset) => (
+                    <button
+                      key={preset.type}
+                      type="button"
+                      onClick={() => {
+                        const now = new Date();
+                        let displayLabel = preset.label;
+                        if (preset.type === "today") {
+                          displayLabel = `Today (${now.toLocaleDateString("en-IN", { day: "2-digit", month: "short" })})`;
+                        } else if (preset.type === "thisMonth") {
+                          displayLabel = `${now.toLocaleDateString("en-IN", { month: "short", year: "numeric" })}`;
+                        }
+                        setDateFilter({ type: preset.type, label: displayLabel });
+                        setIsDatePickerOpen(false);
+                      }}
+                      className={`px-2.5 py-1.5 rounded-lg text-left text-xs font-medium transition-colors cursor-pointer flex items-center justify-between ${
+                        dateFilter.type === preset.type
+                          ? "bg-emerald-600 text-white font-semibold"
+                          : "bg-gray-50 hover:bg-emerald-50 text-gray-700"
+                      }`}
+                    >
+                      <span>{preset.label}</span>
+                      {dateFilter.type === preset.type && <Check className="h-3 w-3" />}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="pt-3 border-t border-gray-100 space-y-2.5">
+                  <span className="font-semibold text-gray-700 block text-[11px]">Custom Range</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-gray-400 block mb-1">From</label>
+                      <input
+                        type="date"
+                        value={customStart}
+                        onChange={(e) => setCustomStart(e.target.value)}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-xs text-gray-700 outline-none focus:border-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-gray-400 block mb-1">To</label>
+                      <input
+                        type="date"
+                        value={customEnd}
+                        onChange={(e) => setCustomEnd(e.target.value)}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-xs text-gray-700 outline-none focus:border-emerald-500"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!customStart && !customEnd}
+                    onClick={() => {
+                      const startLabel = customStart ? new Date(customStart).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
+                      const endLabel = customEnd ? new Date(customEnd).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "";
+                      const label = startLabel && endLabel ? `${startLabel} - ${endLabel}` : startLabel ? `From ${startLabel}` : `Until ${endLabel}`;
+                      setDateFilter({
+                        type: "custom",
+                        label,
+                        startDate: customStart,
+                        endDate: customEnd,
+                      });
+                      setIsDatePickerOpen(false);
+                    }}
+                    className="w-full mt-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold py-1.5 rounded-lg text-xs transition-colors cursor-pointer"
+                  >
+                    Apply Range
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           <button
             onClick={handleDownloadReport}
@@ -266,7 +439,7 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
           <div>
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-bold text-gray-700">Order Volume Activity</p>
-              <span className="text-[11px] text-gray-400 font-medium">{currentMonthLabel}</span>
+              <span className="text-[11px] text-gray-400 font-medium">{dateFilter.label}</span>
             </div>
 
             {/* Total Indicator */}

@@ -34,9 +34,56 @@ const COURIER_PARTNERS = [
   { name: "India Post", initial: "IP", color: "bg-rose-600" },
 ];
 
+interface ShippingSettings {
+  defaultCourier: string;
+  freeShippingThreshold: number;
+  flatShippingRate: number;
+  autoGenerateAwb: boolean;
+  standardSlaDays: number;
+  expressSlaDays: number;
+  returnPickupWindowDays: number;
+  enableTrackingSms: boolean;
+  apiKey: string;
+}
+
+const DEFAULT_SHIPPING_SETTINGS: ShippingSettings = {
+  defaultCourier: "Delhivery",
+  freeShippingThreshold: 999,
+  flatShippingRate: 49,
+  autoGenerateAwb: true,
+  standardSlaDays: 3,
+  expressSlaDays: 1,
+  returnPickupWindowDays: 7,
+  enableTrackingSms: true,
+  apiKey: "dlhv_live_89f92a0134bc",
+};
+
 export default function ShippingManagementView({ orders: propOrders, onViewShipment }: ShippingManagementViewProps) {
   const { orders: appOrders } = useApp();
   const rawOrders = (propOrders && propOrders.length > 0 ? propOrders : (appOrders || []));
+
+  // Shipping Settings from localStorage
+  const [shippingSettings, setShippingSettings] = useState<ShippingSettings>(() => {
+    try {
+      const saved = localStorage.getItem("krivexa_shipping_settings");
+      return saved ? { ...DEFAULT_SHIPPING_SETTINGS, ...JSON.parse(saved) } : DEFAULT_SHIPPING_SETTINGS;
+    } catch {
+      return DEFAULT_SHIPPING_SETTINGS;
+    }
+  });
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [tempSettings, setTempSettings] = useState<ShippingSettings>(shippingSettings);
+
+  const handleSaveSettings = () => {
+    setShippingSettings(tempSettings);
+    try {
+      localStorage.setItem("krivexa_shipping_settings", JSON.stringify(tempSettings));
+    } catch {
+      // ignore
+    }
+    toast.success("Shipping settings saved successfully!");
+    setShowSettingsModal(false);
+  };
 
   // Generate real shipments list from actual orders
   const initialShipments = useMemo<ShipmentItem[]>(() => {
@@ -159,6 +206,18 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [courierFilter, setCourierFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+
+  // Count active filters
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (search.trim()) count++;
+    if (statusFilter !== "all") count++;
+    if (courierFilter !== "all") count++;
+    if (dateFilter !== "all") count++;
+    return count;
+  }, [search, statusFilter, courierFilter, dateFilter]);
 
   const totalShipments = shipments.length;
   const inTransitCount = shipments.filter(s => s.status === "In Transit").length;
@@ -167,6 +226,51 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
   const returnedCount = shipments.filter(s => s.status === "Returned").length;
   const shippedCount = totalShipments - failedCount - returnedCount;
   const successRate = totalShipments > 0 ? Math.round((deliveredCount / (totalShipments - inTransitCount || 1)) * 100) : 100;
+
+  const resetAllFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+    setCourierFilter("all");
+    setDateFilter("all");
+    toast.success("Filters reset");
+  };
+
+  const isShipmentInDateFilter = (shippedOn: string, filter: string) => {
+    if (filter === "all") return true;
+    const now = new Date();
+    const todayStr = now.toLocaleDateString("en-IN");
+
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString("en-IN");
+
+    const cleanDate = shippedOn.split(",")[0].trim();
+
+    if (filter === "today") {
+      return cleanDate === "Today" || cleanDate === todayStr;
+    }
+    if (filter === "yesterday") {
+      return cleanDate === yesterdayStr;
+    }
+    if (filter === "last7days") {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const parts = cleanDate.split("/");
+      if (parts.length === 3) {
+        const d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+        return d >= sevenDaysAgo && d <= now;
+      }
+      return true;
+    }
+    if (filter === "thismonth") {
+      const parts = cleanDate.split("/");
+      if (parts.length === 3) {
+        return Number(parts[1]) === now.getMonth() + 1 && Number(parts[2]) === now.getFullYear();
+      }
+      return true;
+    }
+    return true;
+  };
 
   const filtered = shipments.filter((s) => {
     const matchSearch = s.awb.toLowerCase().includes(search.toLowerCase()) || s.orderId.toLowerCase().includes(search.toLowerCase()) || s.customer.toLowerCase().includes(search.toLowerCase());
@@ -178,7 +282,9 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
       (activeTab === "Returned" && s.status === "Returned");
     const matchCourier = courierFilter === "all" || s.courier.toLowerCase().includes(courierFilter.toLowerCase());
     const matchStatus = statusFilter === "all" || s.status.toLowerCase() === statusFilter.toLowerCase();
-    return matchSearch && matchTab && matchCourier && matchStatus;
+    const matchDate = isShipmentInDateFilter(s.shippedOn, dateFilter);
+
+    return matchSearch && matchTab && matchCourier && matchStatus && matchDate;
   });
 
   const getStatusBadge = (status: string) => {
@@ -197,7 +303,14 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
           <p className="text-xs text-gray-500 mt-0.5">Track and manage all shipments and deliveries in real time</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => toast.info("Shipping Settings")} className="h-8 text-xs gap-1.5 rounded-xl border-gray-200">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setTempSettings(shippingSettings);
+              setShowSettingsModal(true);
+            }}
+            className="h-8 text-xs gap-1.5 rounded-xl border-gray-200 hover:border-emerald-500 hover:text-emerald-700 transition-colors"
+          >
             <Settings className="h-3.5 w-3.5 text-gray-500" /> Shipping Settings
           </Button>
           <Button onClick={() => setShowCreateModal(true)} className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1.5 rounded-xl font-semibold">
@@ -259,6 +372,7 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
               <option value="delivered">Delivered</option>
               <option value="in transit">In Transit</option>
               <option value="delivery failed">Delivery Failed</option>
+              <option value="returned">Returned</option>
             </select>
             <select value={courierFilter} onChange={(e) => setCourierFilter(e.target.value)} className="h-8 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-600">
               <option value="all">Select Courier</option>
@@ -267,13 +381,102 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
               <option value="ekart">Ekart Logistics</option>
               <option value="india post">India Post</option>
             </select>
-            <Button onClick={() => { setSearch(""); setStatusFilter("all"); setCourierFilter("all"); }} variant="outline" className="h-8 text-xs gap-1 rounded-xl border-gray-200">
+            <Button onClick={resetAllFilters} variant="outline" className="h-8 text-xs gap-1 rounded-xl border-gray-200">
               <RotateCcw className="h-3 w-3" /> Reset
             </Button>
-            <Button className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1 rounded-xl font-semibold ml-auto">
+            <Button
+              onClick={() => setShowFilterDrawer(!showFilterDrawer)}
+              className={`h-8 text-white text-xs gap-1.5 rounded-xl font-semibold ml-auto transition-all ${
+                showFilterDrawer || activeFilterCount > 0 ? "bg-emerald-700 hover:bg-emerald-800 ring-2 ring-emerald-300" : "bg-emerald-600 hover:bg-emerald-700"
+              }`}
+            >
               <Filter className="h-3 w-3" /> Filter
+              {activeFilterCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-white text-emerald-700 text-[10px] font-black flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
             </Button>
           </div>
+
+          {/* Advanced Filter Drawer / Tray */}
+          {showFilterDrawer && (
+            <div className="bg-emerald-50/40 border-b border-emerald-100 p-4 space-y-3 animate-in slide-in-from-top-2 duration-150 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-gray-800 flex items-center gap-1.5">
+                  <Filter className="w-3.5 h-3.5 text-emerald-600" /> Advanced Filter Options
+                </span>
+                <button
+                  onClick={() => setShowFilterDrawer(false)}
+                  className="text-gray-400 hover:text-gray-600 text-xs flex items-center gap-0.5"
+                >
+                  <X className="w-3.5 h-3.5" /> Close
+                </button>
+              </div>
+
+              {/* Date Filter Range Pills */}
+              <div>
+                <span className="text-[11px] font-semibold text-gray-600 block mb-1.5">Dispatch Date</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { key: "all", label: "All Time" },
+                    { key: "today", label: "Today" },
+                    { key: "yesterday", label: "Yesterday" },
+                    { key: "last7days", label: "Last 7 Days" },
+                    { key: "thismonth", label: "This Month" },
+                  ].map((df) => (
+                    <button
+                      key={df.key}
+                      onClick={() => setDateFilter(df.key)}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        dateFilter === df.key
+                          ? "bg-emerald-600 text-white font-semibold shadow-xs"
+                          : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {df.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Courier Quick Select Pills */}
+              <div>
+                <span className="text-[11px] font-semibold text-gray-600 block mb-1.5">Courier Partner</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => setCourierFilter("all")}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      courierFilter === "all" ? "bg-emerald-600 text-white font-semibold" : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    All Couriers
+                  </button>
+                  {COURIER_PARTNERS.map((cp) => (
+                    <button
+                      key={cp.name}
+                      onClick={() => setCourierFilter(cp.name.toLowerCase())}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                        courierFilter === cp.name.toLowerCase() ? "bg-emerald-600 text-white font-semibold" : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {cp.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1 text-[11px] text-gray-500">
+                <span>Showing <strong>{filtered.length}</strong> of {totalShipments} shipments</span>
+                <button
+                  onClick={resetAllFilters}
+                  className="text-emerald-700 font-semibold hover:underline"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Table */}
           <div className="overflow-x-auto">
@@ -551,6 +754,145 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
                 className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl font-semibold gap-1.5"
               >
                 <Plus className="h-3.5 w-3.5" /> Create &amp; Dispatch
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shipping Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowSettingsModal(false); }}>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <Settings className="h-4 w-4 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Shipping Settings</h3>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Configure courier partners, rates and SLAs</p>
+                </div>
+              </div>
+              <button onClick={() => setShowSettingsModal(false)} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              {/* Default Courier */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1.5">Default Courier Partner</label>
+                <select
+                  value={tempSettings.defaultCourier}
+                  onChange={(e) => setTempSettings(prev => ({ ...prev, defaultCourier: e.target.value }))}
+                  className="w-full h-9 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium focus:outline-none focus:border-emerald-500"
+                >
+                  {COURIER_PARTNERS.map(c => (<option key={c.name} value={c.name}>{c.name}</option>))}
+                </select>
+              </div>
+
+              {/* Rates */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1.5">Free Shipping Threshold (₹)</label>
+                  <Input
+                    type="number"
+                    value={tempSettings.freeShippingThreshold}
+                    onChange={(e) => setTempSettings(prev => ({ ...prev, freeShippingThreshold: Number(e.target.value) }))}
+                    className="h-9 text-xs rounded-xl border-gray-200"
+                    min={0}
+                  />
+                  <p className="text-[10px] text-gray-400 mt-0.5">Orders above this get free shipping</p>
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1.5">Flat Shipping Rate (₹)</label>
+                  <Input
+                    type="number"
+                    value={tempSettings.flatShippingRate}
+                    onChange={(e) => setTempSettings(prev => ({ ...prev, flatShippingRate: Number(e.target.value) }))}
+                    className="h-9 text-xs rounded-xl border-gray-200"
+                    min={0}
+                  />
+                  <p className="text-[10px] text-gray-400 mt-0.5">Applied below free threshold</p>
+                </div>
+              </div>
+
+              {/* SLA Days */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1.5">Standard SLA (days)</label>
+                  <Input
+                    type="number"
+                    value={tempSettings.standardSlaDays}
+                    onChange={(e) => setTempSettings(prev => ({ ...prev, standardSlaDays: Number(e.target.value) }))}
+                    className="h-9 text-xs rounded-xl border-gray-200"
+                    min={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1.5">Express SLA (days)</label>
+                  <Input
+                    type="number"
+                    value={tempSettings.expressSlaDays}
+                    onChange={(e) => setTempSettings(prev => ({ ...prev, expressSlaDays: Number(e.target.value) }))}
+                    className="h-9 text-xs rounded-xl border-gray-200"
+                    min={1}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1.5">Return Pickup (days)</label>
+                  <Input
+                    type="number"
+                    value={tempSettings.returnPickupWindowDays}
+                    onChange={(e) => setTempSettings(prev => ({ ...prev, returnPickupWindowDays: Number(e.target.value) }))}
+                    className="h-9 text-xs rounded-xl border-gray-200"
+                    min={1}
+                  />
+                </div>
+              </div>
+
+              {/* Toggles */}
+              <div className="space-y-2.5">
+                <label className="block text-gray-700 font-semibold mb-1">Automation</label>
+                {[
+                  { key: "autoGenerateAwb" as keyof ShippingSettings, label: "Auto-Generate AWB Numbers", desc: "Automatically assign AWBs on order dispatch" },
+                  { key: "enableTrackingSms" as keyof ShippingSettings, label: "Enable SMS Tracking Alerts", desc: "Send customer SMS updates on shipment events" },
+                ].map(({ key, label, desc }) => (
+                  <div key={key} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                    <div>
+                      <p className="font-semibold text-gray-800 text-xs">{label}</p>
+                      <p className="text-[10px] text-gray-400">{desc}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setTempSettings(prev => ({ ...prev, [key]: !prev[key] }))}
+                      className={`relative w-10 h-5 rounded-full transition-colors ${tempSettings[key] ? "bg-emerald-600" : "bg-gray-300"}`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${tempSettings[key] ? "translate-x-5" : "translate-x-0"}`} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* API Key */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1.5">Courier API Key</label>
+                <Input
+                  type="password"
+                  value={tempSettings.apiKey}
+                  onChange={(e) => setTempSettings(prev => ({ ...prev, apiKey: e.target.value }))}
+                  placeholder="Enter API key..."
+                  className="h-9 text-xs rounded-xl border-gray-200 font-mono"
+                />
+                <p className="text-[10px] text-gray-400 mt-0.5">Used for AWB generation and real-time tracking</p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+              <Button variant="outline" onClick={() => setShowSettingsModal(false)} className="h-8 text-xs rounded-xl border-gray-200">Cancel</Button>
+              <Button onClick={handleSaveSettings} className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl font-semibold gap-1.5">
+                <Save className="h-3.5 w-3.5" /> Save Settings
               </Button>
             </div>
           </div>

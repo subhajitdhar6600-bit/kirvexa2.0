@@ -300,6 +300,52 @@ router.post('/', async (req, res) => {
       ]);
     }
 
+    // 12. Notifications
+    const notifCount = await Notification.countDocuments();
+    if (notifCount === 0) {
+      await Notification.insertMany([
+        {
+          id: `notif-${Date.now()}-1`,
+          userId: 'broadcast',
+          title: 'New Order Received 📦',
+          message: 'Order #ORD-920145 of ₹2,940 has been placed by Rajesh Kumar Sharma.',
+          time: 'Just now',
+          read: false,
+          isRead: false,
+          type: 'success',
+          link: '/admin/orders',
+          category: 'orders',
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: `notif-${Date.now()}-2`,
+          userId: 'broadcast',
+          title: 'New Farmer Registered 🌾',
+          message: 'Ramesh Kumar (Patna, Bihar) has joined Krivexa platform.',
+          time: '15 mins ago',
+          read: false,
+          isRead: false,
+          type: 'info',
+          link: '/admin/farmers',
+          category: 'account',
+          createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+        },
+        {
+          id: `notif-${Date.now()}-3`,
+          userId: 'broadcast',
+          title: 'KCC Application Pending Review 💳',
+          message: 'Kisan Credit Card application KCC-801294 is awaiting admin verification.',
+          time: '1 hour ago',
+          read: false,
+          isRead: false,
+          type: 'warning',
+          link: '/admin/card-requests',
+          category: 'kcc',
+          createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        },
+      ]);
+    }
+
     res.json({ success: true, message: 'Database Farma successfully seeded with authentic initial records!' });
   } catch (error) {
     console.error('Error seeding DB Farma:', error);

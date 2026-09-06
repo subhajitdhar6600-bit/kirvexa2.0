@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Search, Bell, Sun, Moon, Menu, ExternalLink, Shield, User } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useApp } from "@/context/AppContext.tsx";
+import { api } from "@/services/api.ts";
 
 interface AdminHeaderProps {
   searchQuery: string;
@@ -26,9 +27,14 @@ export default function AdminHeader({
   adminTheme = "light",
   onToggleTheme,
 }: AdminHeaderProps) {
-  const { notifications, markNotificationAsRead, markAllNotificationsAsRead } = useApp();
+  const { notifications, markNotificationAsRead, markAllNotificationsAsRead, refreshNotifications } = useApp();
   const [showNotifMenu, setShowNotifMenu] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // Sync notifications on mount
+  useEffect(() => {
+    refreshNotifications();
+  }, [refreshNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -42,6 +48,31 @@ export default function AdminHeader({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleNotificationClick = async (n: any) => {
+    if (!n.read) {
+      markNotificationAsRead(n.id);
+      try {
+        await api.markNotificationRead(n.id);
+      } catch (err) {
+        console.warn("Failed to mark notification as read:", err);
+      }
+    }
+    if (n.link && onNavigateTab) {
+      setShowNotifMenu(false);
+      const tabName = n.link.replace("/admin/", "").replace(/^\//, "");
+      if (tabName) onNavigateTab(tabName);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    markAllNotificationsAsRead();
+    try {
+      await api.markAllNotificationsRead();
+    } catch (err) {
+      console.warn("Failed to mark all notifications read:", err);
+    }
+  };
 
   const isDark = adminTheme === "dark";
 
@@ -103,53 +134,73 @@ export default function AdminHeader({
             className={`relative w-9 h-9 rounded-xl border flex items-center justify-center transition-colors cursor-pointer ${
               isDark ? "bg-white/5 border-white/10 text-gray-300 hover:text-white" : "bg-gray-50 border-gray-200 text-gray-600 hover:text-black"
             }`}
+            title="Notifications"
           >
             <Bell className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 min-w-4.5 h-4.5 px-1 bg-red-500 text-white font-extrabold text-[10px] rounded-full flex items-center justify-center">
-              {unreadCount || 12}
-            </span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-4.5 h-4.5 px-1 bg-red-500 text-white font-extrabold text-[10px] rounded-full flex items-center justify-center animate-pulse shadow-xs">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </button>
 
           {showNotifMenu && (
             <div className={`absolute right-0 mt-2 w-80 sm:w-96 border rounded-2xl shadow-2xl z-50 p-4 animate-in fade-in zoom-in-95 duration-150 ${
               isDark ? "bg-[#1a1a1a] border-white/10 text-white" : "bg-white border-gray-200 text-gray-900"
             }`}>
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-white/10">
                 <div className="flex items-center gap-2">
                   <h3 className="font-bold text-sm">System Notifications</h3>
-                  <span className="text-[10px] bg-red-500/10 text-red-400 font-bold px-2 py-0.5 rounded-full">
-                    {unreadCount || 12} unread
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    unreadCount > 0
+                      ? isDark ? "bg-red-500/20 text-red-400 border border-red-500/30" : "bg-red-50 text-red-600 border border-red-200"
+                      : isDark ? "bg-white/5 text-gray-400" : "bg-gray-100 text-gray-500"
+                  }`}>
+                    {unreadCount} unread
                   </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={markAllNotificationsAsRead}
-                  className="text-[11px] text-emerald-400 hover:text-emerald-300 font-medium cursor-pointer"
-                >
-                  Mark all read
-                </button>
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleMarkAllRead}
+                    className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-medium cursor-pointer"
+                  >
+                    Mark all read
+                  </button>
+                )}
               </div>
 
               <div className="py-2 max-h-72 overflow-y-auto space-y-2">
                 {notifications.length === 0 ? (
                   <div className="py-8 text-center text-gray-400 text-xs">
-                    No new notifications
+                    <div className="text-2xl mb-1.5">🔔</div>
+                    No notifications yet. You're all caught up!
                   </div>
                 ) : (
-                  notifications.slice(0, 5).map((n) => (
+                  notifications.slice(0, 8).map((n) => (
                     <div
                       key={n.id}
-                      onClick={() => markNotificationAsRead(n.id)}
-                      className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-colors ${
+                      onClick={() => handleNotificationClick(n)}
+                      className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
                         !n.read
-                          ? isDark ? "bg-emerald-500/10 border-emerald-500/20 text-gray-200" : "bg-emerald-50/50 border-emerald-200 text-gray-800"
-                          : isDark ? "bg-white/5 border-white/5 text-gray-400" : "bg-gray-50 border-gray-100 text-gray-500"
+                          ? isDark ? "bg-emerald-500/10 border-emerald-500/20 text-gray-200 hover:bg-emerald-500/15" : "bg-emerald-50/50 border-emerald-200 text-gray-800 hover:bg-emerald-50"
+                          : isDark ? "bg-white/5 border-white/5 text-gray-400 hover:bg-white/10" : "bg-gray-50 border-gray-100 text-gray-500 hover:bg-gray-100"
                       }`}
                     >
-                      <div className="font-bold mb-0.5">{n.title}</div>
-                      <p className="text-[11px] opacity-80 line-clamp-2">{n.message}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="font-bold text-xs flex items-center gap-1.5">
+                          {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />}
+                          <span className="line-clamp-1">{n.title}</span>
+                        </div>
+                        {n.category && (
+                          <span className="text-[9px] uppercase tracking-wider font-semibold opacity-60 shrink-0">
+                            {n.category}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] opacity-80 line-clamp-2 mt-1">{n.message}</p>
                       <span className="text-[9px] opacity-60 mt-1 block">
-                        {n.time || "Just now"}
+                        {n.time || "Recent"}
                       </span>
                     </div>
                   ))
@@ -157,13 +208,13 @@ export default function AdminHeader({
               </div>
 
               {/* Dropdown Footer */}
-              <div className="p-2.5 border-t border-white/10 bg-white/5 text-center">
+              <div className="p-2.5 border-t border-gray-100 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 text-center -mx-4 -mb-4 rounded-b-2xl">
                 <button
                   onClick={() => {
                     setShowNotifMenu(false);
                     if (onNavigateTab) onNavigateTab("notifications_mgmt");
                   }}
-                  className="w-full text-[11px] text-emerald-400 hover:text-emerald-300 font-bold py-1 flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold py-1 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   Go to Notifications Management <ExternalLink className="h-3 w-3" />
                 </button>

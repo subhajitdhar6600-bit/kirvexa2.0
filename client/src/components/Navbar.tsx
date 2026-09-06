@@ -46,16 +46,20 @@ export default function Navbar() {
   ];
 
   const SERVICES_LINKS = [
+    { label: "All Services Hub", href: "/services" },
     { label: t.nav.mandiBhav, href: "/mandi-bhav" },
     { label: t.nav.buyInputs, href: "/agri-market" },
     { label: t.nav.sellCrops, href: "/sell-crops" },
+    { label: "Machinery Booking", href: "/machinery-booking" },
     { label: t.nav.labourBooking, href: "/labour-booking" },
+    { label: "Soil Testing Lab", href: "/soil-testing" },
     { label: t.nav.expertAdvice, href: "/expert-advice" },
     { label: t.nav.weather, href: "/weather" },
     { label: t.nav.wallet, href: "/wallet" },
   ];
 
   const RESOURCES_LINKS = [
+    { label: "Kisan Pathshala (Classes)", href: "/kisan-pathshala" },
     { label: t.nav.blog, href: "/blog" },
     { label: t.nav.cropCalendar, href: "/crop-calendar" },
     { label: t.nav.govSchemes, href: "/government-schemes" },

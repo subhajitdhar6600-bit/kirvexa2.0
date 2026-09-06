@@ -31,6 +31,7 @@ import ProfilePage from "./pages/profile/page.tsx";
 import CartPage from "./pages/cart/page.tsx";
 import KisanPathshalaPage from "./pages/kisan-pathshala/page.tsx";
 import ServicesPage from "./pages/services/page.tsx";
+import SoilTestingPage from "./pages/soil-testing/page.tsx";
 
 function AppInner() {
   useServiceWorker();
@@ -63,6 +64,7 @@ function AppInner() {
           <Route path="/farming-tips" element={<FarmingTipsPage />} />
           <Route path="/kisan-pathshala" element={<KisanPathshalaPage />} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/soil-testing" element={<SoilTestingPage />} />
           <Route path="/help-center" element={<HelpCenterPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/:tab" element={<AdminPage />} />

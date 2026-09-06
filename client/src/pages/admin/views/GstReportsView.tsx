@@ -29,11 +29,61 @@ interface GstInvoiceRecord {
   status: "Filed" | "Pending" | "Processed";
 }
 
+interface GstSettings {
+  gstin: string;
+  legalName: string;
+  tradeName: string;
+  stateCode: string;
+  taxRate5: boolean;
+  taxRate12: boolean;
+  taxRate18: boolean;
+  eInvoicingEnabled: boolean;
+  filingFrequency: string;
+}
+
+const DEFAULT_GST_SETTINGS: GstSettings = {
+  gstin: "10ABCDE1234F1Z5",
+  legalName: "Krivexa Agritech Pvt Ltd",
+  tradeName: "Krivexa",
+  stateCode: "10 - Bihar",
+  taxRate5: true,
+  taxRate12: false,
+  taxRate18: false,
+  eInvoicingEnabled: false,
+  filingFrequency: "Monthly (GSTR-1 & 3B)",
+};
+
 export default function GstReportsView({ orders: propOrders, onViewInvoice }: GstReportsViewProps) {
   const { orders: appOrders } = useApp();
   const rawOrders = (propOrders && propOrders.length > 0 ? propOrders : (appOrders || []));
 
   const [activeSubTab, setActiveSubTab] = useState("GST Dashboard");
+
+  // GST Settings
+  const [gstSettings, setGstSettings] = useState<GstSettings>(() => {
+    try {
+      const saved = localStorage.getItem("krivexa_gst_settings");
+      return saved ? { ...DEFAULT_GST_SETTINGS, ...JSON.parse(saved) } : DEFAULT_GST_SETTINGS;
+    } catch { return DEFAULT_GST_SETTINGS; }
+  });
+  const [showGstSettingsModal, setShowGstSettingsModal] = useState(false);
+  const [tempGstSettings, setTempGstSettings] = useState<GstSettings>(gstSettings);
+
+  const handleSaveGstSettings = () => {
+    setGstSettings(tempGstSettings);
+    try { localStorage.setItem("krivexa_gst_settings", JSON.stringify(tempGstSettings)); } catch { }
+    toast.success("GST settings saved successfully!");
+    setShowGstSettingsModal(false);
+  };
+
+  // Filter state
+  const [selectedFY, setSelectedFY] = useState("2025-26");
+  const [selectedReturnType, setSelectedReturnType] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All");
+  const [filtersApplied, setFiltersApplied] = useState(false);
+  const [pendingFY, setPendingFY] = useState("2025-26");
+  const [pendingReturnType, setPendingReturnType] = useState("All");
+  const [pendingStatus, setPendingStatus] = useState("All");
 
   // Local state for GST invoices so Edit and Delete work interactively
   const initialGstInvoices = useMemo<GstInvoiceRecord[]>(() => {
@@ -120,9 +170,21 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
     }
   };
 
-  // Real calculations based on current GST invoices
-  const totalTaxable = useMemo(() => gstInvoices.reduce((sum, i) => sum + i.taxable, 0), [gstInvoices]);
-  const totalGstCollected = useMemo(() => gstInvoices.reduce((sum, i) => sum + i.totalGst, 0), [gstInvoices]);
+  // (KPI computations moved below to use filteredInvoices)
+
+  // Filtered invoices based on applied filters
+  const filteredInvoices = useMemo(() => {
+    if (!filtersApplied) return gstInvoices;
+    return gstInvoices.filter(inv => {
+      const matchType = selectedReturnType === "All" || inv.type.toLowerCase().includes(selectedReturnType.toLowerCase().replace("gstr-1", "outward").replace("gstr-3b", "summary"));
+      const matchStatus = selectedStatus === "All" || inv.status.toLowerCase() === selectedStatus.toLowerCase();
+      return matchType && matchStatus;
+    });
+  }, [gstInvoices, filtersApplied, selectedReturnType, selectedStatus]);
+
+  // KPI computations on filtered invoices
+  const totalTaxable = useMemo(() => filteredInvoices.reduce((sum, i) => sum + i.taxable, 0), [filteredInvoices]);
+  const totalGstCollected = useMemo(() => filteredInvoices.reduce((sum, i) => sum + i.totalGst, 0), [filteredInvoices]);
   const totalSales = totalTaxable + totalGstCollected;
   const cgst = Math.round((totalGstCollected / 2) * 100) / 100;
   const sgst = Math.round((totalGstCollected - cgst) * 100) / 100;
@@ -138,22 +200,31 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
           <p className="text-xs text-gray-500 mt-0.5">Track, manage and file GST returns &amp; view real-time tax reports</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => toast.info("GST Settings")} className="h-8 text-xs gap-1.5 rounded-xl border-gray-200">
+          <Button variant="outline" onClick={() => { setTempGstSettings(gstSettings); setShowGstSettingsModal(true); }} className="h-8 text-xs gap-1.5 rounded-xl border-gray-200 hover:border-emerald-500 hover:text-emerald-700">
             <Settings className="h-3.5 w-3.5 text-gray-500" /> GST Settings
           </Button>
-          <Button onClick={() => toast.success("Exporting GST Reports...")} className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1.5 rounded-xl font-semibold">
+          <Button onClick={() => {
+            const headers = ["Date","Invoice","Party","Taxable","CGST","SGST","Total GST","Status"];
+            const rows = filteredInvoices.map(i => [i.date,i.inv,i.party,i.taxable.toFixed(2),i.cgst.toFixed(2),i.sgst.toFixed(2),i.totalGst.toFixed(2),i.status]);
+            const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); a.href = url; a.download = `gst-report-${selectedFY}.csv`; a.click();
+            URL.revokeObjectURL(url);
+            toast.success(`GST Report exported (${selectedFY})!`);
+          }} className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs gap-1.5 rounded-xl font-semibold">
             <Download className="h-3.5 w-3.5" /> Export Reports
           </Button>
         </div>
       </div>
 
-      {/* 4 KPI Cards - Computed dynamically from real sales */}
+      {/* 4 KPI Cards - Computed dynamically from filtered invoices */}
       <div className="grid grid-cols-4 gap-4">
         {[
           { label: "Total GST Collected (Sales)", value: `₹ ${totalGstCollected.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, sub: `From ₹ ${totalSales.toLocaleString("en-IN")} sales`, Icon: IndianRupee, bg: "bg-purple-50", tc: "text-purple-600" },
           { label: "Total GST Paid (Purchases)", value: `₹ ${totalGstPaid.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, sub: "Input tax credit", Icon: ArrowDownLeft, bg: "bg-emerald-50", tc: "text-emerald-600" },
           { label: "Net GST Payable", value: `₹ ${netGstPayable.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, sub: "Ready for monthly filing", Icon: Coins, bg: "bg-amber-50", tc: "text-amber-600" },
-          { label: "GST Compliance Rate", value: "100.0%", sub: `${gstInvoices.length} invoices compliant`, Icon: Percent, bg: "bg-blue-50", tc: "text-blue-600" },
+          { label: "GST Compliance Rate", value: "100.0%", sub: `${filteredInvoices.length} invoices compliant`, Icon: Percent, bg: "bg-blue-50", tc: "text-blue-600" },
         ].map((k, i) => {
           const IconComp = k.Icon;
           return (
@@ -190,20 +261,64 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
         <div className="flex items-center gap-3 flex-wrap text-xs">
           <div className="flex items-center gap-1.5">
             <span className="text-gray-400">Financial Year</span>
-            <select className="h-8 px-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 font-medium">
-              <option>2025-26</option>
-              <option>2024-25</option>
+            <select
+              value={pendingFY}
+              onChange={(e) => setPendingFY(e.target.value)}
+              className="h-8 px-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 font-medium focus:outline-none focus:border-emerald-500"
+            >
+              <option value="2025-26">2025-26</option>
+              <option value="2024-25">2024-25</option>
+              <option value="2023-24">2023-24</option>
             </select>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-gray-400">Return Type</span>
-            <select className="h-8 px-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 font-medium">
-              <option>All</option>
-              <option>GSTR-1</option>
-              <option>GSTR-3B</option>
+            <select
+              value={pendingReturnType}
+              onChange={(e) => setPendingReturnType(e.target.value)}
+              className="h-8 px-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 font-medium focus:outline-none focus:border-emerald-500"
+            >
+              <option value="All">All</option>
+              <option value="GSTR-1">GSTR-1</option>
+              <option value="GSTR-3B">GSTR-3B</option>
             </select>
           </div>
-          <Button onClick={() => toast.success("Filters applied")} className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 rounded-xl font-semibold ml-auto">
+          <div className="flex items-center gap-1.5">
+            <span className="text-gray-400">Status</span>
+            <select
+              value={pendingStatus}
+              onChange={(e) => setPendingStatus(e.target.value)}
+              className="h-8 px-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 font-medium focus:outline-none focus:border-emerald-500"
+            >
+              <option value="All">All</option>
+              <option value="Filed">Filed</option>
+              <option value="Pending">Pending</option>
+              <option value="Processed">Processed</option>
+            </select>
+          </div>
+          {filtersApplied && (
+            <button
+              onClick={() => {
+                setPendingFY("2025-26"); setPendingReturnType("All"); setPendingStatus("All");
+                setSelectedFY("2025-26"); setSelectedReturnType("All"); setSelectedStatus("All");
+                setFiltersApplied(false);
+                toast.success("Filters reset");
+              }}
+              className="h-8 px-3 rounded-xl border border-gray-200 bg-white text-gray-500 text-xs hover:bg-gray-50 flex items-center gap-1"
+            >
+              ✕ Reset
+            </button>
+          )}
+          <Button
+            onClick={() => {
+              setSelectedFY(pendingFY);
+              setSelectedReturnType(pendingReturnType);
+              setSelectedStatus(pendingStatus);
+              setFiltersApplied(true);
+              toast.success(`Filters applied: FY ${pendingFY}, Type: ${pendingReturnType}`);
+            }}
+            className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 rounded-xl font-semibold ml-auto"
+          >
             Apply Filters
           </Button>
         </div>
@@ -235,10 +350,10 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
           <div>
             <p className="font-bold text-gray-800 text-xs mb-2">GSTIN Profile</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div><span className="text-gray-400 text-[10px]">GSTIN</span><p className="font-mono font-bold text-emerald-700">10ABCDE1234F1Z5</p></div>
-              <div><span className="text-gray-400 text-[10px]">Legal Entity</span><p className="font-semibold text-gray-800">Krivexa Agritech Pvt Ltd</p></div>
-              <div><span className="text-gray-400 text-[10px]">Registered State</span><p className="text-gray-700">Bihar (State Code 10)</p></div>
-              <div><span className="text-gray-400 text-[10px]">Filing Frequency</span><p className="text-gray-700">Monthly (GSTR-1 &amp; 3B)</p></div>
+              <div><span className="text-gray-400 text-[10px]">GSTIN</span><p className="font-mono font-bold text-emerald-700">{gstSettings.gstin}</p></div>
+              <div><span className="text-gray-400 text-[10px]">Legal Entity</span><p className="font-semibold text-gray-800">{gstSettings.legalName}</p></div>
+              <div><span className="text-gray-400 text-[10px]">Registered State</span><p className="text-gray-700">{gstSettings.stateCode}</p></div>
+              <div><span className="text-gray-400 text-[10px]">Filing Frequency</span><p className="text-gray-700">{gstSettings.filingFrequency}</p></div>
             </div>
           </div>
           <div className="pt-2 border-t border-gray-100 flex items-center gap-2 text-emerald-700 font-semibold text-[11px]">
@@ -252,8 +367,8 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-sm font-bold text-gray-900">Recent GST Invoices ({gstInvoices.length})</h3>
-            <p className="text-[11px] text-gray-400 mt-0.5">Live order tax records from database</p>
+            <h3 className="text-sm font-bold text-gray-900">GST Invoices ({filteredInvoices.length}{filtersApplied ? ` filtered from ${gstInvoices.length}` : ""})</h3>
+            <p className="text-[11px] text-gray-400 mt-0.5">{filtersApplied ? `FY ${selectedFY} · ${selectedReturnType} · ${selectedStatus}` : "Live order tax records from database"}</p>
           </div>
         </div>
 
@@ -274,10 +389,10 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-xs">
-              {gstInvoices.length === 0 ? (
+              {filteredInvoices.length === 0 ? (
                 <tr>
                   <td colSpan={10} className="py-8 text-center text-gray-400">
-                    No GST invoices found.
+                    No GST invoices found for selected filters.
                   </td>
                 </tr>
               ) : (
@@ -409,6 +524,94 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
                 className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl font-semibold gap-1.5"
               >
                 <Save className="h-3.5 w-3.5" /> Save Changes
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GST Settings Modal */}
+      {showGstSettingsModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowGstSettingsModal(false); }}>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-lg w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center"><ShieldCheck className="h-4 w-4 text-purple-600" /></div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">GST Settings</h3>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Manage GSTIN, tax slabs and compliance settings</p>
+                </div>
+              </div>
+              <button onClick={() => setShowGstSettingsModal(false)} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700"><X className="h-4 w-4" /></button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">GSTIN Number</label>
+                  <Input value={tempGstSettings.gstin} onChange={(e) => setTempGstSettings(p => ({ ...p, gstin: e.target.value }))} placeholder="e.g. 10ABCDE1234F1Z5" className="h-9 text-xs rounded-xl border-gray-200 font-mono" />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">State Code</label>
+                  <select value={tempGstSettings.stateCode} onChange={(e) => setTempGstSettings(p => ({ ...p, stateCode: e.target.value }))} className="w-full h-9 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium">
+                    {["10 - Bihar","07 - Delhi","29 - Karnataka","27 - Maharashtra","09 - Uttar Pradesh","33 - Tamil Nadu","19 - West Bengal"].map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1">Legal Entity Name</label>
+                <Input value={tempGstSettings.legalName} onChange={(e) => setTempGstSettings(p => ({ ...p, legalName: e.target.value }))} className="h-9 text-xs rounded-xl border-gray-200" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">Trade Name</label>
+                  <Input value={tempGstSettings.tradeName} onChange={(e) => setTempGstSettings(p => ({ ...p, tradeName: e.target.value }))} className="h-9 text-xs rounded-xl border-gray-200" />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">Filing Frequency</label>
+                  <select value={tempGstSettings.filingFrequency} onChange={(e) => setTempGstSettings(p => ({ ...p, filingFrequency: e.target.value }))} className="w-full h-9 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-700 font-medium">
+                    <option value="Monthly (GSTR-1 & 3B)">Monthly (GSTR-1 &amp; 3B)</option>
+                    <option value="Quarterly (QRMP)">Quarterly (QRMP)</option>
+                  </select>
+                </div>
+              </div>
+              {/* Tax Slabs */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-1.5">Active Tax Slabs</label>
+                <div className="flex items-center gap-3">
+                  {([5, 12, 18] as const).map(rate => (
+                    <label key={rate} className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={tempGstSettings[`taxRate${rate}` as keyof GstSettings] as boolean}
+                        onChange={(e) => setTempGstSettings(p => ({ ...p, [`taxRate${rate}`]: e.target.checked }))}
+                        className="w-3.5 h-3.5 accent-emerald-600"
+                      />
+                      <span className="text-gray-700">{rate}% GST</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {/* E-Invoicing */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                <div>
+                  <p className="font-semibold text-gray-800">E-Invoicing (IRN Generation)</p>
+                  <p className="text-[10px] text-gray-400">Enable for turnover above ₹5 Cr — as per CBIC mandate</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTempGstSettings(p => ({ ...p, eInvoicingEnabled: !p.eInvoicingEnabled }))}
+                  className={`relative w-10 h-5 rounded-full transition-colors ${tempGstSettings.eInvoicingEnabled ? "bg-emerald-600" : "bg-gray-300"}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${tempGstSettings.eInvoicingEnabled ? "translate-x-5" : "translate-x-0"}`} />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+              <Button variant="outline" onClick={() => setShowGstSettingsModal(false)} className="h-8 text-xs rounded-xl border-gray-200">Cancel</Button>
+              <Button onClick={handleSaveGstSettings} className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl font-semibold gap-1.5">
+                <Save className="h-3.5 w-3.5" /> Save GST Settings
               </Button>
             </div>
           </div>
