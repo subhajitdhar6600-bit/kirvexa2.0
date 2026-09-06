@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://kirvexa2-0-backend.vercel.app/api';
 
 export const checkMongoHealth = async () => {
   try {
