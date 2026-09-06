@@ -6,7 +6,6 @@ const userSchema = new mongoose.Schema(
     id: { type: String, required: true, unique: true, index: true },
     role: {
       type: String,
-      enum: Object.values(ROLES),
       default: ROLES.FARMER,
       index: true,
     },
@@ -17,9 +16,7 @@ const userSchema = new mongoose.Schema(
     profileImage: { type: String, default: '' },
     status: {
       type: String,
-      enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'BLOCKED', 'DELETED', 'active', 'inactive', 'suspended', 'blocked', 'deleted'],
       default: USER_STATUS.ACTIVE,
-      set: (v) => (v ? String(v).toUpperCase() : USER_STATUS.ACTIVE),
       index: true,
     },
     isVerified: { type: Boolean, default: false },

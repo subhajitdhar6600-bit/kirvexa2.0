@@ -103,6 +103,10 @@ export const api = {
     apiFetch<any>('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }),
   registerAuth: (userData: any) =>
     apiFetch<any>('/auth/register', { method: 'POST', body: JSON.stringify(userData) }),
+  sendEmailCode: (email: string) =>
+    apiFetch<any>('/auth/send-email-code', { method: 'POST', body: JSON.stringify({ email }) }),
+  verifyEmailCode: (email: string, code: string) =>
+    apiFetch<any>('/auth/verify-email-code', { method: 'POST', body: JSON.stringify({ email, code }) }),
   resetPassword: (data: { identifier: string; newPassword: string }) =>
     apiFetch<any>('/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
   changePassword: (data: { currentPassword?: string; newPassword: string }, token?: string) =>

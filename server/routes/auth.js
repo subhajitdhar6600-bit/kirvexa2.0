@@ -1,6 +1,6 @@
 import express from 'express';
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
-import { registerUser, loginUser, refreshSession, sendOtp, verifyOtp, resetPassword, changePassword } from '../services/authService.js';
+import { registerUser, loginUser, refreshSession, sendEmailVerification, verifyEmailCode, sendOtp, verifyOtp, resetPassword, changePassword } from '../services/authService.js';
 import { authenticate } from '../middleware/auth.js';
 import User from '../models/User.js';
 
@@ -124,47 +124,83 @@ router.post('/refresh', async (req, res) => {
 });
 
 /**
+ * @route POST /api/auth/send-email-code
+ * @desc Send verification code to Email
+ */
+router.post('/send-email-code', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return sendError(res, 'Email address is required.', 'VALIDATION_ERROR', 400);
+    }
+
+    const result = await sendEmailVerification(email);
+    return sendSuccess(res, result, 'Verification code sent to email successfully');
+  } catch (error) {
+    return sendError(res, error.message, 'EMAIL_FAILED', 400);
+  }
+});
+
+/**
+ * @route POST /api/auth/verify-email-code
+ * @desc Verify email code
+ */
+router.post('/verify-email-code', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return sendError(res, 'Email and verification code are required.', 'VALIDATION_ERROR', 400);
+    }
+
+    await verifyEmailCode(email, code);
+    return sendSuccess(res, { verified: true }, 'Email verification successful');
+  } catch (error) {
+    return sendError(res, error.message, 'VERIFICATION_FAILED', 400);
+  }
+});
+
+/**
  * @route POST /api/auth/send-otp
- * @desc Send 6-digit OTP to mobile
+ * @desc Send verification code (email/phone)
  */
 router.post('/send-otp', async (req, res) => {
   try {
-    const { phone } = req.body;
-    if (!phone) {
-      return sendError(res, 'Phone number is required.', 'VALIDATION_ERROR', 400);
+    const target = req.body.email || req.body.phone;
+    if (!target) {
+      return sendError(res, 'Email or Phone is required.', 'VALIDATION_ERROR', 400);
     }
 
-    const result = await sendOtp(phone);
-    return sendSuccess(res, result, 'OTP sent successfully');
+    const result = await sendEmailVerification(target);
+    return sendSuccess(res, result, 'Verification code sent successfully');
   } catch (error) {
-    return sendError(res, error.message, 'OTP_FAILED', 400);
+    return sendError(res, error.message, 'SEND_CODE_FAILED', 400);
   }
 });
 
 /**
  * @route POST /api/auth/verify-otp
- * @desc Verify OTP and authenticate
+ * @desc Verify code
  */
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { phone, otp, role = 'farmer', name = 'Farmer User' } = req.body;
-    if (!phone || !otp) {
-      return sendError(res, 'Phone and OTP are required.', 'VALIDATION_ERROR', 400);
+    const target = req.body.email || req.body.phone;
+    const code = req.body.code || req.body.otp;
+    if (!target || !code) {
+      return sendError(res, 'Target and verification code are required.', 'VALIDATION_ERROR', 400);
     }
 
-    await verifyOtp(phone, otp);
+    await verifyEmailCode(target, code);
 
-    // Check if user exists, if not auto-register
-    let user = await User.findOne({ phone });
-    if (!user) {
-      const reg = await registerUser({ name, phone, role });
-      return sendSuccess(res, reg, 'OTP verified and account created');
+    // Check if user exists
+    let user = await User.findOne({ $or: [{ email: target }, { phone: target }] });
+    if (!user && req.body.name) {
+      const reg = await registerUser({ name: req.body.name, phone: req.body.phone || target, email: target, role: req.body.role || 'farmer' });
+      return sendSuccess(res, reg, 'Email verified and account created');
     }
 
-    const result = await loginUser({ phone });
-    return sendSuccess(res, result, 'OTP verified successfully');
+    return sendSuccess(res, { verified: true }, 'Code verified successfully');
   } catch (error) {
-    return sendError(res, error.message, 'OTP_VERIFICATION_FAILED', 400);
+    return sendError(res, error.message, 'VERIFICATION_FAILED', 400);
   }
 });
 

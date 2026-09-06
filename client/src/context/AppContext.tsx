@@ -917,13 +917,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, 0);
 
   const registerNewAccount = (accountData: Omit<RegisteredAccount, "id" | "createdAt">): RegisteredAccount => {
+    const accountName = accountData.fullName || (accountData as any).name || "User";
     const newAccount: RegisteredAccount = {
       ...accountData,
+      fullName: accountName,
       id: `acc-${Date.now()}`,
       createdAt: new Date().toISOString(),
     };
     setRegisteredAccounts((prev) => [newAccount, ...prev.filter(a => a.phone !== newAccount.phone)]);
-    api.saveUser(newAccount);
+
+    // Send complete payload to API
+    const apiPayload = {
+      ...newAccount,
+      name: accountName,
+      status: (accountData as any).status || (accountData.role === "dealer" ? "pending" : "active"),
+      role: accountData.role?.toLowerCase() || "farmer",
+    };
+    api.saveUser(apiPayload);
     return newAccount;
   };
 

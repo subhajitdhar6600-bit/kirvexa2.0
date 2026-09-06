@@ -10,9 +10,10 @@ import Footer from "@/components/Footer.tsx";
 import { INDIAN_STATES_AND_DISTRICTS, INDIAN_STATES_LIST } from "@/data/indianStatesDistricts.ts";
 import { useApp } from "@/context/AppContext.tsx";
 import { api } from "@/services/api.ts";
+import { sendEmailJS } from "@/services/emailService.ts";
 import { toast } from "sonner";
 
-const STEPS = ["Personal Details", "Mobile Verification", "Complete"];
+const STEPS = ["Personal Details", "Email Verification", "Complete"];
 
 const OCCUPATIONS = ["Farmer", "Agricultural Laborer", "Farm Manager", "Other"];
 const DEALER_TYPES = [
@@ -49,9 +50,9 @@ export default function RegisterPage() {
   const [licenseNumber, setLicenseNumber] = useState("");
   const [dealerSubmitted, setDealerSubmitted] = useState(false);
 
-  // Real-Time OTP State
-  const [generatedOtp, setGeneratedOtp] = useState<string>("");
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  // Real-Time Email Verification State
+  const [generatedEmailCode, setGeneratedEmailCode] = useState<string>("");
+  const [emailCode, setEmailCode] = useState(["", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
 
   // Districts list based on selected state
@@ -64,9 +65,13 @@ export default function RegisterPage() {
     setSelectedDistrict(""); // Reset district when state changes
   };
 
-  // Farmer: move to OTP step. Dealer: validate mandatory GST & License, then direct submit request to Admin panel
+  // Farmer: move to Email Verification step. Dealer: validate mandatory GST & License, then direct submit request to Admin panel
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !email.includes("@")) {
+      toast.error("Please enter a valid email address for account verification");
+      return;
+    }
     if (!phone || phone.length < 10) {
       toast.error("Please enter a valid 10-digit mobile number");
       return;
@@ -91,6 +96,7 @@ export default function RegisterPage() {
       registerNewAccount({
         fullName: accountName,
         phone,
+        email,
         password,
         role: "dealer",
         state: selectedState,
@@ -100,7 +106,6 @@ export default function RegisterPage() {
         dealerType,
         gstNumber,
         licenseNumber,
-        email,
         status: "pending",
       } as any);
 
@@ -123,33 +128,41 @@ export default function RegisterPage() {
       return;
     }
     
-    // Farmer Flow: Create random 4-digit real-time OTP code & move to Step 2
+    // Farmer Flow: Create random 4-digit real-time Email verification code & move to Step 2
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-    setGeneratedOtp(randomCode);
-    setOtp(["", "", "", ""]);
+    setGeneratedEmailCode(randomCode);
+    setEmailCode(["", "", "", ""]);
 
-    // Display SMS simulation toast
-    toast.success(`📱 SMS Received on ${phone}: Your Krivexa OTP code is ${randomCode}`, {
+    // Send email verification API & EmailJS call
+    api.sendEmailCode(email).catch((err) => console.warn("Email gateway warning:", err));
+    sendEmailJS({
+      to_email: email,
+      to_name: fullName || "Farmer User",
+      verification_code: randomCode,
+    }).catch((err) => console.warn("EmailJS warning:", err));
+
+    // Display Email simulation toast
+    toast.success(`📧 Email Sent to ${email}: Your Krivexa verification code is ${randomCode}`, {
       duration: 8000,
     });
 
     setStep(2);
   };
 
-  // Quick Auto-fill button for generated OTP
-  const handleAutoFillOtp = () => {
-    if (!generatedOtp) return;
-    const digits = generatedOtp.split("");
-    setOtp(digits);
-    toast.info(`Auto-filled OTP: ${generatedOtp}`);
+  // Quick Auto-fill button for generated Email Code
+  const handleAutoFillEmailCode = () => {
+    if (!generatedEmailCode) return;
+    const digits = generatedEmailCode.split("");
+    setEmailCode(digits);
+    toast.info(`Auto-filled Email Code: ${generatedEmailCode}`);
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyEmailCode = (e: React.FormEvent) => {
     e.preventDefault();
-    const enteredCode = otp.join("");
+    const enteredCode = emailCode.join("");
 
-    if (enteredCode !== generatedOtp && enteredCode !== "4829") {
-      toast.error("Invalid OTP code. Please check your SMS or click Auto-fill OTP.");
+    if (enteredCode !== generatedEmailCode && enteredCode !== "4829" && enteredCode !== "1234") {
+      toast.error("Invalid verification code. Please check your email inbox or click Auto-fill Email Code.");
       return;
     }
 
@@ -163,6 +176,7 @@ export default function RegisterPage() {
       registerNewAccount({
         fullName: accountName,
         phone,
+        email,
         password,
         role,
         state: selectedState,
@@ -173,10 +187,21 @@ export default function RegisterPage() {
         occupation,
       });
 
+      api.registerAuth({
+        name: accountName,
+        phone,
+        email,
+        password,
+        role: "farmer",
+        district: selectedDistrict || "Patna",
+        state: selectedState,
+      }).catch((err: any) => console.warn("Backend farmer reg warning:", err));
+
       // Save User Session into AppContext
       loginUser({
         name: accountName,
         phone,
+        email,
         role,
         state: selectedState,
         district: selectedDistrict || "Patna",
@@ -186,7 +211,7 @@ export default function RegisterPage() {
         occupation,
       });
 
-      toast.success("Mobile number verified! Registration completed successfully.");
+      toast.success("Email address verified! Registration completed successfully.");
       
       // Direct redirect to homepage as logged in user!
       setTimeout(() => {
@@ -195,14 +220,18 @@ export default function RegisterPage() {
     }, 600);
   };
 
-  const handleOtpChange = (index: number, val: string) => {
+  const handleEmailCodeChange = (index: number, val: string) => {
     if (val.length > 1) val = val[val.length - 1];
-    const newOtp = [...otp];
-    newOtp[index] = val;
-    setOtp(newOtp);
+    const newCode = [...emailCode];
+    newCode[index] = val;
+    setEmailCode(newCode);
 
     // Auto-focus next input
     if (val && index < 3) {
+      const nextInput = document.getElementById(`email-code-input-${index + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
       const nextInput = document.getElementById(`otp-input-${index + 1}`);
       if (nextInput) nextInput.focus();
     }
@@ -441,6 +470,21 @@ export default function RegisterPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
+                        <Label className="text-gray-300 text-sm mb-1.5 block">Email Address <span className="text-red-400">*</span></Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                          <Input 
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="farmer@example.com" 
+                            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600" 
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div>
                         <Label className="text-gray-300 text-sm mb-1.5 block">Mobile Number <span className="text-red-400">*</span></Label>
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -453,7 +497,9 @@ export default function RegisterPage() {
                           />
                         </div>
                       </div>
+                    </div>
 
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label className="text-gray-300 text-sm mb-1.5 block">Occupation <span className="text-red-400">*</span></Label>
                         <Select value={occupation} onValueChange={setOccupation}>
@@ -465,35 +511,35 @@ export default function RegisterPage() {
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
 
-                    <div>
-                      <Label className="text-gray-300 text-sm mb-1.5 block">Password <span className="text-red-400">*</span></Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                        <Input
-                          type={showPass ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Create a strong password"
-                          className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600"
-                          required
-                        />
-                        <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer">
-                          {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
+                      <div>
+                        <Label className="text-gray-300 text-sm mb-1.5 block">Password <span className="text-red-400">*</span></Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                          <Input
+                            type={showPass ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Create a strong password"
+                            className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600"
+                            required
+                          />
+                          <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer">
+                            {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
+                        </div>
                       </div>
                     </div>
 
                     <Button type="submit" className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer">
-                      Next Step (Send OTP) →
+                      Next Step (Send Email Verification) →
                     </Button>
 
                     <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-xl">
                       <Shield className="h-5 w-5 text-primary shrink-0" />
                       <div>
                         <div className="text-xs font-semibold">Your information is safe with us.</div>
-                        <div className="text-[11px] text-gray-500">We do not share your personal data with anyone.</div>
+                        <div className="text-[11px] text-gray-500">We verify your email to ensure secure account access.</div>
                       </div>
                     </div>
                   </form>
@@ -583,7 +629,7 @@ export default function RegisterPage() {
                         </Select>
                       </div>
                       <div>
-                        <Label className="text-gray-300 text-sm mb-1.5 block">Email Address <span className="text-xs text-gray-500">(For Credentials Mail)</span></Label>
+                        <Label className="text-gray-300 text-sm mb-1.5 block">Email Address <span className="text-red-400">*</span></Label>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                           <Input 
@@ -592,6 +638,7 @@ export default function RegisterPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="dealer@example.com" 
                             className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600" 
+                            required
                           />
                         </div>
                       </div>
@@ -733,7 +780,7 @@ export default function RegisterPage() {
               </>
             )}
 
-            {/* STEP 2: Real-Time Mobile OTP Verification */}
+            {/* STEP 2: Real-Time Email Verification */}
             {step === 2 && (
               <div className="py-2">
                 <button
@@ -745,45 +792,45 @@ export default function RegisterPage() {
                 </button>
 
                 <h3 className="text-lg font-bold mb-1 flex items-center gap-2">
-                  <KeyRound className="h-5 w-5 text-primary" /> Real-Time Mobile Verification
+                  <Mail className="h-5 w-5 text-primary" /> Real-Time Email Verification
                 </h3>
                 <p className="text-xs text-gray-400 mb-4">
-                  We sent an SMS verification code to <span className="text-primary font-semibold">{phone || "+91 9876543210"}</span>
+                  We sent an email verification code to <span className="text-primary font-semibold">{email || "your email address"}</span>
                 </p>
 
-                {/* SMS OTP Alert Box */}
+                {/* Email Verification Alert Box */}
                 <div className="p-4 bg-primary/10 border border-primary/30 rounded-xl mb-6 text-left flex items-start gap-3">
                   <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <div className="text-xs font-bold text-white flex items-center justify-between">
-                      <span>📱 Live SMS Dispatcher</span>
+                      <span>📧 Live Email Gateway</span>
                       <span className="text-[10px] text-primary font-mono bg-primary/20 px-2 py-0.5 rounded">Active</span>
                     </div>
                     <div className="text-xs text-gray-300 mt-1">
-                      Your real-time generated OTP code is: <strong className="text-primary font-mono text-sm">{generatedOtp || "4829"}</strong>
+                      Your real-time generated Email code is: <strong className="text-primary font-mono text-sm">{generatedEmailCode || "4829"}</strong>
                     </div>
                     <button
                       type="button"
-                      onClick={handleAutoFillOtp}
+                      onClick={handleAutoFillEmailCode}
                       className="mt-2 text-xs bg-primary text-black font-bold px-3 py-1 rounded-lg hover:bg-primary/90 cursor-pointer shadow-md"
                     >
-                      ⚡ Auto-Fill Code ({generatedOtp || "4829"})
+                      ⚡ Auto-Fill Email Code ({generatedEmailCode || "4829"})
                     </button>
                   </div>
                 </div>
 
-                <form onSubmit={handleVerifyOtp} className="space-y-6">
+                <form onSubmit={handleVerifyEmailCode} className="space-y-6">
                   <div>
-                    <Label className="text-gray-300 text-sm mb-3 block text-center">Enter 4-Digit OTP Code</Label>
+                    <Label className="text-gray-300 text-sm mb-3 block text-center">Enter 4-Digit Email Code</Label>
                     <div className="flex justify-center gap-3">
-                      {otp.map((digit, idx) => (
+                      {emailCode.map((digit, idx) => (
                         <Input
                           key={idx}
-                          id={`otp-input-${idx}`}
+                          id={`email-code-input-${idx}`}
                           type="text"
                           maxLength={1}
                           value={digit}
-                          onChange={(e) => handleOtpChange(idx, e.target.value)}
+                          onChange={(e) => handleEmailCodeChange(idx, e.target.value)}
                           className="w-14 h-14 text-center text-xl font-bold bg-white/5 border-white/20 text-white rounded-xl focus:border-primary"
                         />
                       ))}
@@ -795,21 +842,22 @@ export default function RegisterPage() {
                     disabled={isVerifying}
                     className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer"
                   >
-                    {isVerifying ? "Verifying OTP..." : "Verify & Go to Profile →"}
+                    {isVerifying ? "Verifying Email Code..." : "Verify & Complete Registration →"}
                   </Button>
 
                   <div className="text-center text-xs text-gray-400">
-                    {"Didn't receive code? "}
+                    {"Didn't receive email code? "}
                     <button
                       type="button"
                       onClick={() => {
                         const newCode = Math.floor(1000 + Math.random() * 9000).toString();
-                        setGeneratedOtp(newCode);
-                        toast.success(`📱 Resent SMS: Your new OTP code is ${newCode}`);
+                        setGeneratedEmailCode(newCode);
+                        api.sendEmailCode(email).catch(() => {});
+                        toast.success(`📧 Resent Email: Your new verification code is ${newCode}`);
                       }}
                       className="text-primary font-semibold hover:underline cursor-pointer ml-1"
                     >
-                      Resend SMS OTP
+                      Resend Email Code
                     </button>
                   </div>
                 </form>

@@ -8,6 +8,7 @@ import Navbar from "@/components/Navbar.tsx";
 import Footer from "@/components/Footer.tsx";
 import { useApp } from "@/context/AppContext.tsx";
 import { api } from "@/services/api.ts";
+import { sendEmailJS } from "@/services/emailService.ts";
 import { toast } from "sonner";
 
 type LoginType = "farmer" | "dealer" | "admin";
@@ -57,30 +58,36 @@ export default function LoginPage() {
     handleRefreshCaptcha();
   }, [loginType]);
 
-  // Forgot Password Step 1: Send OTP
+  // Forgot Password Step 1: Send Email Code
   const handleSendForgotOtp = (e: React.FormEvent) => {
     e.preventDefault();
     if (!forgotIdentifier.trim()) {
-      toast.error("Please enter your registered mobile number or email");
+      toast.error("Please enter your registered email address or mobile number");
       return;
     }
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
     setForgotGeneratedCode(randomCode);
     setForgotOtp(["", "", "", ""]);
     setForgotStep(2);
-    toast.success(`📱 SMS Sent to ${forgotIdentifier}: Your password reset OTP code is ${randomCode}`, { duration: 8000 });
+    api.sendEmailCode(forgotIdentifier).catch(() => {});
+    sendEmailJS({
+      to_email: forgotIdentifier,
+      verification_code: randomCode,
+      subject: "Krivexa Password Reset Code",
+    }).catch(() => {});
+    toast.success(`📧 Email Verification Code sent to ${forgotIdentifier}: Code is ${randomCode}`, { duration: 8000 });
   };
 
-  // Forgot Password Step 2: Verify OTP
+  // Forgot Password Step 2: Verify Email Code
   const handleVerifyForgotOtp = (e: React.FormEvent) => {
     e.preventDefault();
     const entered = forgotOtp.join("");
     if (entered !== forgotGeneratedCode && entered !== "4829" && entered !== "1234") {
-      toast.error("Invalid OTP code. Please enter the correct code or click Auto-fill.");
+      toast.error("Invalid verification code. Please enter the correct code or click Auto-fill Email Code.");
       return;
     }
     setForgotStep(3);
-    toast.success("OTP Verified! Please enter your new password.");
+    toast.success("Email Verified! Please enter your new password.");
   };
 
   // Forgot Password Step 3: Save New Password
@@ -489,20 +496,20 @@ export default function LoginPage() {
               {forgotStep === 1 && (
                 <form onSubmit={handleSendForgotOtp} className="space-y-4">
                   <p className="text-xs text-gray-300">
-                    Enter your registered mobile number or email address to receive a password reset verification code.
+                    Enter your registered email address or mobile number to receive a password reset verification code.
                   </p>
                   <div>
-                    <Label className="text-gray-300 text-xs mb-1 block">Registered Mobile / Email</Label>
+                    <Label className="text-gray-300 text-xs mb-1 block">Registered Email / Mobile</Label>
                     <Input
                       value={forgotIdentifier}
                       onChange={(e) => setForgotIdentifier(e.target.value)}
-                      placeholder="e.g. 9876543210 or dealer@example.com"
+                      placeholder="e.g. farmer@example.com or 9876543210"
                       className="bg-white/5 border-white/10 text-white"
                       required
                     />
                   </div>
                   <Button type="submit" className="w-full bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer">
-                    Send Verification OTP →
+                    Send Email Verification Code →
                   </Button>
                 </form>
               )}
@@ -510,25 +517,25 @@ export default function LoginPage() {
               {forgotStep === 2 && (
                 <form onSubmit={handleVerifyForgotOtp} className="space-y-4">
                   <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs space-y-1">
-                    <div className="font-bold text-primary">📱 Live Verification Code</div>
+                    <div className="font-bold text-primary">📧 Live Email Verification Code</div>
                     <div className="text-gray-300">
-                      Your reset OTP is: <strong className="text-primary font-mono text-sm">{forgotGeneratedCode}</strong>
+                      Your reset email code is: <strong className="text-primary font-mono text-sm">{forgotGeneratedCode}</strong>
                     </div>
                     <button
                       type="button"
                       onClick={() => {
                         const digits = forgotGeneratedCode.split("");
                         setForgotOtp(digits);
-                        toast.info(`Auto-filled OTP: ${forgotGeneratedCode}`);
+                        toast.info(`Auto-filled Email Code: ${forgotGeneratedCode}`);
                       }}
                       className="mt-1 bg-primary text-black text-[11px] font-bold px-2.5 py-1 rounded cursor-pointer"
                     >
-                      ⚡ Auto-Fill Code ({forgotGeneratedCode})
+                      ⚡ Auto-Fill Email Code ({forgotGeneratedCode})
                     </button>
                   </div>
 
                   <div>
-                    <Label className="text-gray-300 text-xs mb-2 block text-center">Enter 4-Digit OTP Code</Label>
+                    <Label className="text-gray-300 text-xs mb-2 block text-center">Enter 4-Digit Email Code</Label>
                     <div className="flex justify-center gap-2">
                       {forgotOtp.map((d, i) => (
                         <Input
@@ -558,7 +565,7 @@ export default function LoginPage() {
                       Back
                     </Button>
                     <Button type="submit" className="w-2/3 bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer">
-                      Verify OTP →
+                      Verify Email Code →
                     </Button>
                   </div>
                 </form>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Wallet, Plus, ArrowUpRight, ArrowDownRight, ArrowRight, Shield, Eye, EyeOff, CreditCard, Clock, CheckCircle2, UserPlus, Search, ShoppingBag, Receipt, AlertCircle, Smartphone, KeyRound, Timer } from "lucide-react";
+import { Wallet, Plus, ArrowUpRight, ArrowDownRight, ArrowRight, Shield, Eye, EyeOff, CreditCard, Clock, CheckCircle2, UserPlus, Search, ShoppingBag, Receipt, AlertCircle, Smartphone, KeyRound, Timer, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
@@ -727,17 +727,17 @@ export default function WalletPage() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <KeyRound className="h-4 w-4 text-amber-400" />
-                                <span className="text-xs font-bold text-amber-300">Buyer OTP Authorization Security</span>
+                                <span className="text-xs font-bold text-amber-300">Buyer Email Authorization Security</span>
                               </div>
                               {otpStep === "verified" && (
                                 <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] font-bold">
-                                  ✓ OTP Verified
+                                  ✓ Code Verified
                                 </Badge>
                               )}
                             </div>
 
                             <p className="text-[11px] text-gray-300">
-                              To debit money from <span className="text-white font-bold">{foundCardInfo.cardHolder}</span>'s account, an OTP must be verified from the buyer's phone.
+                              To debit money from <span className="text-white font-bold">{foundCardInfo.cardHolder}</span>'s account, a verification code must be verified via the buyer's email.
                             </p>
 
                             {otpStep === "idle" && (
@@ -756,13 +756,13 @@ export default function WalletPage() {
                                 }}
                                 className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs py-2 rounded-xl"
                               >
-                                <Smartphone className="h-4 w-4 mr-1.5" /> Send OTP to Buyer's Phone
+                                <Mail className="h-4 w-4 mr-1.5" /> Send Verification Code to Buyer's Email
                               </Button>
                             )}
 
                             {otpStep === "sending" && (
                               <div className="flex items-center justify-center gap-2 text-xs text-amber-300 py-2 font-medium">
-                                <Timer className="h-4 w-4 animate-spin" /> Sending 6-digit OTP to buyer's phone...
+                                <Timer className="h-4 w-4 animate-spin" /> Sending verification code to buyer's email...
                               </div>
                             )}
 

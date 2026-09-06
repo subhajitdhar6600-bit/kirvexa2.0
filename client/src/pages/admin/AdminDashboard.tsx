@@ -210,7 +210,7 @@ const TAB_TO_URL: Record<AdminTab, string> = {
 };
 
 export default function AdminDashboard() {
-  const { adminLogout, adminName, kccApplications, loadAllKccApplications } = useApp();
+  const { adminLogout, adminName, kccApplications, loadAllKccApplications, registeredAccounts } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -338,105 +338,134 @@ export default function AdminDashboard() {
         api.getPayments(),
       ]);
 
-      // Process users
-      if (usersRes.status === "fulfilled" && usersRes.value && usersRes.value.length > 0) {
-        const users = usersRes.value;
-        setRawUsers(users);
-        const farmerUsers = users.filter((u: any) => u.role === "farmer").map((u: any, idx: number) => ({
-          id: u.id || u._id || `FRM${1000 + idx}`,
-          name: u.fullName || u.name || "—",
-          fatherName: u.fatherName || "—",
-          phone: u.phone || "—",
-          email: u.email && u.email !== "—" && !u.email.endsWith("@farma.local") ? u.email : "—",
-          gender: u.gender || "—",
-          dob: u.dob || "—",
-          state: u.state || "Bihar",
-          district: u.district || "Patna",
-          village: u.village || "—",
-          address: u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "—",
-          location: [u.village, u.district || u.state].filter(Boolean).join(", ") || u.district || u.state || "Bihar",
-          occupation: u.occupation || "Farmer",
-          crops: u.occupation || "Agricultural Crops",
-          status: (u.status?.toLowerCase() === "pending" ? "pending" : u.status?.toLowerCase() === "suspended" ? "suspended" : "active") as any,
-          verified: (u.verificationStatus === "Verified" ? "verified" : u.verificationStatus === "Rejected" ? "unverified" : "pending") as any,
-          totalProducts: 0,
-          totalOrders: 0,
-          totalSales: 0,
-          totalEarnings: 0,
-          farmName: u.businessName || `${u.fullName || u.name || "Farmer"} Farm`,
-          totalLand: u.landSize || "—",
-          landType: "—",
-          mainCrops: u.occupation || "Grain, Vegetables",
-          organicCertified: "No" as const,
-          createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
-          avatar: u.avatar || "",
-          rawUser: u,
-        }));
+      // Process users (combining DB users + registeredAccounts from AppContext)
+      let fetchedUsers: any[] = [];
+      if (usersRes.status === "fulfilled" && usersRes.value) {
+        fetchedUsers = Array.isArray(usersRes.value) ? usersRes.value : [];
+      }
 
-        const dealerUsers = users.filter((u: any) => u.role === "dealer").map((u: any, idx: number) => ({
-          id: u.id || u._id || `DLR${2000 + idx}`,
-          businessName: u.businessName || u.fullName || u.name || "Agri Dealer",
-          owner: u.fullName || u.owner || u.name || "—",
-          phone: u.phone || "—",
-          email: u.email && u.email !== "—" && !u.email.endsWith("@farma.local") ? u.email : "—",
-          dealerType: u.dealerType || "Seeds & Fertilizer Dealer",
-          businessType: u.dealerType || "Seeds & Fertilizer Dealer",
-          gstin: u.gstin || u.gstNumber || "Not provided",
-          gstNumber: u.gstin || u.gstNumber || "Not provided",
-          licenseNumber: u.licenseNumber || "Not provided",
-          state: u.state || "Bihar",
-          district: u.district || "Patna",
-          village: u.village || "—",
-          address: u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "—",
-          location: [u.village, u.district || u.state].filter(Boolean).join(", ") || u.district || u.state || "Bihar",
-          status: (u.status?.toLowerCase() === "pending" ? "pending" : u.status?.toLowerCase() === "suspended" ? "suspended" : "active") as any,
-          verified: (u.verificationStatus === "Verified" ? "verified" : u.verificationStatus === "Rejected" ? "unverified" : "pending") as any,
-          totalOrders: 0,
-          totalPurchases: 0,
-          outstanding: 0,
-          createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
-          avatar: u.avatar || "",
-          rawUser: u,
-        }));
+      const localAccounts = Array.isArray(registeredAccounts) ? registeredAccounts : [];
+      const existingPhones = new Set(fetchedUsers.map((u: any) => u.phone).filter(Boolean));
+      const combinedUsers = [...fetchedUsers];
 
-        if (farmerUsers.length > 0) setFarmers(farmerUsers);
-        if (dealerUsers.length > 0) setDealers(dealerUsers);
-
-        // Populate verifications from farmers and dealers
-        const verifItems: VerificationItem[] = [];
-        farmerUsers.forEach((f: any, idx: number) => {
-          verifItems.push({
-            id: `VRF-F-${f.id || idx}`,
-            user: f.name,
-            userId: f.id,
-            type: "Farmer",
-            verificationType: "Aadhaar & Land Ownership Document",
-            submittedOn: f.createdAt || "Recent",
-            documentsCount: 2,
-            status: f.verified === "verified" ? "approved" : "pending",
-            documents: [
-              { name: "Aadhaar Card Copy", type: "ID Proof" },
-              { name: "Land Khasra / Khatauni Record", type: "Land Proof" },
-            ],
+      localAccounts.forEach((acc: any) => {
+        if (acc.phone && !existingPhones.has(acc.phone)) {
+          combinedUsers.push({
+            id: acc.id,
+            name: acc.fullName || acc.name || "User",
+            fullName: acc.fullName || acc.name || "User",
+            phone: acc.phone,
+            role: acc.role || "farmer",
+            state: acc.state || "Bihar",
+            district: acc.district || "Patna",
+            village: acc.village || "—",
+            businessName: acc.businessName,
+            dealerType: acc.dealerType,
+            occupation: acc.occupation,
+            status: acc.status || (acc.role === "dealer" ? "pending" : "active"),
+            createdAt: acc.createdAt,
           });
+          existingPhones.add(acc.phone);
+        }
+      });
+
+      setRawUsers(combinedUsers);
+
+      const farmerUsers = combinedUsers.filter((u: any) => (u.role || "").toLowerCase() === "farmer").map((u: any, idx: number) => ({
+        id: u.id || u._id || `FRM${1000 + idx}`,
+        name: u.fullName || u.name || "—",
+        fatherName: u.fatherName || "—",
+        phone: u.phone || "—",
+        email: u.email && u.email !== "—" && !u.email.endsWith("@farma.local") ? u.email : "—",
+        gender: u.gender || "—",
+        dob: u.dob || "—",
+        state: u.state || "Bihar",
+        district: u.district || "Patna",
+        village: u.village || "—",
+        address: u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "—",
+        location: [u.village, u.district || u.state].filter(Boolean).join(", ") || u.district || u.state || "Bihar",
+        occupation: u.occupation || "Farmer",
+        crops: u.occupation || "Agricultural Crops",
+        status: (u.status?.toLowerCase() === "pending" ? "pending" : u.status?.toLowerCase() === "suspended" ? "suspended" : "active") as any,
+        verified: (u.verificationStatus === "Verified" ? "verified" : u.verificationStatus === "Rejected" ? "unverified" : "pending") as any,
+        totalProducts: 0,
+        totalOrders: 0,
+        totalSales: 0,
+        totalEarnings: 0,
+        farmName: u.businessName || `${u.fullName || u.name || "Farmer"} Farm`,
+        totalLand: u.landSize || "—",
+        landType: "—",
+        mainCrops: u.occupation || "Grain, Vegetables",
+        organicCertified: "No" as const,
+        createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
+        avatar: u.avatar || "",
+        rawUser: u,
+      }));
+
+      const dealerUsers = combinedUsers.filter((u: any) => (u.role || "").toLowerCase() === "dealer").map((u: any, idx: number) => ({
+        id: u.id || u._id || `DLR${2000 + idx}`,
+        businessName: u.businessName || u.fullName || u.name || "Agri Dealer",
+        owner: u.fullName || u.owner || u.name || "—",
+        phone: u.phone || "—",
+        email: u.email && u.email !== "—" && !u.email.endsWith("@farma.local") ? u.email : "—",
+        dealerType: u.dealerType || "Seeds & Fertilizer Dealer",
+        businessType: u.dealerType || "Seeds & Fertilizer Dealer",
+        gstin: u.gstin || u.gstNumber || "Not provided",
+        gstNumber: u.gstin || u.gstNumber || "Not provided",
+        licenseNumber: u.licenseNumber || "Not provided",
+        state: u.state || "Bihar",
+        district: u.district || "Patna",
+        village: u.village || "—",
+        address: u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "—",
+        location: [u.village, u.district || u.state].filter(Boolean).join(", ") || u.district || u.state || "Bihar",
+        status: (u.status?.toLowerCase() === "pending" ? "pending" : u.status?.toLowerCase() === "suspended" ? "suspended" : "active") as any,
+        verified: (u.verificationStatus === "Verified" ? "verified" : u.verificationStatus === "Rejected" ? "unverified" : "pending") as any,
+        totalOrders: 0,
+        totalPurchases: 0,
+        outstanding: 0,
+        createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
+        avatar: u.avatar || "",
+        rawUser: u,
+      }));
+
+      setFarmers(farmerUsers);
+      setDealers(dealerUsers);
+
+      // Populate verifications from farmers and dealers
+      const verifItems: VerificationItem[] = [];
+      farmerUsers.forEach((f: any, idx: number) => {
+        verifItems.push({
+          id: `VRF-F-${f.id || idx}`,
+          user: f.name,
+          userId: f.id,
+          type: "Farmer",
+          verificationType: "Aadhaar & Land Ownership Document",
+          submittedOn: f.createdAt || "Recent",
+          documentsCount: 2,
+          status: f.verified === "verified" ? "approved" : "pending",
+          documents: [
+            { name: "Aadhaar Card Copy", type: "ID Proof" },
+            { name: "Land Khasra / Khatauni Record", type: "Land Proof" },
+          ],
         });
-        dealerUsers.forEach((d: any, idx: number) => {
-          verifItems.push({
-            id: `VRF-D-${d.id || idx}`,
-            user: d.businessName || d.owner,
-            userId: d.id,
-            type: "Dealer",
-            verificationType: "Fertilizer / Seeds License & GSTIN",
-            submittedOn: d.createdAt || "Recent",
-            documentsCount: 2,
-            status: d.verified === "verified" ? "approved" : "pending",
-            documents: [
-              { name: "GSTIN Certificate", type: "Tax Registration" },
-              { name: "Fertilizer / Pesticide Retail License", type: "Trade License" },
-            ],
-          });
+      });
+      dealerUsers.forEach((d: any, idx: number) => {
+        verifItems.push({
+          id: `VRF-D-${d.id || idx}`,
+          user: d.businessName || d.owner,
+          userId: d.id,
+          type: "Dealer",
+          verificationType: "Fertilizer / Seeds License & GSTIN",
+          submittedOn: d.createdAt || "Recent",
+          documentsCount: 2,
+          status: d.verified === "verified" ? "approved" : "pending",
+          documents: [
+            { name: "GSTIN Certificate", type: "Tax Registration" },
+            { name: "Fertilizer / Pesticide Retail License", type: "Trade License" },
+          ],
         });
-        if (verifItems.length > 0) setVerifications(verifItems);
+      });
+      setVerifications(verifItems);
 
         // Populate payouts for dealers
         const payoutList: PayoutItem[] = [];

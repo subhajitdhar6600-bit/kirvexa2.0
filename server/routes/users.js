@@ -33,6 +33,12 @@ router.post('/', async (req, res) => {
     if (userData.fullName && !userData.name) {
       userData.name = userData.fullName;
     }
+    if (userData.name && !userData.fullName) {
+      userData.fullName = userData.name;
+    }
+    if (userData.role) {
+      userData.role = userData.role.toLowerCase();
+    }
     const filter = userData.phone ? { phone: userData.phone } : { id: userData.id };
     const user = await User.findOneAndUpdate(
       filter,

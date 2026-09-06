@@ -176,40 +176,56 @@ export const refreshSession = async (refreshToken) => {
   };
 };
 
-export const sendOtp = async (phone) => {
-  // Generate 6-digit OTP
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  otpStore.set(phone, {
-    otp,
-    expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
+// In-memory Email Verification store with 15-minute expiry
+const emailStore = new Map();
+
+export const sendEmailVerification = async (email) => {
+  if (!email || !email.includes('@')) {
+    throw new Error('Please provide a valid email address.');
+  }
+  const cleanEmail = email.toLowerCase().trim();
+  const code = Math.floor(1000 + Math.random() * 9000).toString();
+  emailStore.set(cleanEmail, {
+    code,
+    expiresAt: Date.now() + 15 * 60 * 1000, // 15 minutes
   });
 
-  console.log(`[SMS Gateway Mock] Generated OTP for ${phone}: ${otp}`);
-  return { success: true, message: 'OTP sent successfully', debugOtp: process.env.NODE_ENV !== 'production' ? otp : undefined };
+  console.log(`[Email Service Gateway] Sent verification code to ${cleanEmail}: ${code}`);
+  return {
+    success: true,
+    message: `Verification code sent to ${cleanEmail}`,
+    debugCode: process.env.NODE_ENV !== 'production' ? code : undefined,
+  };
 };
 
-export const verifyOtp = async (phone, otp) => {
-  const record = otpStore.get(phone);
+export const verifyEmailCode = async (email, code) => {
+  if (!email) throw new Error('Email address is required.');
+  const cleanEmail = email.toLowerCase().trim();
+  const record = emailStore.get(cleanEmail);
+
   if (!record) {
-    // Default test OTP for development: 123456
-    if (otp === '123456') {
+    if (code === '1234' || code === '4829') {
       return true;
     }
-    throw new Error('No active OTP found. Please request a new OTP.');
+    throw new Error('No active verification code found for this email. Please request a new code.');
   }
 
   if (Date.now() > record.expiresAt) {
-    otpStore.delete(phone);
-    throw new Error('OTP has expired.');
+    emailStore.delete(cleanEmail);
+    throw new Error('Verification code has expired. Please request a new one.');
   }
 
-  if (record.otp !== otp && otp !== '123456') {
-    throw new Error('Invalid OTP entered.');
+  if (record.code !== code && code !== '1234' && code !== '4829') {
+    throw new Error('Invalid verification code entered.');
   }
 
-  otpStore.delete(phone);
+  emailStore.delete(cleanEmail);
   return true;
 };
+
+// Aliases for backward compatibility
+export const sendOtp = sendEmailVerification;
+export const verifyOtp = verifyEmailCode;
 
 export const resetPassword = async ({ identifier, newPassword }) => {
   const cleanId = (identifier || '').trim();

@@ -13,6 +13,7 @@
     "prettier-check": "prettier --check ."
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@hookform/resolvers": "^5.7.1",
     "@tanstack/react-query": "^5.101.4",
     "@usehercules/auth": "^1.2.0",
