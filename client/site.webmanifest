@@ -1,0 +1,50 @@
+{
+  "id": "/",
+  "name": "KisanSeva - Kisan ki Seva",
+  "short_name": "KisanSeva",
+  "description": "A comprehensive agricultural platform for Indian farmers — mandi prices, expert advice, machinery booking, weather, soil testing, and more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a1a0a",
+  "theme_color": "#1a3a1a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon/icon-192.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon/icon-512.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon/icon-maskable-192.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon/icon-maskable-512.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://hercules-cdn.com/file_orn3TBGHk4TlWhJgNmqcPpJQ",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://hercules-cdn.com/file_orn3TBGHk4TlWhJgNmqcPpJQ",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

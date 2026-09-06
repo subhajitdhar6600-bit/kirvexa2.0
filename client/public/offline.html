@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline - KisanSeva</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #0a1a0a;
+        color: #e0ffe0;
+      }
+      .container {
+        text-align: center;
+        padding: 2rem;
+        max-width: 400px;
+      }
+      .icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: #6dcc6d;
+      }
+      p {
+        color: #8aaa8a;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+      }
+      button {
+        background: #3a8a3a;
+        color: #e0ffe0;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      button:hover { background: #4aaa4a; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="icon">🌾</div>
+      <h1>You're Offline</h1>
+      <p>No internet connection found. Please check your connection and try again.</p>
+      <button onclick="window.location.reload()">Try Again</button>
+    </div>
+  </body>
+</html>

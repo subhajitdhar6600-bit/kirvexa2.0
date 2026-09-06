@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+
+    <title>KRIVEXA - Smart Farming. Smarter Future.</title>
+    <meta name="description" content="KRIVEXA - Smart Farming Platform for India. Live mandi rates, machinery booking, expert advice, soil testing, and more." />
+    <meta name="author" content="KRIVEXA" />
+    <link
+      rel="icon"
+      type="image/jpeg"
+      href="/krivexa-logo.jpg"
+    />
+
+    <meta property="og:title" content="KRIVEXA - Smart Farming Platform" />
+    <meta
+      property="og:description"
+      content="KRIVEXA brings every farming solution to your fingertips."
+    />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:image"
+      content="/krivexa-logo.jpg"
+    />
+    <meta property="og:image:type" content="image/jpeg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:image"
+      content="/krivexa-logo.jpg"
+    />
+    <meta name="twitter:site" content="@usehercules" />
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#1a3a1a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="apple-touch-icon" href="/krivexa-logo.jpg" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+      crossorigin
+    />
+
+    <!-- Detect dark mode preference and set the class before next-themes loads. This avoids a flash of unstyled content (FOUC) when the page loads. -->
+    <script>
+      try {
+        let theme = localStorage.getItem("theme");
+        if (theme === "system" || !theme) {
+          let prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          theme = prefersDark ? "dark" : "light";
+        }
+        document.documentElement.classList.add(theme);
+      } catch (e) {}
+    </script>
+
+    <script type="module" crossorigin src="/assets/index-BM0uz8od.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-B0Z9INg1.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-BIZ2ov0K.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
