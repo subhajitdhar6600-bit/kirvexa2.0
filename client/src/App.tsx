@@ -32,6 +32,7 @@ import CartPage from "./pages/cart/page.tsx";
 import KisanPathshalaPage from "./pages/kisan-pathshala/page.tsx";
 import ServicesPage from "./pages/services/page.tsx";
 import SoilTestingPage from "./pages/soil-testing/page.tsx";
+import AuthGate from "./components/AuthGate.tsx";
 
 function AppInner() {
   useServiceWorker();
@@ -42,35 +43,40 @@ function AppInner() {
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
-          <Route path="/" element={<Index />} />
+          {/* Public Auth Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/machinery-booking" element={<MachineryBookingPage />} />
-          <Route path="/mandi-bhav" element={<MandiBhavPage />} />
-          <Route path="/agri-market" element={<AgriMarketPage />} />
-          <Route path="/sell-crops" element={<SellCropsPage />} />
-          <Route path="/labour-booking" element={<LabourBookingPage />} />
-          <Route path="/expert-advice" element={<ExpertAdvicePage />} />
-          <Route path="/weather" element={<WeatherPage />} />
-          <Route path="/wallet" element={<WalletPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/:tab" element={<AdminPage />} />
+          <Route path="/admin/:tab/*" element={<AdminPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+
+          {/* Public Platform & Information Routes */}
+          <Route path="/" element={<Index />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/services" element={<ServicesPage />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/weather" element={<WeatherPage />} />
+          <Route path="/mandi-bhav" element={<MandiBhavPage />} />
+          <Route path="/agri-market" element={<AgriMarketPage />} />
           <Route path="/crop-calendar" element={<CropCalendarPage />} />
           <Route path="/government-schemes" element={<GovernmentSchemesPage />} />
           <Route path="/farming-tips" element={<FarmingTipsPage />} />
           <Route path="/kisan-pathshala" element={<KisanPathshalaPage />} />
-          <Route path="/services" element={<ServicesPage />} />
-          <Route path="/soil-testing" element={<SoilTestingPage />} />
           <Route path="/help-center" element={<HelpCenterPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/:tab" element={<AdminPage />} />
-          <Route path="/admin/:tab/*" element={<AdminPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
+
+          {/* Protected Platform Routes (Requires Login / Account) */}
+          <Route path="/dashboard" element={<AuthGate><DashboardPage /></AuthGate>} />
+          <Route path="/profile" element={<AuthGate><ProfilePage /></AuthGate>} />
+          <Route path="/cart" element={<AuthGate><CartPage /></AuthGate>} />
+          <Route path="/wallet" element={<AuthGate><WalletPage /></AuthGate>} />
+          <Route path="/sell-crops" element={<AuthGate><SellCropsPage /></AuthGate>} />
+          <Route path="/machinery-booking" element={<AuthGate><MachineryBookingPage /></AuthGate>} />
+          <Route path="/labour-booking" element={<AuthGate><LabourBookingPage /></AuthGate>} />
+          <Route path="/expert-advice" element={<AuthGate><ExpertAdvicePage /></AuthGate>} />
+          <Route path="/soil-testing" element={<AuthGate><SoilTestingPage /></AuthGate>} />
+          <Route path="/notifications" element={<AuthGate><NotificationsPage /></AuthGate>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

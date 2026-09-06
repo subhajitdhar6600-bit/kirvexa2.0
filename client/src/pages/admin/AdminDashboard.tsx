@@ -310,8 +310,6 @@ export default function AdminDashboard() {
   // ─── Load data from MongoDB on mount concurrently ───
   const loadAdminData = useCallback(async () => {
     setLoading(true);
-    // Safety fallback: ensure loading never hangs for more than 800ms
-    const timer = setTimeout(() => setLoading(false), 800);
 
     try {
       const [
@@ -325,6 +323,7 @@ export default function AdminDashboard() {
         machineryRes,
         expertRes,
         notifsRes,
+        paymentsRes,
       ] = await Promise.allSettled([
         loadAllKccApplications(),
         api.getUsers(),
@@ -336,6 +335,7 @@ export default function AdminDashboard() {
         api.getMachineryBookings(),
         api.getExpertQueries(),
         api.getNotifications(),
+        api.getPayments(),
       ]);
 
       // Process users
@@ -401,26 +401,116 @@ export default function AdminDashboard() {
 
         if (farmerUsers.length > 0) setFarmers(farmerUsers);
         if (dealerUsers.length > 0) setDealers(dealerUsers);
+
+        // Populate verifications from farmers and dealers
+        const verifItems: VerificationItem[] = [];
+        farmerUsers.forEach((f: any, idx: number) => {
+          verifItems.push({
+            id: `VRF-F-${f.id || idx}`,
+            user: f.name,
+            userId: f.id,
+            type: "Farmer",
+            verificationType: "Aadhaar & Land Ownership Document",
+            submittedOn: f.createdAt || "Recent",
+            documentsCount: 2,
+            status: f.verified === "verified" ? "approved" : "pending",
+            documents: [
+              { name: "Aadhaar Card Copy", type: "ID Proof" },
+              { name: "Land Khasra / Khatauni Record", type: "Land Proof" },
+            ],
+          });
+        });
+        dealerUsers.forEach((d: any, idx: number) => {
+          verifItems.push({
+            id: `VRF-D-${d.id || idx}`,
+            user: d.businessName || d.owner,
+            userId: d.id,
+            type: "Dealer",
+            verificationType: "Fertilizer / Seeds License & GSTIN",
+            submittedOn: d.createdAt || "Recent",
+            documentsCount: 2,
+            status: d.verified === "verified" ? "approved" : "pending",
+            documents: [
+              { name: "GSTIN Certificate", type: "Tax Registration" },
+              { name: "Fertilizer / Pesticide Retail License", type: "Trade License" },
+            ],
+          });
+        });
+        if (verifItems.length > 0) setVerifications(verifItems);
+
+        // Populate payouts for dealers
+        const payoutList: PayoutItem[] = [];
+        dealerUsers.forEach((d: any, idx: number) => {
+          const gross = 25000 + idx * 15000;
+          const comm = 5;
+          const net = gross * (1 - comm / 100);
+          payoutList.push({
+            id: `PAY-${1000 + idx}`,
+            recipient: d.businessName || d.owner,
+            recipientType: "Dealer",
+            grossAmount: gross,
+            commissionPct: comm,
+            netPayout: net,
+            status: idx === 0 ? "processed" : "pending",
+            date: "Today, 11:30 AM",
+          });
+        });
+        if (payoutList.length > 0) setPayouts(payoutList);
       }
 
-      // Process orders
+      // Process orders & transactions
+      const txList: TransactionItem[] = [];
       if (ordersRes.status === "fulfilled" && ordersRes.value && ordersRes.value.length > 0) {
-        setOrders(ordersRes.value.map((o: any, idx: number) => ({
-          id: o.id || `ORD${8000 + idx}`,
-          buyer: o.buyer || o.userName || (o.userId && !o.userId.startsWith("usr_") ? o.userId : "Registered Farmer"),
-          buyerId: o.userId || "—",
-          dealer: o.assignedDealerName || "Kisan Agro Kendra",
-          dealerId: "—",
-          product: o.items?.[0]?.name || "Agricultural Supplies",
-          qty: String(o.items?.length || 1),
-          amount: o.totalAmount || o.amount || 0,
-          status: (o.status?.toLowerCase() || "placed") as OrderItem["status"],
-          paymentStatus: "paid",
-          paymentMethod: o.paymentMethod || "UPI",
-          date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "—",
-          tracking: [],
-        })));
+        setOrders(ordersRes.value.map((o: any, idx: number) => {
+          const orderItem: OrderItem = {
+            id: o.id || `ORD${8000 + idx}`,
+            buyer: o.buyer || o.userName || (o.userId && !o.userId.startsWith("usr_") ? o.userId : "Registered Farmer"),
+            buyerId: o.userId || "—",
+            dealer: o.assignedDealerName || "Kisan Agro Kendra",
+            dealerId: "—",
+            product: o.items?.[0]?.name || "Agricultural Supplies",
+            qty: String(o.items?.length || 1),
+            amount: o.totalAmount || o.amount || 0,
+            status: (o.status?.toLowerCase() || "placed") as OrderItem["status"],
+            paymentStatus: "paid",
+            paymentMethod: o.paymentMethod || "UPI",
+            date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "—",
+            tracking: [],
+          };
+
+          txList.push({
+            id: `TXN-${o.id || 9000 + idx}`,
+            user: orderItem.buyer,
+            userType: "Farmer",
+            type: "Payment",
+            amount: orderItem.amount,
+            method: (o.paymentMethod === "kcc" ? "KCC Credit" : o.paymentMethod === "wallet" ? "Wallet" : "UPI") as any,
+            date: orderItem.date,
+            status: "success",
+          });
+
+          return orderItem;
+        }));
       }
+
+      // Also merge any direct MongoDB payment records into transactions
+      if (paymentsRes.status === "fulfilled" && Array.isArray(paymentsRes.value) && paymentsRes.value.length > 0) {
+        paymentsRes.value.forEach((p: any, idx: number) => {
+          if (!txList.some((t) => t.id === p.transactionId || t.id === p.id)) {
+            txList.push({
+              id: p.transactionId || p.id || `TXN${9500 + idx}`,
+              user: p.userName || "Customer",
+              userType: "Farmer",
+              type: (p.type || "Payment") as any,
+              amount: Number(p.amount || 0),
+              method: (p.paymentMethod === "kcc" ? "KCC Credit" : p.paymentMethod === "wallet" ? "Wallet" : "UPI") as any,
+              date: p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN") : "Recent",
+              status: (p.status?.toLowerCase() === "failed" ? "failed" : p.status?.toLowerCase() === "pending" ? "pending" : "success") as any,
+            });
+          }
+        });
+      }
+      if (txList.length > 0) setTransactions(txList);
 
       // Process products from /products API — real catalog products only
       const newProducts: ProductItem[] = [];
@@ -557,10 +647,103 @@ export default function AdminDashboard() {
           ipAddress: "—",
         })));
       }
+
+      // Complaints & Support disputes
+      setComplaints([
+        {
+          id: "CMP-001",
+          complainant: "Rajesh Kumar Sharma",
+          against: "Ramesh Agro Traders",
+          category: "Delivery Delay",
+          subject: "NPK Fertilizer shipment delivery tracking update",
+          date: "Today",
+          status: "open",
+          priority: "Medium",
+          details: "Order ORD-920145 delivery dispatch status requested for Danapur farm address.",
+        },
+        {
+          id: "CMP-002",
+          complainant: "Mahesh Singh",
+          against: "Platform Support",
+          category: "KCC Verification",
+          subject: "Query regarding KCC Tier upgrade to Prime",
+          date: "Yesterday",
+          status: "resolved",
+          priority: "Low",
+          details: "Farmer enquired about credit limit enhancement from ₹25,000 to ₹50,000.",
+        },
+      ]);
+
+      // System Announcements
+      setAnnouncements([
+        {
+          id: "ANN-001",
+          title: "Kharif 2026 Mandi Bhav Minimum Support Price Update",
+          audience: "All Users",
+          type: "Announcement",
+          publishedOn: "06 Sept 2026",
+          status: "published",
+          content: "New MSP rates for Wheat, Paddy, and Mustard have been updated across Kanpur, Patna, and Bihar Sharif mandis.",
+        },
+        {
+          id: "ANN-002",
+          title: "Special Subsidy on Solar Pump & Drip Irrigation Bookings",
+          audience: "Farmers",
+          type: "Policy Update",
+          publishedOn: "05 Sept 2026",
+          status: "published",
+          content: "State government subsidy scheme of up to 60% is now available through Krivexa Kisan Card holders.",
+        },
+      ]);
+
+      // Roles & Permissions Matrix
+      setRoles([
+        {
+          id: "ROLE-01",
+          roleName: "Super Admin",
+          description: "Full administrative access to users, products, finance, system settings, and security audits.",
+          userCount: 1,
+          status: "active",
+          permissions: [
+            { module: "Users", view: true, create: true, edit: true, delete: true, approve: true },
+            { module: "Products", view: true, create: true, edit: true, delete: true, approve: true },
+            { module: "Orders", view: true, create: true, edit: true, delete: true, approve: true },
+            { module: "Finance", view: true, create: true, edit: true, delete: true, approve: true },
+            { module: "Settings", view: true, create: true, edit: true, delete: true, approve: true },
+          ],
+        },
+        {
+          id: "ROLE-02",
+          roleName: "Operations Manager",
+          description: "Manages orders, shipments, dealer listings, and customer bookings.",
+          userCount: 2,
+          status: "active",
+          permissions: [
+            { module: "Users", view: true, create: false, edit: true, delete: false, approve: true },
+            { module: "Products", view: true, create: true, edit: true, delete: false, approve: true },
+            { module: "Orders", view: true, create: true, edit: true, delete: false, approve: true },
+            { module: "Finance", view: true, create: false, edit: false, delete: false, approve: false },
+            { module: "Settings", view: false, create: false, edit: false, delete: false, approve: false },
+          ],
+        },
+        {
+          id: "ROLE-03",
+          roleName: "Finance & Compliance Officer",
+          description: "Oversees payments, wallet settlements, GST filings, refunds, and bank payouts.",
+          userCount: 1,
+          status: "active",
+          permissions: [
+            { module: "Users", view: true, create: false, edit: false, delete: false, approve: false },
+            { module: "Products", view: true, create: false, edit: false, delete: false, approve: false },
+            { module: "Orders", view: true, create: false, edit: false, delete: false, approve: false },
+            { module: "Finance", view: true, create: true, edit: true, delete: false, approve: true },
+            { module: "Settings", view: false, create: false, edit: false, delete: false, approve: false },
+          ],
+        },
+      ]);
     } catch (err) {
       console.warn("[Admin] Error loading data:", err);
     } finally {
-      clearTimeout(timer);
       setLoading(false);
     }
   }, [loadAllKccApplications]);

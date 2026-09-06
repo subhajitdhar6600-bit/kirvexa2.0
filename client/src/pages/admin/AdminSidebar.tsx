@@ -330,6 +330,8 @@ export default function AdminSidebar({
                 {[
                   { label: "All Products", key: "all" },
                   { label: "Add New Product", key: "add" },
+                  { label: "Farmer Products", key: "farmer" },
+                  { label: "Dealer Products", key: "dealer" },
                   { label: "Categories", key: "categories" },
                   { label: "Brands", key: "brands" },
                   { label: "Units", key: "units" },

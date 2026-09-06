@@ -55,9 +55,42 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
   const paged = filtered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
+  const [allotModalOpen, setAllotModalOpen] = useState(false);
+  const [allottingRequest, setAllottingRequest] = useState<any | null>(null);
+  const [allottedCardNumber, setAllottedCardNumber] = useState("");
+  const [allottedCreditLimit, setAllottedCreditLimit] = useState(50000);
+  const [isVerifyingUser, setIsVerifyingUser] = useState(true);
+
+  const openAllotModal = (req: any) => {
+    setAllottingRequest(req);
+    const cleanPhone = (req.phone || "9876").replace(/\D/g, "").slice(-4);
+    setAllottedCardNumber(`KVX 1256 8942 ${cleanPhone}`);
+    setAllottedCreditLimit(req.creditRequested || 50000);
+    setIsVerifyingUser(true);
+    setAllotModalOpen(true);
+  };
+
+  const handleConfirmAllotment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!allottingRequest) return;
+    if (!allottedCardNumber.trim()) {
+      toast.error("Please specify a valid KCC Card Number");
+      return;
+    }
+    approveKccApplication(allottingRequest.id, allottedCardNumber.trim(), allottedCreditLimit);
+    toast.success(`KCC Card "${allottedCardNumber}" allotted with ₹${allottedCreditLimit.toLocaleString("en-IN")} limit! User documents verified.`);
+    setAllotModalOpen(false);
+    setAllottingRequest(null);
+  };
+
   const handleApprove = (id: string) => {
-    approveKccApplication(id);
-    toast.success(`KCC Request ${id} approved with live card issued!`);
+    const target = requests.find(r => r.id === id);
+    if (target) {
+      openAllotModal(target);
+    } else {
+      approveKccApplication(id);
+      toast.success(`KCC Request ${id} approved with live card issued!`);
+    }
   };
   const handleReject = (id: string) => {
     rejectKccApplication(id);
@@ -337,8 +370,8 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
                 ))}
                 {selected.status === "Pending" && (
                   <div className="flex gap-2 pt-2">
-                    <Button onClick={() => handleApprove(selected.id)} className="flex-1 h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl font-semibold cursor-pointer">
-                      Approve
+                    <Button onClick={() => openAllotModal(selected)} className="flex-1 h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl font-semibold cursor-pointer">
+                      Review & Allot Card
                     </Button>
                     <Button onClick={() => handleReject(selected.id)} variant="outline" className="flex-1 h-8 text-red-600 border-red-200 hover:bg-red-50 text-xs rounded-xl font-semibold cursor-pointer">
                       Reject
@@ -369,6 +402,114 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
           </div>
         )}
       </div>
+
+      {/* ─── REVIEW & ALLOT KCC CARD MODAL (Point 5) ─── */}
+      {allotModalOpen && allottingRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative animate-in fade-in zoom-in-95">
+            <button
+              onClick={() => setAllotModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold text-base">
+                <CreditCard className="h-6 w-6 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Review & Allot KCC Card</h3>
+                <p className="text-[11px] text-gray-500">Assign card number, credit limit & verify user</p>
+              </div>
+            </div>
+
+            {/* Applicant Summary */}
+            <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3.5 space-y-1.5 text-xs mb-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Applicant:</span>
+                <span className="font-bold text-gray-900">{allottingRequest.name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Phone:</span>
+                <span className="font-medium text-gray-800">{allottingRequest.phone}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Location:</span>
+                <span className="font-medium text-gray-800">{allottingRequest.address}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Card Tier:</span>
+                <span className="font-semibold text-emerald-800">{allottingRequest.cardType}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleConfirmAllotment} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Allot KCC Card Number (16-Digit) *</label>
+                <div className="relative">
+                  <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-600" />
+                  <Input
+                    value={allottedCardNumber}
+                    onChange={e => setAllottedCardNumber(e.target.value)}
+                    placeholder="e.g. KVX 1256 8942 9876"
+                    className="pl-9 h-9 text-xs font-mono font-bold text-emerald-900 rounded-xl"
+                    required
+                  />
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">Format: KVX 1256 XXXX XXXX (Unmasked across platform)</p>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Approved Credit Limit (₹) *</label>
+                <Input
+                  type="number"
+                  min="1000"
+                  step="1000"
+                  value={allottedCreditLimit}
+                  onChange={e => setAllottedCreditLimit(Number(e.target.value))}
+                  className="h-9 text-xs rounded-xl font-bold"
+                  required
+                />
+                <p className="text-[10px] text-gray-400 mt-1">Available credit allotted for purchasing inputs & booking machinery</p>
+              </div>
+
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-start gap-2.5">
+                <input
+                  type="checkbox"
+                  id="verifyUser"
+                  checked={isVerifyingUser}
+                  onChange={e => setIsVerifyingUser(e.target.checked)}
+                  className="mt-0.5 accent-emerald-600 rounded"
+                />
+                <label htmlFor="verifyUser" className="text-[11px] text-gray-700 cursor-pointer">
+                  <strong className="font-semibold">Verify User & Authenticate KCC:</strong> Mark user as verified so full active permissions (Buy, Sell, Book) are unlocked immediately.
+                </label>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  type="submit"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-xl cursor-pointer"
+                >
+                  <Check className="h-4 w-4 mr-1" /> Allot & Issue Card
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    handleReject(allottingRequest.id);
+                    setAllotModalOpen(false);
+                  }}
+                  className="text-red-600 border-red-200 hover:bg-red-50 text-xs font-semibold rounded-xl cursor-pointer"
+                >
+                  Reject
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="text-center text-[11px] text-gray-400">
         © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar KCC Applications Database

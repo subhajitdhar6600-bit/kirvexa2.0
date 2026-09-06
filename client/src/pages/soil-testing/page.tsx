@@ -25,7 +25,7 @@ const PROCESS = [
 ];
 
 export default function SoilTestingPage() {
-  const { user, addNotification } = useApp();
+  const { user, addNotification, checkKccPermission } = useApp();
   const [selected, setSelected] = useState("Standard Soil Test");
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
@@ -37,8 +37,13 @@ export default function SoilTestingPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!checkKccPermission("book soil testing services")) return;
     if (!name || !phone || !address || !date || !crop) {
       toast.error("Please fill in all details");
+      return;
+    }
+    if (phone.replace(/\D/g, "").length < 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
       return;
     }
     setShowPreview(true);
@@ -166,7 +171,7 @@ export default function SoilTestingPage() {
               </div>
               <div>
                 <Label className="text-gray-300 text-sm mb-1.5 block">Mobile Number</Label>
-                <Input value={phone} onChange={(e) => setPhone(e.target.value)} required placeholder="Mobile number" className="bg-white/5 border-white/10 text-white placeholder:text-gray-600" />
+                <Input value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} maxLength={10} required placeholder="10-digit mobile number" className="bg-white/5 border-white/10 text-white placeholder:text-gray-600" />
               </div>
             </div>
             <div>

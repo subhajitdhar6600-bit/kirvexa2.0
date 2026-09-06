@@ -118,13 +118,14 @@ function CropDetailModal({ crop, onClose }: CropDetailModalProps) {
 }
 
 export default function AgriMarketPage() {
-  const { cropListings, addToCart, t } = useApp();
+  const { cropListings, dealerListings, addToCart, t, checkKccPermission } = useApp();
   const [products, setProducts] = useState<LiveProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
   const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [selectedCrop, setSelectedCrop] = useState<CropListing | null>(null);
+  const [selectedDealerProduct, setSelectedDealerProduct] = useState<any | null>(null);
 
   const fetchLiveProducts = async () => {
     setIsLoading(true);
@@ -176,9 +177,10 @@ export default function AgriMarketPage() {
   }, []);
 
   const approvedCrops = cropListings.filter((c) => c.status === "approved");
+  const approvedDealerListings = (dealerListings || []).filter((d) => d.status === "approved");
 
-  const filteredProducts = category === "All" || category === "Farmer Crops"
-    ? category === "Farmer Crops" ? [] : products.filter((p) =>
+  const filteredProducts = category === "All" || category === "Farmer Crops" || category === "Dealer Products"
+    ? (category === "Farmer Crops" || category === "Dealer Products") ? [] : products.filter((p) =>
         (category === "All" || p.category === category) &&
         p.name.toLowerCase().includes(search.toLowerCase())
       )
@@ -191,11 +193,19 @@ export default function AgriMarketPage() {
     c.cropName.toLowerCase().includes(search.toLowerCase())
   );
 
+  const showDealerProducts = category === "All" || category === "Dealer Products";
+  const filteredDealerProducts = approvedDealerListings.filter((d) =>
+    d.title.toLowerCase().includes(search.toLowerCase()) ||
+    (d.category && d.category.toLowerCase().includes(search.toLowerCase())) ||
+    (d.dealerName && d.dealerName.toLowerCase().includes(search.toLowerCase()))
+  );
+
   const handleViewDetails = (crop: CropListing) => {
     setSelectedCrop(crop);
   };
 
-  const handleAddToCart = (product: { id: string; name: string; category?: string; price: number; unit?: string; img?: string }) => {
+  const handleAddToCart = (product: { id: string; name: string; category?: string; price: number; unit?: string; img?: string; sellerName?: string }) => {
+    if (!checkKccPermission("buy products and add items to cart")) return;
     addToCart({
       id: product.id,
       name: product.name,
@@ -203,6 +213,7 @@ export default function AgriMarketPage() {
       price: product.price,
       unit: product.unit,
       image: product.img,
+      sellerName: product.sellerName,
     });
     toast.success(`${product.name} added to cart!`, {
       action: {
@@ -216,6 +227,56 @@ export default function AgriMarketPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar />
       {selectedCrop && <CropDetailModal crop={selectedCrop} onClose={() => setSelectedCrop(null)} />}
+      {selectedDealerProduct && (
+        <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedDealerProduct(null)} />
+          <div className="relative bg-[#141414] border border-white/10 rounded-2xl max-w-md w-full z-10 overflow-hidden shadow-2xl">
+            <div className="relative h-60 overflow-hidden bg-black/50">
+              <img
+                src={(selectedDealerProduct.images && selectedDealerProduct.images[0]) || selectedDealerProduct.image || "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=80"}
+                alt={selectedDealerProduct.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
+              <button onClick={() => setSelectedDealerProduct(null)} className="absolute top-3 right-3 bg-black/60 rounded-full p-1.5 text-white hover:bg-black cursor-pointer z-10">
+                <X className="h-4 w-4" />
+              </button>
+              <div className="absolute bottom-0 left-0 p-4">
+                <Badge className="bg-emerald-500 text-black text-xs font-bold mb-1">Verified Dealer Product</Badge>
+                <h3 className="text-xl font-black text-white">{selectedDealerProduct.title}</h3>
+              </div>
+            </div>
+            <div className="p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400">Category: {selectedDealerProduct.category}</span>
+                <span className="text-xl font-black text-emerald-400">₹{selectedDealerProduct.price} <span className="text-xs font-normal text-gray-400">/{selectedDealerProduct.unit}</span></span>
+              </div>
+              <p className="text-xs text-gray-300 leading-relaxed">{selectedDealerProduct.description || "High quality agricultural input supplied directly by verified dealer."}</p>
+              <div className="bg-white/5 rounded-xl p-3 text-xs text-gray-400">
+                <p className="font-semibold text-white mb-1">Dealer: {selectedDealerProduct.dealerName}</p>
+                <p className="flex items-center gap-1"><MapPin className="h-3 w-3 text-emerald-400" /> {selectedDealerProduct.location || "Patna, Bihar"}</p>
+              </div>
+              <Button
+                onClick={() => {
+                  handleAddToCart({
+                    id: selectedDealerProduct.id,
+                    name: selectedDealerProduct.title,
+                    category: selectedDealerProduct.category || "Dealer Products",
+                    price: selectedDealerProduct.price,
+                    unit: selectedDealerProduct.unit,
+                    img: (selectedDealerProduct.images && selectedDealerProduct.images[0]) || selectedDealerProduct.image,
+                    sellerName: selectedDealerProduct.dealerName,
+                  });
+                  setSelectedDealerProduct(null);
+                }}
+                className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm h-10 rounded-xl"
+              >
+                Add to Cart &amp; Order
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="relative h-44 overflow-hidden">
@@ -252,6 +313,7 @@ export default function AgriMarketPage() {
             { key: "Farm Tools", label: t.buyInputs.farmTools },
             { key: "Organic", label: t.buyInputs.organic },
             { key: "Farmer Crops", label: `🌾 ${t.buyInputs.userCrops}` },
+            { key: "Dealer Products", label: `🏪 Dealer Products` },
           ].map((c) => (
             <button key={c.key} onClick={() => setCategory(c.key)}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer ${category === c.key ? "bg-primary text-black shadow-lg shadow-primary/20 scale-105" : "bg-white/5 border border-white/10 text-gray-300 hover:border-primary/40 hover:bg-primary/5"}`}>
@@ -260,7 +322,7 @@ export default function AgriMarketPage() {
           ))}
         </div>
 
-        {/* Farmer-listed Crops Section */}
+        {/* 1. Farmer-listed Crops Section */}
         {showFarmerCrops && filteredCrops.length > 0 && (
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-5">
@@ -291,16 +353,15 @@ export default function AgriMarketPage() {
                       <div className="text-xl font-black text-amber-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹{crop.price}<span className="text-xs text-gray-500 font-normal">/Qtl</span></div>
                       <div className="flex gap-1.5">
                         <Button size="sm" onClick={() => {
-                          addToCart({
+                          handleAddToCart({
                             id: crop.id,
                             name: crop.cropName,
                             category: "Farmer Crops",
                             price: crop.price,
                             unit: crop.weight,
-                            image: crop.image,
+                            img: crop.image,
                             sellerName: crop.sellerName
                           });
-                          toast.success(`${crop.cropName} added to cart!`);
                         }} className="bg-primary hover:bg-primary/90 text-black text-xs font-bold h-8 px-2.5 rounded-lg">
                           + Cart
                         </Button>
@@ -313,6 +374,80 @@ export default function AgriMarketPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* 2. Verified Dealers Products Section — Directly below Farmer-Listed Crops */}
+        {showDealerProducts && filteredDealerProducts.length > 0 && (
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-5">
+              <Package className="h-5 w-5 text-emerald-400" />
+              <h2 className="text-xl font-bold">Dealers Products</h2>
+              <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs">
+                {filteredDealerProducts.length} Verified
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredDealerProducts.map((dealerProd) => {
+                const imgUrl = (dealerProd.images && dealerProd.images[0]) || dealerProd.image || "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&q=80";
+                return (
+                  <div key={dealerProd.id}
+                    className="bg-[#111] border border-emerald-500/20 rounded-2xl overflow-hidden hover:border-emerald-500/50 transition-all group hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/10">
+                    <div className="relative h-44 overflow-hidden">
+                      <img
+                        src={imgUrl}
+                        alt={dealerProd.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
+                      <Badge className="absolute top-2 left-2 bg-emerald-500/90 text-black text-[10px] font-bold">
+                        Verified Dealer
+                      </Badge>
+                      <div className="absolute bottom-0 left-0 p-3">
+                        <p className="text-xs text-gray-300 flex items-center gap-1 font-medium">
+                          <MapPin className="h-3 w-3 text-emerald-400" />
+                          {dealerProd.location || "Patna, Bihar"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-sm font-bold mb-1 text-white">{dealerProd.title}</h3>
+                      <p className="text-xs text-gray-400 mb-2">By {dealerProd.dealerName} · {dealerProd.unit}</p>
+                      <div className="flex items-end justify-between">
+                        <div className="text-xl font-black text-emerald-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>
+                          ₹{dealerProd.price}
+                          <span className="text-xs text-gray-500 font-normal">/{dealerProd.unit}</span>
+                        </div>
+                        <div className="flex gap-1.5">
+                          <Button
+                            size="sm"
+                            onClick={() => handleAddToCart({
+                              id: dealerProd.id,
+                              name: dealerProd.title,
+                              category: dealerProd.category || "Dealer Products",
+                              price: Number(dealerProd.price) || 0,
+                              unit: dealerProd.unit,
+                              img: imgUrl,
+                              sellerName: dealerProd.dealerName,
+                            })}
+                            className="bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold h-8 px-2.5 rounded-lg"
+                          >
+                            + Cart
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => setSelectedDealerProduct(dealerProd)}
+                            className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold h-8 px-2.5 rounded-lg"
+                          >
+                            Details <ChevronRight className="h-3 w-3 ml-0.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

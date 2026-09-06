@@ -40,6 +40,7 @@ export default function AllCardsView() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
   const [loading, setLoading] = useState(true);
+  const [showCardNumbers, setShowCardNumbers] = useState(true); // Admin sees unmasked by default (Point 9)
 
   // Modals state
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
@@ -70,11 +71,12 @@ export default function AllCardsView() {
           const availableLimit = isVerified ? Math.round(creditLimit * 0.75) : 0;
           const status = (u.status === "inactive" || u.isActive === false) ? "Inactive" : "Active";
 
+          const mid4 = `${String(Math.floor(1000 + (phone.charCodeAt(3) || idx) * 97) % 9000 + 1000)}`;
           return {
             id: u.id || u._id || `c_${idx}`,
             name,
             phone,
-            cardNumber: `KVX 1256 **** ${last4}`,
+            cardNumber: u.kccCardNumber || `KVX 1256 ${mid4} ${last4}`,
             cardType,
             creditLimit,
             availableLimit,
@@ -156,7 +158,7 @@ export default function AllCardsView() {
       id: `card_${Date.now()}`,
       name: targetUser.fullName || targetUser.name || "User",
       phone: targetUser.phone || "—",
-      cardNumber: `KVX 1256 **** ${targetUser.phone ? targetUser.phone.slice(-4) : "8899"}`,
+      cardNumber: `KVX 1256 ${targetUser.phone ? String(Math.floor(4000 + Math.random() * 5000)) : "8941"} ${targetUser.phone ? targetUser.phone.slice(-4) : "8899"}`,
       cardType: issueForm.cardType,
       creditLimit: Number(issueForm.creditLimit) || 25000,
       availableLimit: Number(issueForm.creditLimit) || 25000,
@@ -299,6 +301,16 @@ export default function AllCardsView() {
             >
               <Download className="h-3.5 w-3.5 text-gray-500" />
             </button>
+            {/* Eye toggle for card numbers (Point 9) */}
+            <button
+              onClick={() => setShowCardNumbers(v => !v)}
+              title={showCardNumbers ? "Hide full card numbers" : "Show full card numbers"}
+              className={`h-8 w-8 flex items-center justify-center border rounded-xl cursor-pointer transition-colors shadow-2xs ${
+                showCardNumbers ? "border-emerald-300 bg-emerald-50 hover:bg-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+              }`}
+            >
+              <Eye className={`h-3.5 w-3.5 ${showCardNumbers ? "text-emerald-600" : "text-gray-500"}`} />
+            </button>
             <Button
               onClick={() => setIsIssueModalOpen(true)}
               className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 rounded-xl font-semibold gap-1.5 ml-auto cursor-pointer shadow-2xs"
@@ -353,7 +365,9 @@ export default function AllCardsView() {
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-gray-700 text-[11px]">{c.cardNumber}</td>
+                      <td className="py-3.5 px-4 font-mono text-gray-700 text-[11px]">
+                        {showCardNumbers ? c.cardNumber : c.cardNumber.replace(/\d{4}(\s\d{4})(\s\d{4})/, '???? ???? ????')}
+                      </td>
                       <td className="py-3.5 px-4">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${CARD_BADGES[c.cardType]}`}>
                           {c.cardType}

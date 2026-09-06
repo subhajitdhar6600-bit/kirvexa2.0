@@ -154,6 +154,7 @@ export interface DealerListing {
   unit?: string;
   description?: string;
   image?: string;
+  images?: string[];
   specifications?: string;
   location?: string;
   workerCount?: number;
@@ -320,7 +321,7 @@ interface AppContextType {
 
   // KCC Applications for Admin & Dealer KCC Apply
   kccApplications: KccApplication[];
-  approveKccApplication: (id: string) => void;
+  approveKccApplication: (id: string, customCardNumber?: string, customLimit?: number) => void;
   rejectKccApplication: (id: string) => void;
   loadAllKccApplications: () => Promise<void>;
 
@@ -534,8 +535,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem("krivexa_kcc_issued", nextState ? "true" : "false");
   };
 
-  const approveKccApplication = (id: string) => {
-    const cardNumber = `KCC-BH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+  const approveKccApplication = (id: string, customCardNumber?: string, customLimit?: number) => {
+    const targetApp = kccApplications.find((a) => a.id === id);
+    const cardNumber = customCardNumber?.trim() || `KCC-BH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const limit = customLimit || targetApp?.paymentAmount || 50000;
+
     setKccApplications((prev) =>
       prev.map((app) => {
         if (app.id === id) {
@@ -543,6 +547,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...app,
             status: "approved",
             cardNumber,
+            paymentAmount: limit,
             issueDate: new Date().toISOString().split("T")[0],
           };
         }
@@ -550,6 +555,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
     api.approveKccApplication(id, cardNumber);
+
+    // If matches currently logged-in user, unlock KCC immediately
+    if (targetApp && user && (targetApp.phone === user.phone || targetApp.fullName === user.name)) {
+      setIsKccIssuedState(true);
+      localStorage.setItem("krivexa_kcc_issued", "true");
+      setUser((u) => (u ? { ...u, isKccIssued: true, isVerified: true, kccCardNumber: cardNumber } : null));
+    }
+
+    // Also update registered account if found
+    setRegisteredAccounts((prev) =>
+      prev.map((acc) => {
+        if (targetApp && (acc.phone === targetApp.phone || acc.fullName === targetApp.fullName)) {
+          return { ...acc, isKccIssued: true, isVerified: true, kccCardNumber: cardNumber };
+        }
+        return acc;
+      })
+    );
+
+    addNotification(
+      "KCC Card Approved & Allotted 💳",
+      `KCC Application for ${targetApp?.fullName || "Farmer"} has been approved! Allotted Card Number: ${cardNumber}, Limit: ₹${limit.toLocaleString("en-IN")}. Verified and active.`,
+      "success",
+      "/wallet",
+      "kcc"
+    );
   };
 
   const rejectKccApplication = (id: string) => {
@@ -1459,6 +1489,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       "/cart",
       "orders"
     );
+
+    // Dual notification: notify seller(s) of the purchased crops / dealer products
+    cart.forEach((item) => {
+      if (item.sellerName) {
+        addNotification(
+          "Your Listed Item Was Purchased! 🌾",
+          `Customer ${user?.name || "Verified Farmer"} placed an order for "${item.name}" (${item.quantity} ${item.unit || "unit"}). Total: ₹${(item.price * item.quantity).toLocaleString("en-IN")}.`,
+          "success",
+          "/sell-crops",
+          "crops"
+        );
+      }
+    });
 
     return {
       success: true,

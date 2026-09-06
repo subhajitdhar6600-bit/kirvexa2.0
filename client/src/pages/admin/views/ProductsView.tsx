@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input.tsx";
 import type { ProductItem } from "../types.ts";
 import { toast } from "sonner";
 import { api } from "@/services/api";
+import { useApp } from "@/context/AppContext.tsx";
 
 interface ProductsViewProps {
   products: ProductItem[];
@@ -65,16 +66,38 @@ export default function ProductsView({ products: propProducts, setProducts, prod
   const [newBrandName, setNewBrandName] = useState("");
   const [newUnitName, setNewUnitName] = useState("");
 
+  const { cropListings, approveCropListing, rejectCropListing, dealerListings, approveDealerListing, rejectDealerListing } = useApp();
+  const [mainCatalogSection, setMainCatalogSection] = useState<"platform" | "farmer" | "dealer">("platform");
+
+  // Farmer listings filters & modal
+  const [farmerSearch, setFarmerSearch] = useState("");
+  const [farmerStatusFilter, setFarmerStatusFilter] = useState("all");
+  const [viewCrop, setViewCrop] = useState<any | null>(null);
+
+  // Dealer listings filters & modal
+  const [dealerSearch, setDealerSearch] = useState("");
+  const [dealerStatusFilter, setDealerStatusFilter] = useState("all");
+  const [dealerTypeFilter, setDealerTypeFilter] = useState("all");
+  const [viewDealerItem, setViewDealerItem] = useState<any | null>(null);
+
   // Respond to sidebar sub-tab navigation
   useEffect(() => {
     if (productSubTab === "add") {
       setIsAddOpen(true);
+      setMainCatalogSection("platform");
     } else if (productSubTab === "categories") {
       setIsCategoriesOpen(true);
+      setMainCatalogSection("platform");
     } else if (productSubTab === "brands") {
       setIsBrandsOpen(true);
+      setMainCatalogSection("platform");
     } else if (productSubTab === "units") {
       setIsUnitsOpen(true);
+      setMainCatalogSection("platform");
+    } else if (productSubTab === "farmer") {
+      setMainCatalogSection("farmer");
+    } else if (productSubTab === "dealer") {
+      setMainCatalogSection("dealer");
     } else if (productSubTab === "all") {
       setIsAddOpen(false);
       setIsCategoriesOpen(false);
@@ -82,6 +105,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
       setIsUnitsOpen(false);
       setCatFilter("all");
       setBrandFilter("all");
+      setMainCatalogSection("platform");
     }
   }, [productSubTab]);
   const [newProduct, setNewProduct] = useState({
@@ -143,6 +167,26 @@ export default function ProductsView({ products: propProducts, setProducts, prod
     const matchBrand = brandFilter === "all" || (prod.brand || "").toLowerCase().includes(brandFilter.toLowerCase());
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     return matchSearch && matchCat && matchBrand && matchStatus;
+  });
+
+  const filteredFarmerCrops = cropListings.filter(c => {
+    const matchSearch =
+      (c.cropName || "").toLowerCase().includes(farmerSearch.toLowerCase()) ||
+      (c.sellerName || "").toLowerCase().includes(farmerSearch.toLowerCase()) ||
+      (c.phone || "").includes(farmerSearch) ||
+      (c.district || "").toLowerCase().includes(farmerSearch.toLowerCase());
+    const matchStatus = farmerStatusFilter === "all" || c.status === farmerStatusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  const filteredDealerListings = dealerListings.filter(d => {
+    const matchSearch =
+      (d.title || "").toLowerCase().includes(dealerSearch.toLowerCase()) ||
+      (d.dealerName || "").toLowerCase().includes(dealerSearch.toLowerCase()) ||
+      (d.location || "").toLowerCase().includes(dealerSearch.toLowerCase());
+    const matchStatus = dealerStatusFilter === "all" || d.status === dealerStatusFilter;
+    const matchType = dealerTypeFilter === "all" || d.type === dealerTypeFilter;
+    return matchSearch && matchStatus && matchType;
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
@@ -262,11 +306,61 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
           <span>Dashboard</span><span>›</span><span>Products Management</span><span>›</span>
-          <span className="text-emerald-600 font-medium">All Products</span>
+          <span className="text-emerald-600 font-medium">
+            {mainCatalogSection === "farmer" ? "Farmer Products" : mainCatalogSection === "dealer" ? "Dealer Products" : "Platform Products"}
+          </span>
         </div>
       </div>
+      {/* 3 Main Product Management Sections (Point 2) */}
+      <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
+        <button
+          onClick={() => { setMainCatalogSection("platform"); setProductSubTab?.("all"); }}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            mainCatalogSection === "platform"
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          <Package className="h-4 w-4" />
+          <span>Platform Catalog ({products.length})</span>
+        </button>
+        <button
+          onClick={() => { setMainCatalogSection("farmer"); setProductSubTab?.("farmer"); }}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            mainCatalogSection === "farmer"
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          <Layers className="h-4 w-4" />
+          <span>Farmer Products ({cropListings.length})</span>
+          {cropListings.filter(c => c.status === "pending").length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500 text-white font-bold">
+              {cropListings.filter(c => c.status === "pending").length} Pending
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => { setMainCatalogSection("dealer"); setProductSubTab?.("dealer"); }}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+            mainCatalogSection === "dealer"
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          <Tag className="h-4 w-4" />
+          <span>Dealer Products ({dealerListings.length})</span>
+          {dealerListings.filter(d => d.status === "pending").length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500 text-white font-bold">
+              {dealerListings.filter(d => d.status === "pending").length} Pending
+            </span>
+          )}
+        </button>
+      </div>
 
-      {/* Stat Cards — real data */}
+      {mainCatalogSection === "platform" && (
+        <>
+          {/* Stat Cards — real data */}
       <div className="grid grid-cols-4 gap-4">
         {[
           { label: "Total Products", value: totalProducts.toLocaleString("en-IN"), sub: "Total catalog items", Icon: Package, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -510,6 +604,510 @@ export default function ProductsView({ products: propProducts, setProducts, prod
           </div>
         </div>
       </div>
+      </>
+      )}
+
+      {/* ─── FARMER PRODUCTS SECTION (Point 2) ─── */}
+      {mainCatalogSection === "farmer" && (
+        <div className="space-y-4">
+          {/* Farmer Products Stats */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <p className="text-xs text-gray-500 font-medium">Total Farmer Crops</p>
+              <p className="text-2xl font-black text-gray-900 mt-1">{cropListings.length}</p>
+              <p className="text-[11px] text-gray-400 mt-0.5">Submitted by verified farmers</p>
+            </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <p className="text-xs text-gray-500 font-medium">Pending Approval</p>
+              <p className="text-2xl font-black text-amber-600 mt-1">
+                {cropListings.filter(c => c.status === "pending").length}
+              </p>
+              <p className="text-[11px] text-amber-600 mt-0.5">Awaiting admin review</p>
+            </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <p className="text-xs text-gray-500 font-medium">Approved & Live</p>
+              <p className="text-2xl font-black text-emerald-600 mt-1">
+                {cropListings.filter(c => c.status === "approved").length}
+              </p>
+              <p className="text-[11px] text-emerald-600 mt-0.5">Visible in Buy Inputs store</p>
+            </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <p className="text-xs text-gray-500 font-medium">Rejected Listings</p>
+              <p className="text-2xl font-black text-red-600 mt-1">
+                {cropListings.filter(c => c.status === "rejected").length}
+              </p>
+              <p className="text-[11px] text-red-500 mt-0.5">Declined by admin</p>
+            </div>
+          </div>
+
+          {/* Farmer Crops Table Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 flex-1 max-w-sm">
+                <Search className="h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search farmer crops, seller, phone, district..."
+                  value={farmerSearch}
+                  onChange={e => setFarmerSearch(e.target.value)}
+                  className="h-8 text-xs border-gray-200 bg-gray-50 rounded-xl"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={farmerStatusFilter}
+                  onChange={e => setFarmerStatusFilter(e.target.value)}
+                  className="h-8 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-600 cursor-pointer font-medium"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending Only</option>
+                  <option value="approved">Approved (Live)</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <button
+                  onClick={() => { setFarmerSearch(""); setFarmerStatusFilter("all"); }}
+                  className="h-8 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 cursor-pointer font-medium"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 text-[11px] uppercase tracking-wider font-semibold">
+                    <th className="py-3 px-4 text-left w-14">Image</th>
+                    <th className="py-3 px-4 text-left">Crop & Quantity</th>
+                    <th className="py-3 px-4 text-left">Farmer / Seller</th>
+                    <th className="py-3 px-4 text-left">Contact & District</th>
+                    <th className="py-3 px-4 text-left">Expected Price</th>
+                    <th className="py-3 px-4 text-left">Status</th>
+                    <th className="py-3 px-4 text-center">Verification Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {filteredFarmerCrops.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-gray-400 text-xs">
+                        No farmer crop listings found matching your search.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredFarmerCrops.map(c => {
+                      const primaryImg = c.image || (c.images && c.images[0]) || "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500&q=80";
+                      return (
+                        <tr key={c.id} className="hover:bg-gray-50/70 transition-colors">
+                          <td className="py-3 px-4">
+                            <img src={primaryImg} alt={c.cropName} className="w-10 h-10 rounded-xl object-cover border border-gray-100 shrink-0" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="font-bold text-gray-900">{c.cropName}</p>
+                            <p className="text-[11px] text-gray-500">{c.weight || "Quantity on request"}</p>
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="font-semibold text-gray-800">{c.sellerName}</p>
+                            <p className="text-[10px] text-gray-400 font-mono">#{c.id}</p>
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="text-gray-700 font-medium">{c.phone}</p>
+                            <p className="text-[10px] text-gray-400">{[c.district, c.city].filter(Boolean).join(", ") || "Bihar"}</p>
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="font-bold text-emerald-700">₹ {Number(c.price || 0).toLocaleString("en-IN")}</p>
+                            <p className="text-[10px] text-gray-400">per Quintal</p>
+                          </td>
+                          <td className="py-3 px-4">
+                            {c.status === "approved" ? (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold inline-flex items-center gap-1">
+                                <CheckCircle2 className="h-3 w-3" /> Approved
+                              </span>
+                            ) : c.status === "rejected" ? (
+                              <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold inline-flex items-center gap-1">
+                                <XCircle className="h-3 w-3" /> Rejected
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold inline-flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" /> Pending Review
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                onClick={() => setViewCrop(c)}
+                                title="View Details"
+                                className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 flex items-center justify-center text-blue-600 cursor-pointer"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                              </button>
+                              {c.status !== "approved" && (
+                                <button
+                                  onClick={() => {
+                                    approveCropListing(c.id);
+                                    toast.success(`"${c.cropName}" from ${c.sellerName} approved! Live in Buy Inputs.`);
+                                  }}
+                                  title="Approve Listing"
+                                  className="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-emerald-600 cursor-pointer"
+                                >
+                                  <Check className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                              {c.status !== "rejected" && (
+                                <button
+                                  onClick={() => {
+                                    rejectCropListing(c.id);
+                                    toast.error(`"${c.cropName}" listing rejected.`);
+                                  }}
+                                  title="Reject Listing"
+                                  className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-600 cursor-pointer"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── DEALER PRODUCTS SECTION (Point 2) ─── */}
+      {mainCatalogSection === "dealer" && (
+        <div className="space-y-4">
+          {/* Dealer Products Stats */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <p className="text-xs text-gray-500 font-medium">Total Dealer Listings</p>
+              <p className="text-2xl font-black text-gray-900 mt-1">{dealerListings.length}</p>
+              <p className="text-[11px] text-gray-400 mt-0.5">Submitted by verified dealers</p>
+            </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <p className="text-xs text-gray-500 font-medium">Pending Approval</p>
+              <p className="text-2xl font-black text-amber-600 mt-1">
+                {dealerListings.filter(d => d.status === "pending").length}
+              </p>
+              <p className="text-[11px] text-amber-600 mt-0.5">Awaiting admin review</p>
+            </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <p className="text-xs text-gray-500 font-medium">Approved & Live</p>
+              <p className="text-2xl font-black text-emerald-600 mt-1">
+                {dealerListings.filter(d => d.status === "approved").length}
+              </p>
+              <p className="text-[11px] text-emerald-600 mt-0.5">Visible in Buy Inputs store</p>
+            </div>
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <p className="text-xs text-gray-500 font-medium">Rejected Listings</p>
+              <p className="text-2xl font-black text-red-600 mt-1">
+                {dealerListings.filter(d => d.status === "rejected").length}
+              </p>
+              <p className="text-[11px] text-red-500 mt-0.5">Declined by admin</p>
+            </div>
+          </div>
+
+          {/* Dealer Listings Table Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 flex-1 max-w-sm">
+                <Search className="h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search dealer products, dealer name, location..."
+                  value={dealerSearch}
+                  onChange={e => setDealerSearch(e.target.value)}
+                  className="h-8 text-xs border-gray-200 bg-gray-50 rounded-xl"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={dealerTypeFilter}
+                  onChange={e => setDealerTypeFilter(e.target.value)}
+                  className="h-8 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-600 cursor-pointer font-medium"
+                >
+                  <option value="all">All Types</option>
+                  <option value="product">Products (Inputs/Tools)</option>
+                  <option value="machinery">Machinery Rental</option>
+                  <option value="labour">Labour Services</option>
+                </select>
+                <select
+                  value={dealerStatusFilter}
+                  onChange={e => setDealerStatusFilter(e.target.value)}
+                  className="h-8 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-600 cursor-pointer font-medium"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending Only</option>
+                  <option value="approved">Approved (Live)</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <button
+                  onClick={() => { setDealerSearch(""); setDealerStatusFilter("all"); setDealerTypeFilter("all"); }}
+                  className="h-8 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 cursor-pointer font-medium"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 text-[11px] uppercase tracking-wider font-semibold">
+                    <th className="py-3 px-4 text-left w-14">Image</th>
+                    <th className="py-3 px-4 text-left">Title & Type</th>
+                    <th className="py-3 px-4 text-left">Dealer Name</th>
+                    <th className="py-3 px-4 text-left">Category / Unit</th>
+                    <th className="py-3 px-4 text-left">Price / Rate</th>
+                    <th className="py-3 px-4 text-left">Status</th>
+                    <th className="py-3 px-4 text-center">Verification Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {filteredDealerListings.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-gray-400 text-xs">
+                        No dealer listings found matching your search.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredDealerListings.map(d => {
+                      const imgUrl = d.image || (d.type === "machinery" ? "https://images.unsplash.com/photo-1530267981608-bc34199c9c30?w=400&q=80" : d.type === "labour" ? "https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?w=400&q=80" : "https://images.unsplash.com/photo-1592417817098-8f3d6ef23a85?w=500&q=80");
+                      return (
+                        <tr key={d.id} className="hover:bg-gray-50/70 transition-colors">
+                          <td className="py-3 px-4">
+                            <img src={imgUrl} alt={d.title} className="w-10 h-10 rounded-xl object-cover border border-gray-100 shrink-0" />
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="font-bold text-gray-900">{d.title}</p>
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 capitalize">
+                              {d.type}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="font-semibold text-gray-800">{d.dealerName}</p>
+                            <p className="text-[10px] text-gray-400 font-mono">#{d.id}</p>
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="text-gray-700 font-medium">{d.category || "General"}</p>
+                            <p className="text-[10px] text-gray-400">{d.unit || "per item"}</p>
+                          </td>
+                          <td className="py-3 px-4">
+                            <p className="font-bold text-emerald-700">₹ {Number(d.price || 0).toLocaleString("en-IN")}</p>
+                          </td>
+                          <td className="py-3 px-4">
+                            {d.status === "approved" ? (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold inline-flex items-center gap-1">
+                                <CheckCircle2 className="h-3 w-3" /> Approved
+                              </span>
+                            ) : d.status === "rejected" ? (
+                              <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold inline-flex items-center gap-1">
+                                <XCircle className="h-3 w-3" /> Rejected
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold inline-flex items-center gap-1">
+                                <AlertCircle className="h-3 w-3" /> Pending Review
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                onClick={() => setViewDealerItem(d)}
+                                title="View Details"
+                                className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 flex items-center justify-center text-blue-600 cursor-pointer"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                              </button>
+                              {d.status !== "approved" && (
+                                <button
+                                  onClick={() => {
+                                    approveDealerListing(d.id);
+                                    toast.success(`"${d.title}" from ${d.dealerName} approved! Live in Buy Inputs.`);
+                                  }}
+                                  title="Approve Listing"
+                                  className="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-emerald-600 cursor-pointer"
+                                >
+                                  <Check className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                              {d.status !== "rejected" && (
+                                <button
+                                  onClick={() => {
+                                    rejectDealerListing(d.id);
+                                    toast.error(`"${d.title}" listing rejected.`);
+                                  }}
+                                  title="Reject Listing"
+                                  className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-600 cursor-pointer"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── View Farmer Crop Modal ─── */}
+      {viewCrop && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
+            <button onClick={() => setViewCrop(null)} className="absolute top-4 right-4 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 cursor-pointer">
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex items-center gap-3 mb-4">
+              <img
+                src={viewCrop.image || (viewCrop.images && viewCrop.images[0]) || "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500&q=80"}
+                alt=""
+                className="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0"
+              />
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">{viewCrop.cropName}</h3>
+                <p className="text-[11px] text-gray-400 font-mono">#{viewCrop.id}</p>
+              </div>
+            </div>
+            {viewCrop.images && viewCrop.images.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
+                {viewCrop.images.map((img: string, i: number) => (
+                  <img key={i} src={img} alt="" className="w-14 h-14 object-cover rounded-lg border border-gray-200 shrink-0" />
+                ))}
+              </div>
+            )}
+            <div className="space-y-2 text-xs text-gray-700">
+              {[
+                ["Farmer / Seller", viewCrop.sellerName],
+                ["Phone Number", viewCrop.phone],
+                ["District & City", [viewCrop.district, viewCrop.city].filter(Boolean).join(", ")],
+                ["Address", viewCrop.address || "—"],
+                ["Pincode", viewCrop.pincode || "—"],
+                ["Quantity / Weight", viewCrop.weight],
+                ["Target Price", `₹ ${Number(viewCrop.price || 0).toLocaleString("en-IN")} / Quintal`],
+                ["Current Status", viewCrop.status],
+                ["Submitted On", viewCrop.createdAt ? new Date(viewCrop.createdAt).toLocaleDateString("en-IN") : "Recent"],
+              ].map(([label, val], i) => (
+                <div key={i} className="flex items-center justify-between border-b border-gray-50 pb-1.5">
+                  <span className="text-gray-500 font-medium">{label}</span>
+                  <span className="font-semibold text-gray-800">{val}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 pt-4">
+              {viewCrop.status !== "approved" && (
+                <Button
+                  onClick={() => {
+                    approveCropListing(viewCrop.id);
+                    setViewCrop(null);
+                    toast.success(`"${viewCrop.cropName}" approved! Live on Buy Inputs store.`);
+                  }}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl"
+                >
+                  <Check className="h-3.5 w-3.5 mr-1" /> Approve Listing
+                </Button>
+              )}
+              {viewCrop.status !== "rejected" && (
+                <Button
+                  onClick={() => {
+                    rejectCropListing(viewCrop.id);
+                    setViewCrop(null);
+                    toast.error(`"${viewCrop.cropName}" listing rejected.`);
+                  }}
+                  variant="outline"
+                  className="flex-1 text-red-600 border-red-200 hover:bg-red-50 text-xs font-bold rounded-xl"
+                >
+                  <X className="h-3.5 w-3.5 mr-1" /> Reject Listing
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── View Dealer Product Modal ─── */}
+      {viewDealerItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
+            <button onClick={() => setViewDealerItem(null)} className="absolute top-4 right-4 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 cursor-pointer">
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex items-center gap-3 mb-4">
+              <img
+                src={viewDealerItem.image || (viewDealerItem.type === "machinery" ? "https://images.unsplash.com/photo-1530267981608-bc34199c9c30?w=400&q=80" : viewDealerItem.type === "labour" ? "https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?w=400&q=80" : "https://images.unsplash.com/photo-1592417817098-8f3d6ef23a85?w=500&q=80")}
+                alt=""
+                className="w-12 h-12 rounded-xl object-cover border border-gray-100 shrink-0"
+              />
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">{viewDealerItem.title}</h3>
+                <p className="text-[11px] text-gray-400 font-mono">#{viewDealerItem.id}</p>
+              </div>
+            </div>
+            <div className="space-y-2 text-xs text-gray-700">
+              {[
+                ["Dealer Name", viewDealerItem.dealerName],
+                ["Listing Type", viewDealerItem.type],
+                ["Category", viewDealerItem.category || "General"],
+                ["Price / Wage", `₹ ${Number(viewDealerItem.price || 0).toLocaleString("en-IN")}`],
+                ["Unit / Duration", viewDealerItem.unit || "—"],
+                ["Location", viewDealerItem.location || "Patna, Bihar"],
+                ["Current Status", viewDealerItem.status],
+              ].map(([label, val], i) => (
+                <div key={i} className="flex items-center justify-between border-b border-gray-50 pb-1.5">
+                  <span className="text-gray-500 font-medium">{label}</span>
+                  <span className="font-semibold text-gray-800 capitalize">{val}</span>
+                </div>
+              ))}
+              {viewDealerItem.description && (
+                <div className="pt-1">
+                  <p className="text-gray-500 font-medium mb-0.5">Description:</p>
+                  <p className="text-gray-700 text-[11px] bg-gray-50 p-2 rounded-xl">{viewDealerItem.description}</p>
+                </div>
+              )}
+              {viewDealerItem.specifications && (
+                <div className="pt-1">
+                  <p className="text-gray-500 font-medium mb-0.5">Specifications:</p>
+                  <p className="text-gray-700 text-[11px] bg-gray-50 p-2 rounded-xl">{viewDealerItem.specifications}</p>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 pt-4">
+              {viewDealerItem.status !== "approved" && (
+                <Button
+                  onClick={() => {
+                    approveDealerListing(viewDealerItem.id);
+                    setViewDealerItem(null);
+                    toast.success(`"${viewDealerItem.title}" approved! Live on Buy Inputs.`);
+                  }}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl"
+                >
+                  <Check className="h-3.5 w-3.5 mr-1" /> Approve Listing
+                </Button>
+              )}
+              {viewDealerItem.status !== "rejected" && (
+                <Button
+                  onClick={() => {
+                    rejectDealerListing(viewDealerItem.id);
+                    setViewDealerItem(null);
+                    toast.error(`"${viewDealerItem.title}" listing rejected.`);
+                  }}
+                  variant="outline"
+                  className="flex-1 text-red-600 border-red-200 hover:bg-red-50 text-xs font-bold rounded-xl"
+                >
+                  <X className="h-3.5 w-3.5 mr-1" /> Reject Listing
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── View Product Modal ─── */}
       {viewProduct && (

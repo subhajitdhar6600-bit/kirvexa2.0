@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { api } from "@/services/api.ts";
+import { useApp } from "@/context/AppContext.tsx";
 
 export interface BookingRow {
   id: string;
@@ -58,6 +59,100 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
   const [editServiceType, setEditServiceType] = useState("");
   const [editStatus, setEditStatus] = useState<"Confirmed" | "Ongoing" | "Completed" | "Cancelled">("Confirmed");
   const [editAmount, setEditAmount] = useState(0);
+
+  const { addNotification } = useApp();
+
+  // Review & Allotment Modal State (Point 6)
+  const [allottingBooking, setAllottingBooking] = useState<BookingRow | null>(null);
+  const [isAllotOpen, setIsAllotOpen] = useState(false);
+  const [allotNotes, setAllotNotes] = useState("");
+
+  // Labour allotment fields
+  const [workerNames, setWorkerNames] = useState("");
+  const [leadWorkerPhone, setLeadWorkerPhone] = useState("");
+  const [labourDailyRate, setLabourDailyRate] = useState("₹450 / day");
+
+  // Machine allotment fields
+  const [machineRegNo, setMachineRegNo] = useState("");
+  const [operatorName, setOperatorName] = useState("");
+  const [operatorPhone, setOperatorPhone] = useState("");
+  const [hourlyRate, setHourlyRate] = useState("₹350 / hr");
+
+  // Soil / Doctor allotment fields
+  const [technicianName, setTechnicianName] = useState("");
+  const [technicianPhone, setTechnicianPhone] = useState("");
+  const [visitSchedule, setVisitSchedule] = useState("");
+  const [testLabRemarks, setTestLabRemarks] = useState("");
+
+  const handleOpenAllot = (b: BookingRow) => {
+    setAllottingBooking(b);
+    setAllotNotes("");
+    const typeLower = (b.rawType || b.serviceType || "").toLowerCase();
+    if (typeLower.includes("labour")) {
+      setWorkerNames("Ramesh Yadav, Mukesh Kumar, Sunita Devi");
+      setLeadWorkerPhone(b.phone || "9876543210");
+      setLabourDailyRate("₹450 / day per worker");
+    } else if (typeLower.includes("machin") || typeLower.includes("tractor")) {
+      setMachineRegNo("BR-01-AX-4892");
+      setOperatorName("Vikram Singh (Certified Operator)");
+      setOperatorPhone("9812345678");
+      setHourlyRate("₹350 / hr (Fuel included)");
+    } else {
+      setTechnicianName("Dr. R. K. Sharma (Senior Soil Analyst)");
+      setTechnicianPhone("9431012345");
+      setVisitSchedule("Tomorrow at 10:30 AM");
+      setTestLabRemarks("Soil sample collection kit dispatched.");
+    }
+    setIsAllotOpen(true);
+  };
+
+  const handleConfirmAllotment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!allottingBooking) return;
+    setIsSubmitting(true);
+
+    const typeLower = (allottingBooking.rawType || allottingBooking.serviceType || "").toLowerCase();
+    let allotmentSummary = "";
+
+    try {
+      if (typeLower.includes("labour")) {
+        const assigned = workerNames.split(",").map(w => ({
+          name: w.trim(),
+          phone: leadWorkerPhone,
+          charges: labourDailyRate,
+        }));
+        await api.assignLabours(allottingBooking.id, assigned, allotNotes).catch(() => {});
+        allotmentSummary = `Workers: ${workerNames} | Lead Phone: ${leadWorkerPhone} | Rate: ${labourDailyRate}`;
+      } else if (typeLower.includes("machin") || typeLower.includes("tractor")) {
+        const details = `Machine Reg: ${machineRegNo} | Operator: ${operatorName} (${operatorPhone}) | Rate: ${hourlyRate}`;
+        await api.allotMachinery(allottingBooking.id, details, allotNotes).catch(() => {});
+        allotmentSummary = details;
+      } else {
+        const reply = `Assigned Technician: ${technicianName} (${technicianPhone}) | Visit: ${visitSchedule} | Remarks: ${testLabRemarks}`;
+        await api.updateExpertQuery(allottingBooking.id, "resolved", reply).catch(() => {});
+        allotmentSummary = reply;
+      }
+
+      // Send in-app notification to the customer
+      addNotification(
+        `Service Allotted! (#${allottingBooking.id})`,
+        `Your ${allottingBooking.serviceType} booking has been confirmed with allotted details: ${allotmentSummary}`,
+        "success",
+        "/services",
+        "services"
+      );
+
+      // Update in table
+      setBookings(prev => prev.map(item => item.id === allottingBooking.id ? { ...item, status: "Confirmed" } : item));
+      toast.success(`Service allotted for #${allottingBooking.id}! Customer notified.`);
+      setIsAllotOpen(false);
+      setAllottingBooking(null);
+    } catch (err: any) {
+      toast.error("Failed to update allotment: " + (err?.message || "Unknown error"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Sync initialServiceFilter prop when updated from sidebar clicks
   useEffect(() => {
@@ -504,11 +599,11 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                     <td className="py-3.5 px-4 font-bold text-gray-900">₹ {b.amount.toLocaleString("en-IN")}</td>
                     <td className="py-3.5 px-4 text-center">
                       <div className="flex items-center justify-center gap-1.5">
-                        {/* View */}
+                        {/* View & Allot */}
                         <button
-                          onClick={() => onViewBookingDetails?.(b.id) || toast.info(`Viewing details for #${b.id}`)}
-                          title="View Details"
-                          className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 flex items-center justify-center transition-colors cursor-pointer"
+                          onClick={() => handleOpenAllot(b)}
+                          title="Review & Allot Service"
+                          className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 flex items-center justify-center transition-colors cursor-pointer"
                         >
                           <Eye className="h-3.5 w-3.5" />
                         </button>
@@ -671,6 +766,228 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                 <Button type="button" variant="ghost" onClick={() => setEditingBooking(null)} className="text-xs text-gray-600">Cancel</Button>
                 <Button type="submit" disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl cursor-pointer">
                   {isSubmitting ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── REVIEW & ALLOT SERVICE MODAL (Point 6) ─── */}
+      {isAllotOpen && allottingBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white border border-gray-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => { setIsAllotOpen(false); setAllottingBooking(null); }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1.5 rounded-full bg-gray-100 cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 text-xl font-bold shrink-0">
+                {allottingBooking.icon || "🚜"}
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Review & Allot Service Details</h3>
+                <p className="text-xs text-gray-500">Booking #{allottingBooking.id} • {allottingBooking.serviceType}</p>
+              </div>
+            </div>
+
+            {/* Customer & Booking Summary */}
+            <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3.5 space-y-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Customer Name:</span>
+                <span className="font-bold text-gray-900">{allottingBooking.customer}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Contact Phone:</span>
+                <span className="font-semibold text-gray-800">{allottingBooking.phone}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Scheduled Date:</span>
+                <span className="font-semibold text-gray-800">{allottingBooking.date}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Booking Amount:</span>
+                <span className="font-bold text-emerald-700">₹ {allottingBooking.amount.toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleConfirmAllotment} className="space-y-3.5 text-xs">
+              {/* If Labour Booking */}
+              {(allottingBooking.rawType === "labour" || allottingBooking.serviceType.toLowerCase().includes("labour")) && (
+                <>
+                  <div className="p-2.5 bg-blue-50/50 border border-blue-100 rounded-xl">
+                    <p className="text-[11px] font-bold text-blue-900 mb-1">Labour Team Allotment</p>
+                    <p className="text-[10px] text-gray-500">Assign verified workers, rates, and supervisor phone</p>
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-1">Assigned Worker Names (Comma separated) *</label>
+                    <Input
+                      value={workerNames}
+                      onChange={e => setWorkerNames(e.target.value)}
+                      placeholder="e.g. Ramesh Yadav, Sunita Devi, Mukesh Kumar"
+                      className="text-xs bg-gray-50 rounded-xl"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">Lead Supervisor Phone *</label>
+                      <Input
+                        value={leadWorkerPhone}
+                        onChange={e => setLeadWorkerPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                        maxLength={10}
+                        placeholder="10-digit mobile"
+                        className="text-xs bg-gray-50 rounded-xl"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">Agreed Daily Wage Rate *</label>
+                      <Input
+                        value={labourDailyRate}
+                        onChange={e => setLabourDailyRate(e.target.value)}
+                        placeholder="e.g. ₹450 / day per worker"
+                        className="text-xs bg-gray-50 rounded-xl"
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* If Machinery Booking */}
+              {(allottingBooking.rawType === "machinery" || allottingBooking.serviceType.toLowerCase().includes("tractor") || allottingBooking.serviceType.toLowerCase().includes("machine")) && (
+                <>
+                  <div className="p-2.5 bg-amber-50/50 border border-amber-100 rounded-xl">
+                    <p className="text-[11px] font-bold text-amber-900 mb-1">Machinery Fleet Allotment</p>
+                    <p className="text-[10px] text-gray-500">Assign machine registration plate, driver details and hourly terms</p>
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-1">Machine Registration Number *</label>
+                    <Input
+                      value={machineRegNo}
+                      onChange={e => setMachineRegNo(e.target.value.toUpperCase())}
+                      placeholder="e.g. BR-01-AX-4892"
+                      className="text-xs font-mono font-bold bg-gray-50 rounded-xl"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">Operator Name *</label>
+                      <Input
+                        value={operatorName}
+                        onChange={e => setOperatorName(e.target.value)}
+                        placeholder="e.g. Vikram Singh"
+                        className="text-xs bg-gray-50 rounded-xl"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">Operator Phone *</label>
+                      <Input
+                        value={operatorPhone}
+                        onChange={e => setOperatorPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                        maxLength={10}
+                        placeholder="10-digit phone"
+                        className="text-xs bg-gray-50 rounded-xl"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-1">Hourly Rate & Fuel Terms *</label>
+                    <Input
+                      value={hourlyRate}
+                      onChange={e => setHourlyRate(e.target.value)}
+                      placeholder="e.g. ₹350 / hour (with fuel and driver)"
+                      className="text-xs bg-gray-50 rounded-xl"
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* If Soil / Doctor / Other Booking */}
+              {allottingBooking.rawType !== "labour" && allottingBooking.rawType !== "machinery" && !allottingBooking.serviceType.toLowerCase().includes("labour") && !allottingBooking.serviceType.toLowerCase().includes("tractor") && (
+                <>
+                  <div className="p-2.5 bg-purple-50/50 border border-purple-100 rounded-xl">
+                    <p className="text-[11px] font-bold text-purple-900 mb-1">Specialist & Soil Technician Allotment</p>
+                    <p className="text-[10px] text-gray-500">Assign authorized field agronomist or technician for visit</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">Technician / Specialist *</label>
+                      <Input
+                        value={technicianName}
+                        onChange={e => setTechnicianName(e.target.value)}
+                        placeholder="e.g. Dr. R. K. Sharma"
+                        className="text-xs bg-gray-50 rounded-xl"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">Technician Contact *</label>
+                      <Input
+                        value={technicianPhone}
+                        onChange={e => setTechnicianPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                        maxLength={10}
+                        placeholder="10-digit phone"
+                        className="text-xs bg-gray-50 rounded-xl"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-1">Field Visit Schedule *</label>
+                    <Input
+                      value={visitSchedule}
+                      onChange={e => setVisitSchedule(e.target.value)}
+                      placeholder="e.g. Tomorrow at 10:30 AM"
+                      className="text-xs bg-gray-50 rounded-xl"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-1">Kit / Report Remarks</label>
+                    <Input
+                      value={testLabRemarks}
+                      onChange={e => setTestLabRemarks(e.target.value)}
+                      placeholder="e.g. Soil sampling kit dispatched. Lab testing turnaround 24 hrs."
+                      className="text-xs bg-gray-50 rounded-xl"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Admin Notes & Instructions</label>
+                <Input
+                  value={allotNotes}
+                  onChange={e => setAllotNotes(e.target.value)}
+                  placeholder="e.g. Call farmer 30 mins before arrival at village site"
+                  className="text-xs bg-gray-50 rounded-xl"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => { setIsAllotOpen(false); setAllottingBooking(null); }}
+                  className="text-xs text-gray-600 cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2 rounded-xl cursor-pointer"
+                >
+                  {isSubmitting ? "Allotting..." : "Confirm Allotment & Notify Customer"}
                 </Button>
               </div>
             </form>

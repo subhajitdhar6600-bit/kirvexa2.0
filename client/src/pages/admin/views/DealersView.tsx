@@ -3,7 +3,8 @@ import {
   Search, Plus, Edit2, Trash2,
   ChevronLeft, ChevronRight, Filter, Download,
   CheckCircle, XCircle, Clock, Eye, ArrowRight,
-  Store, CheckCircle2, ShieldCheck, Users, Phone, Mail, MapPin, Calendar, CreditCard, X, FileText, Building2
+  Store, CheckCircle2, ShieldCheck, Users, Phone, Mail, MapPin, Calendar, CreditCard, X, FileText, Building2,
+  KeyRound, Copy, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -23,6 +24,49 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(10);
+
+  // Point 7: Dealer Credential Allotment Modal
+  const [allotCredDealer, setAllotCredDealer] = useState<Dealer | null>(null);
+  const [credLoginId, setCredLoginId] = useState("");
+  const [credPassword, setCredPassword] = useState("");
+  const [credSendEmail, setCredSendEmail] = useState(true);
+  const [credIsAllotting, setCredIsAllotting] = useState(false);
+
+  const generateCredentials = (dealer: Dealer) => {
+    const city = (dealer.district || dealer.village || "PATNA").slice(0, 6).toUpperCase().replace(/\s/g, "");
+    const rand = Math.floor(100 + Math.random() * 900);
+    const loginId = `DLR-${city}-${rand}`;
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#";
+    const pass = "Dealer@" + Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("") + rand;
+    return { loginId, pass };
+  };
+
+  const openAllotCredModal = (dealer: Dealer) => {
+    const { loginId, pass } = generateCredentials(dealer);
+    setCredLoginId(loginId);
+    setCredPassword(pass);
+    setCredSendEmail(true);
+    setAllotCredDealer(dealer);
+  };
+
+  const handleConfirmAllotCredentials = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!allotCredDealer || !credLoginId.trim() || !credPassword.trim()) return;
+    setCredIsAllotting(true);
+    setTimeout(() => {
+      setDealers(prev => prev.map(d =>
+        d.id === allotCredDealer.id
+          ? { ...d, status: "active", verified: "verified", loginId: credLoginId, password: credPassword }
+          : d
+      ));
+      if (selectedDealer?.id === allotCredDealer.id) {
+        setSelectedDealer(prev => prev ? { ...prev, status: "active", verified: "verified" } : null);
+      }
+      toast.success(`Dealer "${allotCredDealer.businessName}" activated! Credentials allotted: ${credLoginId}${credSendEmail ? ` • Email dispatched to ${allotCredDealer.email || allotCredDealer.phone}` : ""}`);
+      setCredIsAllotting(false);
+      setAllotCredDealer(null);
+    }, 800);
+  };
 
   const filtered = dealers.filter((d) => {
     const matchSearch =
@@ -318,22 +362,18 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                 </button>
               </div>
 
-              {/* Admin Dealer Approval Action */}
+              {/* Admin Dealer Approval Action — Point 7 */}
               {selectedDealer.status === "pending" ? (
                 <div className="p-3 bg-amber-50 border-t border-amber-100 space-y-2">
                   <p className="text-[11px] text-amber-800 font-semibold">⚠️ Pending Registration Approval</p>
-                  <p className="text-[10px] text-gray-600">Review GST and License details before approving.</p>
+                  <p className="text-[10px] text-gray-600">Review GST and License details before allotting credentials.</p>
                   <div className="flex gap-2 pt-1">
                     <Button
                       size="sm"
-                      onClick={() => {
-                        setDealers(prev => prev.map(d => d.id === selectedDealer.id ? { ...d, status: "active", verified: "verified" } : d));
-                        setSelectedDealer(prev => prev ? { ...prev, status: "active", verified: "verified" } : null);
-                        toast.success(`Dealer "${selectedDealer.businessName}" approved! Credentials dispatched to ${selectedDealer.email || selectedDealer.phone}`);
-                      }}
+                      onClick={() => openAllotCredModal(selectedDealer)}
                       className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 rounded-lg cursor-pointer"
                     >
-                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Approve & Email Login
+                      <KeyRound className="h-3.5 w-3.5 mr-1" /> Review & Allot Credentials
                     </Button>
                     <Button
                       size="sm"
@@ -355,12 +395,10 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Account Active & Verified
                   </span>
                   <button
-                    onClick={() => {
-                      toast.info(`Login credentials resent to ${selectedDealer.email || selectedDealer.phone}`);
-                    }}
+                    onClick={() => openAllotCredModal(selectedDealer)}
                     className="text-[10px] text-emerald-700 underline font-medium cursor-pointer"
                   >
-                    Resend Mail
+                    Reset Credentials
                   </button>
                 </div>
               )}
@@ -484,6 +522,137 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                 Close Full Details
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── DEALER CREDENTIAL ALLOTMENT MODAL (Point 7) ─── */}
+      {allotCredDealer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative animate-in fade-in zoom-in-95">
+            <button
+              onClick={() => setAllotCredDealer(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center">
+                <KeyRound className="h-6 w-6 text-orange-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Allot Dealer Credentials</h3>
+                <p className="text-[11px] text-gray-500">Assign login ID & password to activate account</p>
+              </div>
+            </div>
+
+            {/* Dealer Summary */}
+            <div className="bg-orange-50/60 border border-orange-100 rounded-2xl p-3.5 space-y-1.5 text-xs mb-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Business Name:</span>
+                <span className="font-bold text-gray-900">{allotCredDealer.businessName}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Owner:</span>
+                <span className="font-medium text-gray-800">{allotCredDealer.owner}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Phone / Email:</span>
+                <span className="font-medium text-gray-800">{allotCredDealer.email || allotCredDealer.phone}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">GSTIN:</span>
+                <span className="font-mono font-bold text-emerald-800">{allotCredDealer.gstin || allotCredDealer.gstNumber || "Not provided"}</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleConfirmAllotCredentials} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Dealer Login ID *</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-orange-600" />
+                    <Input
+                      value={credLoginId}
+                      onChange={e => setCredLoginId(e.target.value)}
+                      placeholder="e.g. DLR-PATNA-102"
+                      className="pl-9 h-9 text-xs font-mono font-bold text-orange-900 rounded-xl"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { const { loginId } = generateCredentials(allotCredDealer); setCredLoginId(loginId); }}
+                    className="h-9 w-9 flex items-center justify-center border border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-500 cursor-pointer shrink-0"
+                    title="Generate new Login ID"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">Format: DLR-CITY-XXX (fully editable)</p>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Temporary Password *</label>
+                <div className="flex gap-2">
+                  <Input
+                    value={credPassword}
+                    onChange={e => setCredPassword(e.target.value)}
+                    placeholder="e.g. Dealer@2026"
+                    className="h-9 text-xs font-mono font-bold rounded-xl flex-1"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => { const { pass } = generateCredentials(allotCredDealer); setCredPassword(pass); }}
+                    className="h-9 w-9 flex items-center justify-center border border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-500 cursor-pointer shrink-0"
+                    title="Generate new Password"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { navigator.clipboard?.writeText(credPassword); toast.info("Password copied!"); }}
+                    className="h-9 w-9 flex items-center justify-center border border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-500 cursor-pointer shrink-0"
+                    title="Copy password"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-start gap-2.5">
+                <input
+                  type="checkbox"
+                  id="sendCredEmail"
+                  checked={credSendEmail}
+                  onChange={e => setCredSendEmail(e.target.checked)}
+                  className="mt-0.5 accent-orange-600"
+                />
+                <label htmlFor="sendCredEmail" className="text-[11px] text-gray-700 cursor-pointer">
+                  <strong className="font-semibold">Dispatch credentials to dealer:</strong> Simulate sending Login ID & Password to <span className="font-mono text-orange-700">{allotCredDealer.email || allotCredDealer.phone}</span>
+                </label>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <Button
+                  type="submit"
+                  disabled={credIsAllotting}
+                  className="flex-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold py-2 rounded-xl cursor-pointer"
+                >
+                  {credIsAllotting ? "Activating Account..." : "Allot Credentials & Activate Account"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setAllotCredDealer(null)}
+                  className="text-gray-600 border-gray-200 text-xs font-semibold rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

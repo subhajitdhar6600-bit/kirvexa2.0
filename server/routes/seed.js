@@ -14,6 +14,9 @@ import Order from '../models/Order.js';
 import PathshalaVideo from '../models/PathshalaVideo.js';
 import Notification from '../models/Notification.js';
 import FarmerCard from '../models/FarmerCard.js';
+import Product from '../models/Product.js';
+import Complaint from '../models/Complaint.js';
+import PlatformSettings from '../models/PlatformSettings.js';
 
 const router = express.Router();
 
@@ -344,6 +347,161 @@ router.post('/', async (req, res) => {
           createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
         },
       ]);
+    }
+
+    // 13. Products Catalog (PRD Market & Admin Catalog)
+    const productCount = await Product.countDocuments();
+    if (productCount === 0) {
+      await Product.insertMany([
+        {
+          id: 'prd_npk_123216',
+          dealerId: 'usr_dealer_01',
+          categoryId: 'cat_fertilizers',
+          name: 'IFFCO NPK 12:32:16 Fertilizer',
+          slug: 'iffco-npk-12-32-16-fertilizer',
+          description: 'High-grade primary nutrient complex fertilizer containing Nitrogen, Phosphorus, and Potassium for robust root development and grain filling.',
+          brand: 'IFFCO',
+          images: ['https://images.unsplash.com/photo-1628352081506-83c43123ed6d?w=600&q=80'],
+          unit: '50kg Bag',
+          price: 1470,
+          discount: 5,
+          tax: 5,
+          stockQuantity: 180,
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 50,
+          status: 'ACTIVE',
+          adminApprovalStatus: 'APPROVED',
+        },
+        {
+          id: 'prd_dap_50kg',
+          dealerId: 'usr_dealer_01',
+          categoryId: 'cat_fertilizers',
+          name: 'IFFCO DAP (Di-Ammonium Phosphate) 18:46:0',
+          slug: 'iffco-dap-50kg',
+          description: 'Essential phosphatic fertilizer for root growth, crop establishment, and early vegetative vigor in rabi and kharif crops.',
+          brand: 'IFFCO',
+          images: ['https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=600&q=80'],
+          unit: '50kg Bag',
+          price: 1350,
+          discount: 0,
+          tax: 5,
+          stockQuantity: 240,
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 40,
+          status: 'ACTIVE',
+          adminApprovalStatus: 'APPROVED',
+        },
+        {
+          id: 'prd_wheat_seeds',
+          dealerId: 'usr_dealer_01',
+          categoryId: 'cat_seeds',
+          name: 'Certified Hybrid Sharbati Wheat Seeds (PBW 550)',
+          slug: 'certified-hybrid-sharbati-wheat-seeds',
+          description: 'High-yielding, rust-tolerant certified wheat seeds with excellent chapati quality and bold golden grains.',
+          brand: 'National Seeds Corp',
+          images: ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600&q=80'],
+          unit: '40kg Bag',
+          price: 1850,
+          discount: 8,
+          tax: 0,
+          stockQuantity: 120,
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 30,
+          status: 'ACTIVE',
+          adminApprovalStatus: 'APPROVED',
+        },
+        {
+          id: 'prd_mustard_pusa',
+          dealerId: 'usr_dealer_01',
+          categoryId: 'cat_seeds',
+          name: 'Hybrid Mustard Seeds Pusa Bold (High Oil)',
+          slug: 'hybrid-mustard-seeds-pusa-bold',
+          description: 'High oil percentage (42%) certified hybrid mustard seeds, highly resistant to white rust and aphids.',
+          brand: 'Mahyco',
+          images: ['https://images.unsplash.com/photo-1508746829417-e6f548d8d6ed?w=600&q=80'],
+          unit: '1kg Packet',
+          price: 680,
+          discount: 10,
+          tax: 0,
+          stockQuantity: 350,
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 50,
+          status: 'ACTIVE',
+          adminApprovalStatus: 'APPROVED',
+        },
+        {
+          id: 'prd_neem_oil',
+          dealerId: 'usr_dealer_01',
+          categoryId: 'cat_pesticides',
+          name: 'Organic Neem Oil Bio-Pesticide 10000 PPM',
+          slug: 'organic-neem-oil-bio-pesticide',
+          description: '100% natural cold-pressed bio-pesticide for effective control of sucking pests, caterpillars, and fungal pathogens.',
+          brand: 'Krivexa Bio',
+          images: ['https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=600&q=80'],
+          unit: '1L Bottle',
+          price: 499,
+          discount: 15,
+          tax: 5,
+          stockQuantity: 95,
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 20,
+          status: 'ACTIVE',
+          adminApprovalStatus: 'APPROVED',
+        },
+        {
+          id: 'prd_battery_sprayer',
+          dealerId: 'usr_dealer_01',
+          categoryId: 'cat_machinery',
+          name: '16L Dual Battery Knapsack Agriculture Sprayer',
+          slug: '16l-dual-battery-knapsack-agriculture-sprayer',
+          description: 'Heavy duty rechargeable 12V 12Ah dual motor knapsack sprayer with multiple brass nozzles and adjustable pressure.',
+          brand: 'AgriPro',
+          images: ['https://images.unsplash.com/photo-1589923188900-85dae523342b?w=600&q=80'],
+          unit: 'Piece',
+          price: 2850,
+          discount: 12,
+          tax: 12,
+          stockQuantity: 45,
+          minimumOrderQuantity: 1,
+          maximumOrderQuantity: 5,
+          status: 'ACTIVE',
+          adminApprovalStatus: 'APPROVED',
+        },
+      ]);
+    }
+
+    // 14. Support Complaints
+    const complaintCount = await Complaint.countDocuments();
+    if (complaintCount === 0) {
+      await Complaint.insertMany([
+        {
+          id: 'cmp_101',
+          userId: 'usr_farmer_01',
+          orderId: 'ORD-920145',
+          subject: 'Delivery timing update for Fertilizer order',
+          description: 'Kindly inform the expected delivery slot for the IFFCO fertilizer dispatch to Danapur farm address.',
+          category: 'delivery',
+          status: 'OPEN',
+          adminResponse: 'Order is packed and scheduled for delivery tomorrow.',
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+    }
+
+    // 15. Platform Settings
+    const settingsCount = await PlatformSettings.countDocuments();
+    if (settingsCount === 0) {
+      await PlatformSettings.create({
+        platformName: 'Krivexa Agritech',
+        supportEmail: 'support@krivexa.in',
+        phone: '+91 9876543210',
+        address: 'Patna, Bihar - 800001',
+        timezone: 'Asia/Kolkata',
+        autoApproveFarmers: false,
+        autoApproveDealers: false,
+        commissionRatePct: 5,
+        maintenanceMode: false,
+      });
     }
 
     res.json({ success: true, message: 'Database Farma successfully seeded with authentic initial records!' });

@@ -15,7 +15,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "https://kirvexa2-0-backend.vercel.app",
+        target: "http://localhost:5000",
         changeOrigin: true,
         secure: false,
       },
