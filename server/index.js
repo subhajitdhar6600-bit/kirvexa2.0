@@ -49,6 +49,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Connect to MongoDB Database
 connectDB();
 
+// Ensure MongoDB connection is established on every request (critical for Vercel serverless)
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
+
 // PRD Primary API Endpoints
 app.use('/api/auth', authRoutes);
 app.use('/api/farmer', farmerRoutes);

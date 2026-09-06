@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const RAW_URL = import.meta.env.VITE_API_URL || 'https://kirvexa2-0-backend.vercel.app/api';
+const cleanBase = RAW_URL.replace(/\/+$/, '');
+const API_BASE_URL = cleanBase.endsWith('/api') ? cleanBase : `${cleanBase}/api`;
 
 export const checkMongoHealth = async () => {
   try {
@@ -66,7 +68,7 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T |
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       signal: controller.signal,
