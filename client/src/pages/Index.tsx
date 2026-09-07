@@ -550,7 +550,7 @@ export default function Index() {
                       </Button>
                     </Link>
                   )}
-                  {!isKccIssued && (
+                  {!isKccIssued && !hasAppliedKcc && (
                     <Button
                       size="lg"
                       variant="outline"
@@ -808,7 +808,7 @@ export default function Index() {
           </div>
 
           {/* Bottom KCC Card Section matching Image 5 */}
-          {!isKccIssued && (
+          {!isKccIssued && !hasAppliedKcc && (
             <div className="mt-12 bg-linear-to-r from-amber-950/40 via-[#16130b] to-[#0d0d0d] border border-amber-500/30 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400">

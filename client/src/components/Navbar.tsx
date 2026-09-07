@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronDown, Globe, LogIn, CreditCard, Bell, User, LogOut, CheckCheck, MapPin, Store, Wallet, Sprout, MoreVertical, ChevronRight, LayoutDashboard, ShoppingCart, FileDown } from "lucide-react";
+import { Menu, X, ChevronDown, Globe, LogIn, CreditCard, Bell, User, LogOut, CheckCheck, MapPin, Store, Wallet, Sprout, MoreVertical, ChevronRight, LayoutDashboard, ShoppingCart, FileDown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { cn } from "@/lib/utils.ts";
 import { useApp } from "@/context/AppContext.tsx";
@@ -24,6 +24,7 @@ export default function Navbar() {
     isKccIssued,
     setIsKccAppModalOpen,
     hasAppliedKcc,
+    kccDetails,
     user, 
     logoutUser, 
     notifications, 
@@ -336,7 +337,21 @@ export default function Navbar() {
                         >
                           <LayoutDashboard className="h-4 w-4 text-black" /> User Dashboard
                         </Link>
-                        {!isKccIssued && (
+                        {isKccIssued ? (
+                          <Link
+                            to="/wallet"
+                            onClick={() => setShowUserMenu(false)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors"
+                          >
+                            <CreditCard className="h-4 w-4 text-emerald-400 shrink-0" />
+                            <span className="truncate">KCC Active: {user?.kccCardNumber || kccDetails?.cardNumber || "Card Issued"}</span>
+                          </Link>
+                        ) : hasAppliedKcc ? (
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-amber-400 bg-amber-500/10 border border-amber-500/30">
+                            <Clock className="h-4 w-4 text-amber-400 shrink-0" />
+                            <span>KCC Status: Under Review</span>
+                          </div>
+                        ) : (
                           <button
                             onClick={() => {
                               setShowUserMenu(false);

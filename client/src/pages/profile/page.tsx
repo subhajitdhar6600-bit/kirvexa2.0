@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   User, Phone, MapPin, Edit3, ShieldAlert, CheckCircle2, Wallet, CreditCard,
   Calendar, TrendingUp, BookOpen, HelpCircle, FileText, LogOut, ArrowLeft,
-  Bell, Upload, Building2, CreditCard as BankIcon, ChevronRight, X, Lock, KeyRound
+  Bell, Upload, Building2, CreditCard as BankIcon, ChevronRight, X, Lock, KeyRound, Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -17,7 +17,8 @@ import { toast } from "sonner";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { user, updateUserProfile, logoutUser, setIsKccAppModalOpen, notifications, hasAppliedKcc } = useApp();
+  const { user, updateUserProfile, logoutUser, setIsKccAppModalOpen, notifications, hasAppliedKcc, isKccIssued, kccDetails, kccApplicationStatus } = useApp();
+  const isKccApproved = Boolean(isKccIssued || kccApplicationStatus === "approved" || user?.isKccIssued || user?.kccCardNumber);
 
   const unreadNotifs = notifications.filter(n => !n.read).length;
 
@@ -175,9 +176,14 @@ export default function ProfilePage() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h2 className="text-2xl font-bold text-white">{user?.name || "User Profile"}</h2>
-                <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[11px] font-semibold px-2.5 py-0.5">
-                  <ShieldAlert className="h-3 w-3 mr-1" />
-                  {user?.verificationStatus || "Verification Pending"}
+                <Badge className={isKccApproved ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[11px] font-bold px-2.5 py-0.5" : hasAppliedKcc ? "bg-amber-500/20 text-amber-300 border-amber-500/40 text-[11px] font-semibold px-2.5 py-0.5" : "bg-amber-500/10 text-amber-400 border-amber-500/30 text-[11px] font-semibold px-2.5 py-0.5"}>
+                  {isKccApproved ? (
+                    <><CheckCircle2 className="h-3 w-3 mr-1 text-emerald-400" /> KCC Verified & Active</>
+                  ) : hasAppliedKcc ? (
+                    <><Clock className="h-3 w-3 mr-1 text-amber-400" /> KCC Under Review</>
+                  ) : (
+                    <><ShieldAlert className="h-3 w-3 mr-1 text-amber-400" /> Verification Pending</>
+                  )}
                 </Badge>
               </div>
 
@@ -208,6 +214,51 @@ export default function ProfilePage() {
             </Button>
           </div>
         </div>
+
+        {/* KCC Digital Card on Profile (Visible when approved) */}
+        {isKccApproved && (
+          <div className="bg-linear-to-br from-[#1a1508] via-[#120f02] to-[#0a0a0a] border-2 border-amber-500/60 rounded-2xl p-5 mb-6 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                  <CreditCard className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-[10px] text-amber-400 font-black uppercase tracking-wider">Krivexa Kisan Credit Card</div>
+                  <div className="text-xs text-white font-bold">Allotted & Verified by Admin</div>
+                </div>
+              </div>
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px] font-black">
+                ACTIVE 💳
+              </Badge>
+            </div>
+            <div className="my-3 bg-black/60 rounded-xl p-3 border border-white/10">
+              <div className="text-[10px] text-gray-400 font-medium">Allotted KCC Card Number</div>
+              <div className="text-xl font-mono font-black text-amber-300 tracking-wider">
+                {user?.kccCardNumber || kccDetails?.cardNumber || "KCC-BH-2026-ACTIVE"}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-white/10">
+              <div>
+                <span className="text-gray-400 text-[11px]">Cardholder: </span>
+                <span className="font-bold text-white uppercase">{user?.name || "Verified Indian Farmer"}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-gray-400 text-[11px]">Credit Limit: </span>
+                <span className="font-bold text-emerald-400">₹{(kccDetails?.paymentAmount || 150000).toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between pt-2 border-t border-white/10 text-[11px]">
+              <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                <CheckCircle2 className="h-3.5 w-3.5" /> All 100% Platform Features Unlocked
+              </span>
+              <Link to="/wallet" className="text-primary hover:underline font-bold">
+                View in Wallet →
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Section 1: Aadhaar Details */}
         <div className="bg-[#111] border border-white/10 rounded-2xl p-5 mb-5 hover:border-white/20 transition-colors">
@@ -305,24 +356,45 @@ export default function ProfilePage() {
             <ChevronRight className="h-4 w-4 text-gray-500 group-hover:translate-x-1 transition-transform" />
           </Link>
 
-          <button
-            onClick={() => {
-              if (!hasAppliedKcc) setIsKccAppModalOpen(true);
-            }}
-            className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium text-gray-200 group text-left cursor-pointer"
+          {/* KCC Card Item */}
+          <Link
+            to="/wallet"
+            className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium text-gray-200 group"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
                 <CreditCard className="h-4 w-4" />
               </div>
-              <span>{hasAppliedKcc ? "KCC Credit Card (Applied)" : "Nex Credit / Shop Credit"}</span>
+              <div>
+                <span className="block font-semibold">
+                  {isKccApproved
+                    ? `KCC Card (${user?.kccCardNumber || kccDetails?.cardNumber || "Active"})`
+                    : hasAppliedKcc
+                    ? "KCC Credit Card (Applied)"
+                    : "Apply for Kisan Credit Card (KCC)"}
+                </span>
+                {isKccApproved && (
+                  <span className="text-[10px] text-emerald-400">All features unlocked · 100% active</span>
+                )}
+              </div>
             </div>
-            {hasAppliedKcc ? (
-              <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">Applied ✅</Badge>
+            {isKccApproved ? (
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Active 💳</Badge>
+            ) : hasAppliedKcc ? (
+              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px]">Under Review ⏳</Badge>
             ) : (
-              <ChevronRight className="h-4 w-4 text-gray-500 group-hover:translate-x-1 transition-transform" />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsKccAppModalOpen(true);
+                }}
+                className="text-xs text-amber-400 hover:underline font-bold"
+              >
+                Apply Now →
+              </button>
             )}
-          </button>
+          </Link>
 
           <Link
             to="/machinery-booking"
@@ -337,24 +409,45 @@ export default function ProfilePage() {
             <ChevronRight className="h-4 w-4 text-gray-500 group-hover:translate-x-1 transition-transform" />
           </Link>
 
-          <button
-            onClick={() => {
-              if (!hasAppliedKcc) setIsKccAppModalOpen(true);
-            }}
-            className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium text-gray-200 group text-left cursor-pointer"
+          {/* Application for Loan Item */}
+          <Link
+            to="/wallet"
+            className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium text-gray-200 group"
           >
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                 <TrendingUp className="h-4 w-4" />
               </div>
-              <span>{hasAppliedKcc ? "Application for Loan (Submitted)" : "Application for Loan"}</span>
+              <div>
+                <span className="block font-semibold">
+                  {isKccApproved
+                    ? `KCC Credit Facility (₹${(kccDetails?.paymentAmount || 150000).toLocaleString("en-IN")})`
+                    : hasAppliedKcc
+                    ? "Application for Loan (Submitted)"
+                    : "Application for Loan"}
+                </span>
+                {isKccApproved && (
+                  <span className="text-[10px] text-gray-400">Subsidised 4% p.a. credit limit</span>
+                )}
+              </div>
             </div>
-            {hasAppliedKcc ? (
+            {isKccApproved ? (
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Approved ✅</Badge>
+            ) : hasAppliedKcc ? (
               <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">Under Review</Badge>
             ) : (
-              <ChevronRight className="h-4 w-4 text-gray-500 group-hover:translate-x-1 transition-transform" />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsKccAppModalOpen(true);
+                }}
+                className="text-xs text-primary hover:underline font-bold"
+              >
+                Apply Now →
+              </button>
             )}
-          </button>
+          </Link>
 
           <Link
             to="/kisan-pathshala"

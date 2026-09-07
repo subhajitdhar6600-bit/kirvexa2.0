@@ -44,6 +44,7 @@ export default function DashboardPage() {
     markAllNotificationsAsRead,
     isKccIssued,
     setIsKccAppModalOpen,
+    kccDetails,
     cropListings,
     machineryBookings,
     hasAppliedKcc,
@@ -728,8 +729,8 @@ export default function DashboardPage() {
         {/* DASHBOARD CONTENT BODY */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
           
-          {/* PROMINENT KCC APPLICATION BANNER (Visible when KCC is not verified) */}
-          {!isKccIssued && (
+          {/* PROMINENT KCC APPLICATION BANNER */}
+          {!isKccIssued ? (
             <div className="bg-linear-to-r from-amber-950/90 via-amber-900/50 to-black border-2 border-amber-500/60 rounded-2xl p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400">
@@ -737,24 +738,53 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 mb-1">
-                    <Lock className="h-3 w-3 text-amber-400" /> Account Verification &amp; Feature Lock Active
+                    <Lock className="h-3 w-3 text-amber-400" /> {hasAppliedKcc ? "Verification in Progress" : "Account Verification & Feature Lock Active"}
                   </div>
                   <h3 className="text-lg font-black text-amber-200">
-                    Apply for Kisan Credit Card (KCC) Now
+                    {hasAppliedKcc ? "KCC Application Under Admin Review" : "Apply for Kisan Credit Card (KCC) Now"}
                   </h3>
                   <p className="text-xs text-gray-300 max-w-xl">
-                    {user?.role === "dealer"
+                    {hasAppliedKcc
+                      ? "Your KCC application has been submitted and is currently being processed by the Admin. Your card number and credit limit will be allotted shortly."
+                      : user?.role === "dealer"
                       ? "Platform buying, crop selling & bookings are currently locked. Apply for KCC to unlock all dealer transactional features. (Customer Service & Product Listings remain accessible)."
                       : "Buying inputs, selling harvest, labour & machinery bookings are locked. Apply for KCC to unlock 100% platform access and get up to ₹3,00,000 credit limit."}
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={() => setIsKccAppModalOpen(true)}
-                className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs py-3 px-6 rounded-xl shrink-0 cursor-pointer shadow-lg animate-pulse border border-amber-300"
-              >
-                <CreditCard className="h-4 w-4 mr-1.5 text-black" /> Apply for KCC Now →
-              </Button>
+              {!hasAppliedKcc ? (
+                <Button
+                  onClick={() => setIsKccAppModalOpen(true)}
+                  className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs py-3 px-6 rounded-xl shrink-0 cursor-pointer shadow-lg animate-pulse border border-amber-300"
+                >
+                  <CreditCard className="h-4 w-4 mr-1.5 text-black" /> Apply for KCC Now →
+                </Button>
+              ) : (
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold shrink-0">
+                  <Clock className="h-4 w-4 animate-spin" /> Pending Admin Allotment
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-linear-to-r from-emerald-950/80 via-[#102213] to-black border border-emerald-500/50 rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 mb-1">
+                    ✓ KCC Card Active · All Platform Features Unlocked
+                  </div>
+                  <div className="text-xs text-gray-300">
+                    Allotted Card Number: <span className="text-emerald-400 font-mono font-bold">{user?.kccCardNumber || kccDetails?.cardNumber || "KCC-APPROVED"}</span> | Limit: <span className="text-white font-bold">₹{(kccDetails?.paymentAmount || 150000).toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
+              </div>
+              <Link to="/wallet" className="shrink-0">
+                <Button size="sm" className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-xl shadow-md">
+                  View Card in Wallet →
+                </Button>
+              </Link>
             </div>
           )}
           

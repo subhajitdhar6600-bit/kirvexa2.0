@@ -91,6 +91,7 @@ export interface UserProfile {
   dealerType?: string;
   occupation?: string;
   pincode?: string;
+  landSize?: string;
   aadhaarNumber?: string;
   aadhaarFront?: string;
   aadhaarBack?: string;
@@ -100,6 +101,9 @@ export interface UserProfile {
   bankIfsc?: string;
   bankAddress?: string;
   verificationStatus?: "Pending" | "Verified";
+  isKccIssued?: boolean;
+  isVerified?: boolean;
+  kccCardNumber?: string;
   createdAt: string;
 }
 
@@ -116,6 +120,9 @@ export interface RegisteredAccount {
   businessName?: string;
   dealerType?: string;
   occupation?: string;
+  isKccIssued?: boolean;
+  isVerified?: boolean;
+  kccCardNumber?: string;
   createdAt: string;
 }
 
@@ -414,9 +421,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem("krivexa_admin_name");
   };
 
-  // KCC State — default to false until user applies and admin approves with a card number
-  const [isKccIssuedState, setIsKccIssuedState] = useState<boolean>(false);
-  const [kccApplications, setKccApplications] = useState<KccApplication[]>([]);
+  // KCC State — hydrate from localStorage / DB
+  const [isKccIssuedState, setIsKccIssuedState] = useState<boolean>(() => {
+    return localStorage.getItem("krivexa_kcc_issued") === "true";
+  });
+  const [kccApplications, setKccApplications] = useState<KccApplication[]>(() => {
+    return safeJsonParse("krivexa_kcc_apps", []);
+  });
   const [isKccAlertOpen, setIsKccAlertOpen] = useState<boolean>(false);
   const [isKccAppModalOpen, setIsKccAppModalOpen] = useState<boolean>(false);
 
@@ -442,7 +453,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             remoteFarmers,
             remoteOrders,
             remoteNotifs,
-            remoteUsers
+            remoteUsers,
+            remoteKcc
           ] = await Promise.all([
             api.getCrops(),
             api.getLabourBookings(),
@@ -455,8 +467,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             api.getRegisteredFarmers(),
             api.getOrders(),
             api.getNotifications(),
-            api.getUsers()
+            api.getUsers(),
+            api.getKccApplications()
           ]);
+
+          // Hydrate KCC applications from DB
+          if (Array.isArray(remoteKcc) && remoteKcc.length > 0) {
+            setKccApplications((prev) => {
+              const map = new Map<string, KccApplication>();
+              prev.forEach((item) => map.set(item.id, item));
+              remoteKcc.forEach((item: any) => map.set(item.id, item));
+              const merged = Array.from(map.values());
+              localStorage.setItem("krivexa_kcc_apps", JSON.stringify(merged));
+              return merged;
+            });
+          }
 
           // Hydrate registered user accounts from DB
           if (remoteUsers && remoteUsers.length > 0) {
@@ -472,6 +497,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               businessName: u.businessName,
               dealerType: u.dealerType,
               occupation: u.occupation,
+              isKccIssued: u.isKccIssued,
+              isVerified: u.isVerified,
+              kccCardNumber: u.kccCardNumber,
               createdAt: u.createdAt || new Date().toISOString(),
             }));
             setRegisteredAccounts((prev) => {
@@ -542,42 +570,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cardNumber = customCardNumber?.trim() || `KCC-BH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const limit = customLimit || targetApp?.paymentAmount || 50000;
 
-    setKccApplications((prev) =>
-      prev.map((app) => {
-        if (app.id === id) {
-          return {
-            ...app,
-            status: "approved",
-            cardNumber,
-            paymentAmount: limit,
-            issueDate: new Date().toISOString().split("T")[0],
-          };
-        }
-        return app;
-      })
-    );
+    const updatedApps = kccApplications.map((app) => {
+      if (app.id === id) {
+        return {
+          ...app,
+          status: "approved" as const,
+          cardNumber,
+          paymentAmount: limit,
+          issueDate: new Date().toISOString().split("T")[0],
+        };
+      }
+      return app;
+    });
+    setKccApplications(updatedApps);
+    localStorage.setItem("krivexa_kcc_apps", JSON.stringify(updatedApps));
+
     api.approveKccApplication(id, cardNumber);
 
+    const cleanT = (targetApp?.phone || "").replace(/\D/g, "").slice(-10);
+    const matchesApplicant = (p?: string, n?: string) => {
+      if (!targetApp) return false;
+      const cleanP = (p || "").replace(/\D/g, "").slice(-10);
+      if (cleanT && cleanP && cleanT === cleanP) return true;
+      if (n && targetApp.fullName && n.trim().toLowerCase() === targetApp.fullName.trim().toLowerCase()) return true;
+      return false;
+    };
+
     // If matches currently logged-in user, unlock KCC immediately
-    if (targetApp && user && (targetApp.phone === user.phone || targetApp.fullName === user.name)) {
+    if (user && matchesApplicant(user.phone, user.name)) {
       setIsKccIssuedState(true);
       localStorage.setItem("krivexa_kcc_issued", "true");
-      setUser((u) => (u ? { ...u, isKccIssued: true, isVerified: true, kccCardNumber: cardNumber } : null));
+      const updatedUser: UserProfile = {
+        ...user,
+        isKccIssued: true,
+        isVerified: true,
+        kccCardNumber: cardNumber,
+      };
+      setUser(updatedUser);
+      localStorage.setItem("krivexa_user_profile", JSON.stringify(updatedUser));
     }
 
     // Also update registered account if found
-    setRegisteredAccounts((prev) =>
-      prev.map((acc) => {
-        if (targetApp && (acc.phone === targetApp.phone || acc.fullName === targetApp.fullName)) {
+    setRegisteredAccounts((prev) => {
+      const updated = prev.map((acc) => {
+        if (matchesApplicant(acc.phone, acc.fullName)) {
           return { ...acc, isKccIssued: true, isVerified: true, kccCardNumber: cardNumber };
         }
         return acc;
+      });
+      localStorage.setItem("krivexa_registered_accounts", JSON.stringify(updated));
+      return updated;
+    });
+
+    // Also update registeredFarmers if found
+    setRegisteredFarmers((prev) =>
+      prev.map((f) => {
+        if (matchesApplicant(f.phone, f.name)) {
+          return { ...f, isKccIssued: true, cardNumber };
+        }
+        return f;
       })
     );
 
     addNotification(
-      "KCC Card Approved & Allotted 💳",
-      `KCC Application for ${targetApp?.fullName || "Farmer"} has been approved! Allotted Card Number: ${cardNumber}, Limit: ₹${limit.toLocaleString("en-IN")}. Verified and active.`,
+      "Kisan Credit Card (KCC) Approved & Allotted 💳",
+      `Congratulations ${targetApp?.fullName || "User"}! Your KCC card application has been approved by the Admin. Allotted Card Number: ${cardNumber} with Credit Limit of ₹${limit.toLocaleString("en-IN")}. All platform features (buying, selling, bookings & trading) are now 100% unlocked!`,
       "success",
       "/wallet",
       "kcc"
@@ -940,18 +997,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loginUser = (profileData: Omit<UserProfile, "id" | "createdAt">) => {
+    const cleanP = (profileData.phone || "").replace(/\D/g, "").slice(-10);
+    const existingAcc = registeredAccounts.find(
+      (a) => (a.phone || "").replace(/\D/g, "").slice(-10) === cleanP ||
+        (profileData.name && a.fullName && a.fullName.trim().toLowerCase() === profileData.name.trim().toLowerCase())
+    );
+
+    const isApprovedFromAcc = Boolean(existingAcc?.isKccIssued || existingAcc?.kccCardNumber);
+    const kccCardNumFromAcc = existingAcc?.kccCardNumber;
+
     const newUser: UserProfile = {
       ...profileData,
       id: `usr-${Date.now()}`,
+      isKccIssued: isApprovedFromAcc || profileData.isKccIssued || false,
+      kccCardNumber: kccCardNumFromAcc || profileData.kccCardNumber,
       createdAt: new Date().toISOString(),
     };
-    // Always reset KCC & Wallet state when a new user logs in — new user profile must be 100% fresh
-    setIsKccIssuedState(false);
-    setKccApplications([]);
-    setWalletTransactions([]);
-    localStorage.removeItem("krivexa_kcc_issued");
-    localStorage.removeItem("krivexa_kcc_apps");
-    localStorage.removeItem("krivexa_wallet_txns");
+
+    if (newUser.isKccIssued && newUser.kccCardNumber) {
+      setIsKccIssuedState(true);
+      localStorage.setItem("krivexa_kcc_issued", "true");
+    } else {
+      setIsKccIssuedState(false);
+      localStorage.removeItem("krivexa_kcc_issued");
+    }
 
     setUser(newUser);
     api.saveUser(newUser);
@@ -959,11 +1028,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Fetch this user's KCC applications from DB after login
     api.getKccApplications().then((allApps) => {
       if (allApps && allApps.length > 0) {
-        const userApps = allApps.filter(
-          (app: KccApplication) => app.phone === newUser.phone || app.fullName?.toLowerCase() === newUser.name?.toLowerCase()
-        );
+        const userApps = allApps.filter((app: KccApplication) => {
+          const appPhone = (app.phone || "").replace(/\D/g, "").slice(-10);
+          return (cleanP && appPhone && cleanP === appPhone) ||
+            (app.fullName?.trim().toLowerCase() === newUser.name?.trim().toLowerCase());
+        });
         if (userApps.length > 0) {
           setKccApplications(userApps);
+          localStorage.setItem("krivexa_kcc_apps", JSON.stringify(userApps));
+          const approvedApp = userApps.find((a) => a.status === "approved" && a.cardNumber);
+          if (approvedApp) {
+            setIsKccIssuedState(true);
+            localStorage.setItem("krivexa_kcc_issued", "true");
+            setUser((u) => {
+              if (!u) return null;
+              const updated = {
+                ...u,
+                isKccIssued: true,
+                isVerified: true,
+                kccCardNumber: approvedApp.cardNumber,
+              };
+              localStorage.setItem("krivexa_user_profile", JSON.stringify(updated));
+              return updated;
+            });
+          }
         }
       }
     }).catch(() => {});
@@ -1058,19 +1146,68 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // User-specific KCC Application Lookup
+  const cleanPhone = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+
   const currentUserKccApp = user
-    ? kccApplications.find(
-        (app) =>
-          (user.phone && app.phone === user.phone) ||
-          (user.name && app.fullName && app.fullName.toLowerCase() === user.name.toLowerCase())
-      ) || null
+    ? kccApplications.find((app) => {
+        const uPhone = cleanPhone(user.phone);
+        const aPhone = cleanPhone(app.phone);
+        const matchPhone = Boolean(uPhone && aPhone && uPhone === aPhone);
+        const matchName = Boolean(user.name && app.fullName && user.name.trim().toLowerCase() === app.fullName.trim().toLowerCase());
+        const matchCard = Boolean(user.kccCardNumber && app.cardNumber && user.kccCardNumber.trim().toLowerCase() === app.cardNumber.trim().toLowerCase());
+        return matchPhone || matchName || matchCard;
+      }) || null
     : null;
 
-  const kccDetails = currentUserKccApp;
-  const kccApplicationStatus = currentUserKccApp ? currentUserKccApp.status : "none";
-  // isKccIssued: true ONLY if admin OR if logged-in user has an APPROVED KCC application with a cardNumber assigned
-  const isKccIssued = isAdminLoggedIn || (user !== null && currentUserKccApp?.status === "approved" && Boolean(currentUserKccApp?.cardNumber));
-  const hasAppliedKcc = user !== null && currentUserKccApp !== null;
+  // isKccIssued: true if admin OR if logged-in user has KCC approved / card assigned
+  const isKccIssued = Boolean(
+    isAdminLoggedIn ||
+    (user !== null && (
+      Boolean(user.isKccIssued) ||
+      Boolean(user.kccCardNumber) ||
+      isKccIssuedState ||
+      (currentUserKccApp?.status === "approved" && Boolean(currentUserKccApp?.cardNumber))
+    ))
+  );
+
+  const hasAppliedKcc = Boolean(
+    user !== null && (
+      isKccIssued ||
+      currentUserKccApp !== null ||
+      Boolean(user.isKccIssued) ||
+      Boolean(user.kccCardNumber)
+    )
+  );
+
+  const kccApplicationStatus: "none" | "pending" | "approved" | "rejected" =
+    isKccIssued
+      ? "approved"
+      : currentUserKccApp
+      ? (currentUserKccApp.status as any)
+      : "none";
+
+  const kccDetails: KccApplication | null = currentUserKccApp
+    ? {
+        ...currentUserKccApp,
+        cardNumber: currentUserKccApp.cardNumber || user?.kccCardNumber || (isKccIssued ? "KCC-BH-2026-ACTIVE" : undefined),
+        status: isKccIssued ? "approved" : currentUserKccApp.status,
+      }
+    : (user && (user.kccCardNumber || isKccIssued))
+    ? {
+        id: `kcc-${user.id || Date.now()}`,
+        fullName: user.name,
+        phone: user.phone || "",
+        aadhaar: user.aadhaarNumber || "XXXX-XXXX-XXXX",
+        address: [user.village, user.district, user.state].filter(Boolean).join(", ") || (user.district || "Bihar"),
+        district: user.district || "Patna",
+        landSize: user.landSize || "2.5 Acres",
+        status: "approved",
+        cardNumber: user.kccCardNumber || "KCC-BH-2026-ACTIVE",
+        paymentAmount: 150000,
+        issueDate: new Date().toISOString().split("T")[0],
+        createdAt: new Date().toISOString(),
+      }
+    : null;
 
   const checkKccPermission = (actionName?: string): boolean => {
     // 1. Admin always has full access
@@ -1092,12 +1229,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    // 4. KCC must be approved with an assigned card number
+    // 4. KCC must be approved with an assigned card number — unlocks 100% of website features!
     if (isKccIssued) {
       return true;
     }
 
-    // 5. If not approved, trigger the KCC alert modal
+    // 5. If application is currently pending admin review
+    if (hasAppliedKcc && kccApplicationStatus === "pending") {
+      toast.info("Your KCC Application is under Admin review. All features will be unlocked once approved!");
+      setIsKccAlertOpen(true);
+      return false;
+    }
+
+    // 6. If not approved, trigger the KCC alert modal
     setIsKccAlertOpen(true);
     return false;
   };

@@ -1,5 +1,7 @@
 import express from 'express';
 import KccApplication from '../models/KccApplication.js';
+import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 
 const router = express.Router();
 
@@ -37,6 +39,33 @@ router.put('/:id/approve', async (req, res) => {
       { status: 'approved', cardNumber, issueDate },
       { new: true }
     );
+
+    if (updated) {
+      // Also update matching User in DB if exists
+      const cleanPhone = (updated.phone || '').replace(/\D/g, '').slice(-10);
+      if (cleanPhone) {
+        await User.updateMany(
+          { phone: { $regex: cleanPhone } },
+          { isKccIssued: true, isVerified: true, kccCardNumber: cardNumber }
+        );
+      }
+
+      // Add Notification
+      try {
+        await Notification.create({
+          id: `notif-${Date.now()}`,
+          userId: updated.phone || 'broadcast',
+          title: 'KCC Card Approved & Allotted 💳',
+          message: `Congratulations ${updated.fullName}! Your Kisan Credit Card (KCC) has been approved. Allotted Card Number: ${cardNumber}. All platform features are now unlocked!`,
+          type: 'success',
+          link: '/wallet',
+          category: 'kcc',
+        });
+      } catch (notifErr) {
+        console.warn('Failed to persist notification:', notifErr);
+      }
+    }
+
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });

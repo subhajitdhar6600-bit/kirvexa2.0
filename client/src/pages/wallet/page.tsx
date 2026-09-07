@@ -244,16 +244,16 @@ export default function WalletPage() {
   };
 
   // KCC card number & wallet balances logic
-  const isKccApproved = kccApplicationStatus === "approved";
-  const kccCreditBalance = isKccApproved && kccDetails ? 25000 : 0;
+  const isKccApproved = Boolean(isKccIssued || kccApplicationStatus === "approved" || user?.isKccIssued || user?.kccCardNumber);
+  const kccCreditBalance = isKccApproved ? (kccDetails?.paymentAmount || 150000) : 0;
   const totalIn = walletTransactions.filter((t) => t.type === "credit").reduce((s, t) => s + t.amount, 0);
   const totalOut = walletTransactions.filter((t) => t.type === "debit").reduce((s, t) => s + t.amount, 0);
 
-  const kccCardNumber = isKccApproved && kccDetails?.cardNumber
-    ? kccDetails.cardNumber
+  const kccCardNumber = isKccApproved
+    ? (kccDetails?.cardNumber || user?.kccCardNumber || "KCC-BH-2026-LIVE")
     : null;
   const kccHolderName = kccDetails?.fullName || user?.name || "KRIVEXA KISAN";
-  const kccIssueDate = kccDetails?.issueDate || null;
+  const kccIssueDate = kccDetails?.issueDate || (user?.isKccIssued ? new Date().toISOString().split("T")[0] : null);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -273,8 +273,8 @@ export default function WalletPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
 
-        {/* PROMINENT KCC APPLY CTA BANNER CARD (Visible when user has no active KCC) */}
-        {!isKccIssued && (
+        {/* PROMINENT KCC APPLY CTA BANNER CARD (Completely hidden once KCC is approved) */}
+        {!isKccApproved && (
           <div className="bg-linear-to-r from-amber-950/80 via-amber-900/40 to-black border-2 border-amber-500/50 rounded-2xl p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400">
@@ -282,22 +282,30 @@ export default function WalletPage() {
               </div>
               <div>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 mb-1">
-                  <AlertCircle className="h-3 w-3" /> Mandatory Account Verification
+                  <AlertCircle className="h-3 w-3" /> {hasAppliedKcc ? "Verification Under Process" : "Mandatory Account Verification"}
                 </div>
                 <h3 className="text-lg font-black text-amber-200">
-                  Apply for Kisan Credit Card (KCC) Now
+                  {hasAppliedKcc ? "KCC Application Under Admin Review" : "Apply for Kisan Credit Card (KCC) Now"}
                 </h3>
                 <p className="text-xs text-gray-300 max-w-xl">
-                  Get up to ₹3,00,000 credit limit &amp; unlock all buying, crop selling, machinery &amp; labour booking features across the Bihar platform.
+                  {hasAppliedKcc
+                    ? "Your KCC application has been submitted and is currently being processed by the Admin. Your card number and credit limit will be allotted shortly."
+                    : "Get up to ₹3,00,000 credit limit & unlock all buying, crop selling, machinery & labour booking features across the Bihar platform."}
                 </p>
               </div>
             </div>
-            <Button
-              onClick={() => setIsKccAppModalOpen(true)}
-              className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs py-3 px-6 rounded-xl shrink-0 cursor-pointer shadow-lg animate-pulse border border-amber-300"
-            >
-              <CreditCard className="h-4 w-4 mr-1.5 text-black" /> Apply for KCC Now →
-            </Button>
+            {!hasAppliedKcc ? (
+              <Button
+                onClick={() => setIsKccAppModalOpen(true)}
+                className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs py-3 px-6 rounded-xl shrink-0 cursor-pointer shadow-lg animate-pulse border border-amber-300"
+              >
+                <CreditCard className="h-4 w-4 mr-1.5 text-black" /> Apply for KCC Now →
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold shrink-0">
+                <Clock className="h-4 w-4 animate-spin" /> Pending Admin Allotment
+              </div>
+            )}
           </div>
         )}
 
@@ -362,8 +370,10 @@ export default function WalletPage() {
                   className="text-[#f5d77f] font-black tracking-[0.14em] leading-none drop-shadow-md truncate"
                   style={{ fontFamily: "Rajdhani, monospace", fontSize: "clamp(0.65rem, 2.2vw, 0.85rem)", textShadow: "0 2px 8px rgba(0,0,0,0.9)" }}
                 >
-                  {hasAppliedKcc
-                    ? (isKccApproved ? kccCardNumber : "Will be generated after verification")
+                  {isKccApproved
+                    ? kccCardNumber
+                    : hasAppliedKcc
+                    ? "Under Admin Verification..."
                     : "Apply KCC to Activate Card"}
                 </div>
               </div>
@@ -380,11 +390,13 @@ export default function WalletPage() {
               <div className="px-4 py-3 border-t border-amber-500/20 bg-black/40 flex items-center justify-between">
                 <div>
                   <div className="text-[10px] text-gray-400">Krivexa Credit Card</div>
-                  <div className="text-xs font-bold text-amber-400">{isKccApproved ? `Active · Issued ${kccIssueDate || "Recently"}` : hasAppliedKcc ? "Under Review" : "Not Applied"}</div>
+                  <div className="text-xs font-bold text-amber-400">
+                    {isKccApproved ? `Active · All Features Unlocked` : hasAppliedKcc ? "Under Review" : "Not Applied"}
+                  </div>
                 </div>
                 <div className="text-[10px] text-gray-500 text-right">
                   {isKccApproved ? "Credit Limit" : ""}
-                  <div className="text-amber-400 font-black text-sm">{isKccApproved ? `₹${kccCreditBalance.toLocaleString()}` : ""}</div>
+                  <div className="text-amber-400 font-black text-sm">{isKccApproved ? `₹${kccCreditBalance.toLocaleString("en-IN")}` : ""}</div>
                 </div>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { CreditCard, X, AlertTriangle, CheckCircle2, Clock, Crown, Star, ArrowRight, Check, RefreshCw, Wallet, QrCode, ArrowLeft, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -10,8 +11,8 @@ import { generateFormPdf } from "@/lib/pdfGenerator.ts";
 
 /** KCC blocked-action alert */
 export function KccAlertModal() {
-  const { isKccAlertOpen, setIsKccAlertOpen, setIsKccAppModalOpen, t } = useApp();
-  if (!isKccAlertOpen) return null;
+  const { isKccAlertOpen, setIsKccAlertOpen, setIsKccAppModalOpen, isKccIssued, hasAppliedKcc, t } = useApp();
+  if (!isKccAlertOpen || isKccIssued) return null;
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
@@ -25,19 +26,35 @@ export function KccAlertModal() {
             <AlertTriangle className="h-6 w-6 text-amber-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">{t.kccModal.alertTitle}</h3>
-            <p className="text-xs text-amber-400 font-medium">{t.kccModal.restrictedBadge}</p>
+            <h3 className="text-lg font-bold text-white">
+              {hasAppliedKcc ? "KCC Application In Review" : t.kccModal.alertTitle}
+            </h3>
+            <p className="text-xs text-amber-400 font-medium">
+              {hasAppliedKcc ? "Verification Pending" : t.kccModal.restrictedBadge}
+            </p>
           </div>
         </div>
-        <p className="text-gray-300 text-sm leading-relaxed mb-6">{t.kccModal.alertDesc}</p>
+        <p className="text-gray-300 text-sm leading-relaxed mb-6">
+          {hasAppliedKcc
+            ? "Your KCC Application has been submitted and is currently being reviewed by the Admin. Once approved and allotted with your live card number, all features across the platform will unlock automatically!"
+            : t.kccModal.alertDesc}
+        </p>
         <div className="flex gap-3">
-          <Button
-            className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-bold"
-            onClick={() => { setIsKccAlertOpen(false); setIsKccAppModalOpen(true); }}
-          >
-            <CreditCard className="h-4 w-4 mr-2" />
-            {t.kccModal.applyNow}
-          </Button>
+          {!hasAppliedKcc ? (
+            <Button
+              className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-bold"
+              onClick={() => { setIsKccAlertOpen(false); setIsKccAppModalOpen(true); }}
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              {t.kccModal.applyNow}
+            </Button>
+          ) : (
+            <Link to="/wallet" className="flex-1" onClick={() => setIsKccAlertOpen(false)}>
+              <Button className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold">
+                View Status in Wallet →
+              </Button>
+            </Link>
+          )}
           <Button variant="ghost" className="border border-white/10 text-gray-300" onClick={() => setIsKccAlertOpen(false)}>
             {t.kccModal.cancel}
           </Button>
@@ -84,6 +101,10 @@ export function KccApplicationModal() {
     submitKccApplication,
     addNotification,
     user,
+    isKccIssued,
+    hasAppliedKcc,
+    kccApplicationStatus,
+    kccDetails,
     walletBalance,
     addWalletTransaction,
     t,
@@ -106,6 +127,85 @@ export function KccApplicationModal() {
   const [loading, setLoading] = useState(false);
 
   if (!isKccAppModalOpen) return null;
+
+  // 1. If KCC is already approved & issued:
+  if (isKccIssued) {
+    return (
+      <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+        <div className="bg-[#141414] border border-emerald-500/40 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative">
+          <button onClick={() => setIsKccAppModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white cursor-pointer">
+            <X className="h-5 w-5" />
+          </button>
+          <div className="w-14 h-14 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mx-auto mb-3 text-emerald-400">
+            <CheckCircle2 className="h-7 w-7" />
+          </div>
+          <h3 className="text-lg font-bold text-white mb-1">KCC Card Already Active</h3>
+          <p className="text-xs text-gray-300 mb-4">
+            You have already applied and received your Kisan Credit Card. All platform features are 100% unlocked!
+          </p>
+          <div className="bg-black/60 rounded-xl p-3 border border-white/10 mb-5 text-left">
+            <div className="text-[10px] text-gray-400">Allotted Card Number</div>
+            <div className="font-mono font-bold text-amber-300 text-lg">
+              {user?.kccCardNumber || kccDetails?.cardNumber || "KCC-APPROVED"}
+            </div>
+            <div className="text-[11px] text-emerald-400 font-semibold mt-1">
+              ✓ Status: Verified &amp; Active
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Link to="/wallet" onClick={() => setIsKccAppModalOpen(false)} className="flex-1">
+              <Button className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold">
+                View in Wallet →
+              </Button>
+            </Link>
+            <Button variant="ghost" onClick={() => setIsKccAppModalOpen(false)} className="border border-white/10 text-gray-300">
+              Close
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. If KCC application was already submitted and is pending review:
+  if (hasAppliedKcc && kccApplicationStatus === "pending" && step !== "done") {
+    return (
+      <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+        <div className="bg-[#141414] border border-amber-500/40 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative">
+          <button onClick={() => setIsKccAppModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white cursor-pointer">
+            <X className="h-5 w-5" />
+          </button>
+          <div className="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mx-auto mb-3 text-amber-400">
+            <Clock className="h-7 w-7 animate-spin" />
+          </div>
+          <h3 className="text-lg font-bold text-white mb-1">Application Under Review</h3>
+          <p className="text-xs text-gray-300 mb-4">
+            Your Kisan Credit Card application has already been submitted and is currently being verified by the Admin. You do not need to apply again.
+          </p>
+          <div className="bg-black/60 rounded-xl p-3 border border-white/10 mb-5 text-left text-xs space-y-1">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Applicant:</span>
+              <span className="text-white font-bold">{user?.name || form.fullName || "Farmer"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Status:</span>
+              <span className="text-amber-400 font-semibold">Pending Admin Allotment</span>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Link to="/wallet" onClick={() => setIsKccAppModalOpen(false)} className="flex-1">
+              <Button className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold">
+                Check Status in Wallet →
+              </Button>
+            </Link>
+            <Button variant="ghost" onClick={() => setIsKccAppModalOpen(false)} className="border border-white/10 text-gray-300">
+              Close
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const tier = KCC_TIERS.find(t => t.id === selectedTier)!;
 
