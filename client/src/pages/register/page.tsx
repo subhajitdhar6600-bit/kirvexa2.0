@@ -72,7 +72,7 @@ export default function RegisterPage() {
       toast.error("Please enter a valid email address for account verification");
       return;
     }
-    if (!phone || phone.length < 10) {
+    if (!phone || phone.length !== 10) {
       toast.error("Please enter a valid 10-digit mobile number");
       return;
     }
@@ -485,8 +485,11 @@ export default function RegisterPage() {
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                           <Input 
+                            type="tel"
+                            inputMode="numeric"
+                            maxLength={10}
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
+                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                             placeholder="10-digit mobile number" 
                             className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600" 
                             required
@@ -680,8 +683,11 @@ export default function RegisterPage() {
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                           <Input 
+                            type="tel"
+                            inputMode="numeric"
+                            maxLength={10}
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
+                            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                             placeholder="10-digit mobile number" 
                             className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600" 
                             required

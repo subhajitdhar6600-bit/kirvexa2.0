@@ -64,8 +64,8 @@ export default function ProfilePage() {
 
   const handleSaveAadhaar = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!aadhaarNum.trim()) {
-      toast.error("Please enter a valid Aadhaar number");
+    if (!aadhaarNum.trim() || aadhaarNum.replace(/\D/g, "").length !== 12) {
+      toast.error("Please enter a valid 12-digit Aadhaar number");
       return;
     }
     updateUserProfile({
@@ -626,7 +626,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <Label className="text-xs text-gray-300 mb-1 block">Phone Number</Label>
-                <Input value={phone} onChange={e => setPhone(e.target.value)} className="bg-white/5 border-white/10 text-white" required />
+                <Input value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit mobile number" className="bg-white/5 border-white/10 text-white" required />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -669,8 +669,10 @@ export default function ProfilePage() {
                 <Label className="text-xs text-gray-300 mb-1 block">12-Digit Aadhaar Number</Label>
                 <Input
                   value={aadhaarNum}
-                  onChange={e => setAadhaarNum(e.target.value)}
-                  placeholder="e.g. 5432 8901 2345"
+                  onChange={e => setAadhaarNum(e.target.value.replace(/\D/g, "").slice(0, 12))}
+                  inputMode="numeric"
+                  maxLength={12}
+                  placeholder="12-digit Aadhaar number"
                   className="bg-white/5 border-white/10 text-white font-mono"
                   required
                 />

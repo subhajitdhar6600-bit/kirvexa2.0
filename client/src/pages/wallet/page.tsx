@@ -470,6 +470,14 @@ export default function WalletPage() {
                   toast.error("Please fill all required fields");
                   return;
                 }
+                if (farmerForm.phone.replace(/\D/g, "").length !== 10) {
+                  toast.error("Please enter a valid 10-digit mobile number.");
+                  return;
+                }
+                if (farmerForm.aadhaar.replace(/\D/g, "").length !== 12) {
+                  toast.error("Please enter a valid 12-digit Aadhaar number.");
+                  return;
+                }
                 setShowKccPreview(true);
               }}
               className="p-5 space-y-4"
@@ -491,9 +499,11 @@ export default function WalletPage() {
                   <Input
                     required
                     type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
                     placeholder="10-digit Mobile"
                     value={farmerForm.phone}
-                    onChange={(e) => setFarmerForm({ ...farmerForm, phone: e.target.value })}
+                    onChange={(e) => setFarmerForm({ ...farmerForm, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                     className="mt-1 bg-white/5 border-white/10 text-white"
                   />
                 </div>
@@ -501,9 +511,11 @@ export default function WalletPage() {
                   <Label className="text-xs text-gray-300">Aadhaar Card Number *</Label>
                   <Input
                     required
+                    inputMode="numeric"
+                    maxLength={12}
                     placeholder="12-digit Aadhaar"
                     value={farmerForm.aadhaar}
-                    onChange={(e) => setFarmerForm({ ...farmerForm, aadhaar: e.target.value })}
+                    onChange={(e) => setFarmerForm({ ...farmerForm, aadhaar: e.target.value.replace(/\D/g, "").slice(0, 12) })}
                     className="mt-1 bg-white/5 border-white/10 text-white"
                   />
                 </div>

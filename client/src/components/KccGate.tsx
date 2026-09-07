@@ -344,6 +344,14 @@ export function KccApplicationModal() {
       toast.error("Please fill in all required fields.");
       return;
     }
+    if (form.phone.replace(/\D/g, "").length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    if (form.aadhaar.replace(/\D/g, "").length !== 12) {
+      toast.error("Please enter a valid 12-digit Aadhaar number.");
+      return;
+    }
     setShowPreview(true);
   };
 
@@ -493,11 +501,11 @@ export function KccApplicationModal() {
                 </div>
                 <div>
                   <Label className="text-gray-300 text-sm mb-1.5 block">{t.kccModal.phone} *</Label>
-                  <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="10-digit number" className="bg-white/5 border-white/10 text-white" required />
+                  <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, "").slice(0, 10) }))} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit number" className="bg-white/5 border-white/10 text-white" required />
                 </div>
                 <div>
                   <Label className="text-gray-300 text-sm mb-1.5 block">{t.kccModal.aadhaar} *</Label>
-                  <Input value={form.aadhaar} onChange={e => setForm(f => ({ ...f, aadhaar: e.target.value }))} placeholder="XXXX-XXXX-XXXX" className="bg-white/5 border-white/10 text-white" required />
+                  <Input value={form.aadhaar} onChange={e => setForm(f => ({ ...f, aadhaar: e.target.value.replace(/\D/g, "").slice(0, 12) }))} inputMode="numeric" maxLength={12} placeholder="12-digit Aadhaar" className="bg-white/5 border-white/10 text-white" required />
                 </div>
                 <div>
                   <Label className="text-gray-300 text-sm mb-1.5 block">{t.kccModal.district} *</Label>

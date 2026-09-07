@@ -120,6 +120,14 @@ export default function Index() {
       toast.error("Please fill in Name, Phone, and Aadhaar");
       return;
     }
+    if (applyPhone.replace(/\D/g, "").length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    if (applyAadhaar.replace(/\D/g, "").length !== 12) {
+      toast.error("Please enter a valid 12-digit Aadhaar number.");
+      return;
+    }
     dealerApplyFarmerKcc({
       fullName: applyName,
       phone: applyPhone,
@@ -155,7 +163,15 @@ export default function Index() {
   const handleNewFarmerRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!regName || !regPhone || !regAadhaar) {
-      toast.error("Please fill Name, Phone and Aadhaar number");
+      toast.error("Please fill Name, Phone, and Aadhaar");
+      return;
+    }
+    if (regPhone.replace(/\D/g, "").length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    if (regAadhaar.replace(/\D/g, "").length !== 12) {
+      toast.error("Please enter a valid 12-digit Aadhaar number.");
       return;
     }
     const res = registerFarmerByDealer({
@@ -1206,7 +1222,10 @@ export default function Index() {
                       <Label className="text-xs text-gray-300">Phone Number</Label>
                       <Input
                         value={checkPhone}
-                        onChange={(e) => setCheckPhone(e.target.value)}
+                        onChange={(e) => setCheckPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
                         placeholder="e.g. 9876543210"
                         className="bg-black/50 border-white/10 text-white"
                       />
@@ -1215,8 +1234,10 @@ export default function Index() {
                       <Label className="text-xs text-gray-300">Aadhaar Number</Label>
                       <Input
                         value={checkAadhaar}
-                        onChange={(e) => setCheckAadhaar(e.target.value)}
-                        placeholder="e.g. 1234-5678-9012"
+                        onChange={(e) => setCheckAadhaar(e.target.value.replace(/\D/g, "").slice(0, 12))}
+                        inputMode="numeric"
+                        maxLength={12}
+                        placeholder="e.g. 123456789012"
                         className="bg-black/50 border-white/10 text-white font-mono"
                       />
                     </div>
@@ -1268,11 +1289,11 @@ export default function Index() {
                   </div>
                   <div>
                     <Label className="text-xs text-gray-300">Phone Number *</Label>
-                    <Input value={applyPhone} onChange={e => setApplyPhone(e.target.value)} placeholder="10-digit Mobile" className="bg-white/5 border-white/10 text-white" required />
+                    <Input value={applyPhone} onChange={e => setApplyPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit Mobile" className="bg-white/5 border-white/10 text-white" required />
                   </div>
                   <div>
                     <Label className="text-xs text-gray-300">Aadhaar Number *</Label>
-                    <Input value={applyAadhaar} onChange={e => setApplyAadhaar(e.target.value)} placeholder="12-digit Aadhaar" className="bg-white/5 border-white/10 text-white" required />
+                    <Input value={applyAadhaar} onChange={e => setApplyAadhaar(e.target.value.replace(/\D/g, "").slice(0, 12))} inputMode="numeric" maxLength={12} placeholder="12-digit Aadhaar" className="bg-white/5 border-white/10 text-white" required />
                   </div>
                   <div>
                     <Label className="text-xs text-gray-300">Land Size (in Acres)</Label>
@@ -1309,11 +1330,11 @@ export default function Index() {
                   </div>
                   <div>
                     <Label className="text-xs text-gray-300">Phone Number *</Label>
-                    <Input value={regPhone} onChange={e => setRegPhone(e.target.value)} placeholder="10-digit phone" className="bg-white/5 border-white/10 text-white" required />
+                    <Input value={regPhone} onChange={e => setRegPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit phone" className="bg-white/5 border-white/10 text-white" required />
                   </div>
                   <div>
                     <Label className="text-xs text-gray-300">Aadhaar Number *</Label>
-                    <Input value={regAadhaar} onChange={e => setRegAadhaar(e.target.value)} placeholder="12-digit Aadhaar" className="bg-white/5 border-white/10 text-white" required />
+                    <Input value={regAadhaar} onChange={e => setRegAadhaar(e.target.value.replace(/\D/g, "").slice(0, 12))} inputMode="numeric" maxLength={12} placeholder="12-digit Aadhaar" className="bg-white/5 border-white/10 text-white" required />
                   </div>
                 </div>
 
@@ -1359,11 +1380,11 @@ export default function Index() {
                     </div>
                     <div>
                       <Label className="text-xs text-gray-300 mb-1 block">Aadhaar Number</Label>
-                      <Input value={posQueryAadhaar} onChange={e => setPosQueryAadhaar(e.target.value)} placeholder="e.g. 1234-5678-9012" className="bg-black/50 border-white/10 text-white text-xs font-mono" />
+                      <Input value={posQueryAadhaar} onChange={e => setPosQueryAadhaar(e.target.value.replace(/\D/g, "").slice(0, 12))} inputMode="numeric" maxLength={12} placeholder="e.g. 123456789012" className="bg-black/50 border-white/10 text-white text-xs font-mono" />
                     </div>
                     <div>
                       <Label className="text-xs text-gray-300 mb-1 block">Phone Number</Label>
-                      <Input value={posQueryPhone} onChange={e => setPosQueryPhone(e.target.value)} placeholder="e.g. 9876543210" className="bg-black/50 border-white/10 text-white text-xs" />
+                      <Input value={posQueryPhone} onChange={e => setPosQueryPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} type="tel" inputMode="numeric" maxLength={10} placeholder="e.g. 9876543210" className="bg-black/50 border-white/10 text-white text-xs" />
                     </div>
                   </div>
                   <Button type="submit" size="sm" className="bg-primary text-black font-bold">

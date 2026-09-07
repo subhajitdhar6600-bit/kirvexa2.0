@@ -551,8 +551,11 @@ export default function LoginPage() {
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                     <Input 
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
                       value={mobileNumber}
-                      onChange={(e) => setMobileNumber(e.target.value)}
+                      onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
                       placeholder="Enter your 10-digit mobile number" 
                       className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600" 
                       required

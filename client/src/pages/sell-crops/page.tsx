@@ -59,6 +59,10 @@ export default function SellCropsPage() {
       toast.error("Please fill in all required fields.");
       return;
     }
+    if (form.phone.replace(/\D/g, "").length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
     // Open preview step
     setShowPreview(true);
   };
@@ -215,7 +219,7 @@ export default function SellCropsPage() {
                   <Label className="text-gray-300 text-sm mb-1.5 block">{t.sellCrops.phone} *</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                    <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="10-digit number" className="pl-10 bg-white/5 border-white/10 text-white" required />
+                    <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, "").slice(0, 10) }))} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit number" className="pl-10 bg-white/5 border-white/10 text-white" required />
                   </div>
                 </div>
               </div>
