@@ -254,13 +254,13 @@ export default function WalletPage() {
   };
 
   // KCC card number & wallet balances logic
-  const isKccApproved = Boolean(isKccIssued || kccApplicationStatus === "approved" || user?.isKccIssued || user?.kccCardNumber);
+  const isKccApproved = Boolean(isKccIssued || (user && user.kccCardNumber) || (kccDetails && kccDetails.status === "approved" && kccDetails.cardNumber));
   const kccCreditBalance = isKccApproved ? (kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000) : 0;
   const totalIn = walletTransactions.filter((t) => t.type === "credit").reduce((s, t) => s + t.amount, 0);
   const totalOut = walletTransactions.filter((t) => t.type === "debit").reduce((s, t) => s + t.amount, 0);
 
   const kccCardNumber = isKccApproved
-    ? (user?.kccCardNumber || kccDetails?.cardNumber || "KCC-BH-2026-LIVE")
+    ? (user?.kccCardNumber || kccDetails?.cardNumber || "KCC ALLOTTED")
     : null;
   const kccHolderName = kccDetails?.fullName || user?.name || "KRIVEXA KISAN";
   const kccIssueDate = kccDetails?.issueDate || (user?.isKccIssued ? new Date().toISOString().split("T")[0] : null);

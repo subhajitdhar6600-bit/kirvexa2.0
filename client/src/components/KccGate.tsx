@@ -17,47 +17,47 @@ export function KccAlertModal() {
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsKccAlertOpen(false)} />
-      <div className="relative bg-[#141414] border border-amber-500/40 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-amber-500/10 z-10">
-        <button onClick={() => setIsKccAlertOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white cursor-pointer">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsKccAlertOpen(false)} />
+      <div className="relative bg-[#141414] border-2 border-amber-500/60 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-amber-500/20 z-10 animate-in fade-in zoom-in-95 duration-150">
+        <button onClick={() => setIsKccAlertOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white cursor-pointer">
           <X className="h-5 w-5" />
         </button>
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
             <AlertTriangle className="h-6 w-6 text-amber-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">
-              {hasAppliedKcc ? "KCC Application In Review" : t.kccModal.alertTitle}
+            <h3 className="text-lg font-black text-white">
+              {hasAppliedKcc ? "KCC Application In Review" : "KCC Not Applied"}
             </h3>
-            <p className="text-xs text-amber-400 font-medium">
-              {hasAppliedKcc ? "Verification Pending" : t.kccModal.restrictedBadge}
+            <p className="text-xs text-amber-400 font-bold uppercase tracking-wider">
+              {hasAppliedKcc ? "Verification Pending" : "Please Apply to Unlock"}
             </p>
           </div>
         </div>
-        <p className="text-gray-300 text-sm leading-relaxed mb-6">
+        <p className="text-gray-200 text-sm leading-relaxed mb-6">
           {hasAppliedKcc
-            ? "Your KCC Application has been submitted and is currently being reviewed by the Admin. Once approved and allotted with your live card number, all features across the platform will unlock automatically!"
-            : t.kccModal.alertDesc}
+            ? "Your KCC application has been submitted and is currently being reviewed by the Admin. Once approved and allotted with your live card number, all features across the platform will unlock automatically!"
+            : "KCC not applied. Please apply for Kisan Credit Card (KCC) to unlock and use this feature. You can explore this section, but feature usage is restricted until your KCC card is allotted."}
         </p>
         <div className="flex gap-3">
           {!hasAppliedKcc ? (
             <Button
-              className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-bold"
+              className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-extrabold shadow-lg cursor-pointer"
               onClick={() => { setIsKccAlertOpen(false); setIsKccAppModalOpen(true); }}
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              {t.kccModal.applyNow}
+              Apply for KCC to Unlock →
             </Button>
           ) : (
             <Link to="/wallet" className="flex-1" onClick={() => setIsKccAlertOpen(false)}>
-              <Button className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold">
+              <Button className="w-full bg-amber-500 hover:bg-amber-400 text-black font-extrabold shadow-lg cursor-pointer">
                 View Status in Wallet →
               </Button>
             </Link>
           )}
-          <Button variant="ghost" className="border border-white/10 text-gray-300" onClick={() => setIsKccAlertOpen(false)}>
-            {t.kccModal.cancel}
+          <Button variant="ghost" className="border border-white/10 text-gray-300 hover:text-white" onClick={() => setIsKccAlertOpen(false)}>
+            Close
           </Button>
         </div>
       </div>
@@ -66,6 +66,23 @@ export function KccAlertModal() {
 }
 
 const KCC_TIERS = [
+  {
+    id: "standard" as const,
+    name: "Govt Certified KCC (Free)",
+    price: 0,
+    color: "border-emerald-500/60 bg-emerald-500/10",
+    activeColor: "border-emerald-400 bg-emerald-500/20 shadow-emerald-500/20",
+    badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+    icon: Star,
+    iconColor: "text-emerald-400",
+    limit: "₹1,60,000",
+    features: [
+      "Zero application & processing fee",
+      "Credit limit up to ₹1,60,000 collateral-free",
+      "4% Subsidised interest rate under Govt. scheme",
+      "Unlocks 100% platform services upon approval",
+    ],
+  },
   {
     id: "nex" as const,
     name: "Krivexa Nex Card",
@@ -76,7 +93,12 @@ const KCC_TIERS = [
     icon: Star,
     iconColor: "text-blue-400",
     limit: "₹1,00,000",
-    features: ["Annual membership at ₹299 only", "Credit limit up to ₹1,00,000", "Valid at all Krivexa partner stores", "Digital e-Card instantly issued"],
+    features: [
+      "Annual membership at ₹299 only",
+      "Credit limit up to ₹1,00,000",
+      "Valid at all Krivexa partner stores",
+      "Digital e-Card instantly issued upon review",
+    ],
   },
   {
     id: "prime" as const,
@@ -88,7 +110,12 @@ const KCC_TIERS = [
     icon: Crown,
     iconColor: "text-amber-400",
     limit: "₹3,00,000",
-    features: ["Premium membership at ₹999/year", "Credit limit up to ₹3,00,000", "Priority processing & approvals", "Physical gold-plated card issued"],
+    features: [
+      "Premium membership at ₹999/year",
+      "Credit limit up to ₹3,00,000",
+      "Priority processing & approvals",
+      "Physical gold-plated card issued",
+    ],
   },
 ];
 
@@ -112,7 +139,7 @@ export function KccApplicationModal() {
   } = useApp();
 
   const [step, setStep] = useState<Step>("tier");
-  const [selectedTier, setSelectedTier] = useState<"nex" | "prime">("nex");
+  const [selectedTier, setSelectedTier] = useState<"standard" | "nex" | "prime">("standard");
   const [paymentMethod, setPaymentMethod] = useState<"wallet" | "upi">("wallet");
 
   // UPI payment state
@@ -124,7 +151,14 @@ export function KccApplicationModal() {
   const [payLoading, setPayLoading] = useState(false);
 
   // Form state & Preview
-  const [form, setForm] = useState({ fullName: "", phone: "", aadhaar: "", address: "", district: "", landSize: "" });
+  const [form, setForm] = useState({
+    fullName: user?.name || "",
+    phone: user?.phone || "",
+    aadhaar: user?.aadhaarNumber || "",
+    address: [user?.village, user?.district, user?.state].filter(Boolean).join(", ") || "",
+    district: user?.district || "Patna",
+    landSize: user?.landSize || "",
+  });
   const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -313,16 +347,20 @@ export function KccApplicationModal() {
     setShowPreview(true);
   };
 
-  // Confirm Preview -> Proceed to Pay Fee step
+  // Confirm Preview -> If tier is Free Govt KCC, submit directly; otherwise proceed to Pay Fee step
   const handleConfirmPreview = () => {
     setShowPreview(false);
-    setStep("pay");
+    if (tier.price === 0) {
+      completeKccSubmission("Free Government KCC Scheme");
+    } else {
+      setStep("pay");
+    }
   };
 
   const handleClose = () => {
     setIsKccAppModalOpen(false);
     setStep("tier");
-    setSelectedTier("nex");
+    setSelectedTier("standard");
     setPaymentMethod("wallet");
     setUpiId("");
     setUpiEmail("");
@@ -331,16 +369,25 @@ export function KccApplicationModal() {
     setPayCodeSent(false);
     setPayLoading(false);
     setShowPreview(false);
-    setForm({ fullName: "", phone: "", aadhaar: "", address: "", district: "", landSize: "" });
+    setForm({
+      fullName: user?.name || "",
+      phone: user?.phone || "",
+      aadhaar: user?.aadhaarNumber || "",
+      address: [user?.village, user?.district, user?.state].filter(Boolean).join(", ") || "",
+      district: user?.district || "Patna",
+      landSize: user?.landSize || "",
+    });
   };
 
-  const STEP_LABELS = ["Choose Card", "Fill Form", "Pay Fee", "Done"];
-  const STEP_INDEX: Record<Step, number> = { tier: 0, form: 1, pay: 2, done: 3 };
+  const STEP_LABELS = tier.price === 0
+    ? ["Choose Plan", "Fill Form", "Done"]
+    : ["Choose Plan", "Fill Form", "Pay Fee", "Done"];
+  const STEP_INDEX: Record<Step, number> = { tier: 0, form: 1, pay: 2, done: tier.price === 0 ? 2 : 3 };
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={handleClose} />
-      <div className="relative bg-[#141414] border border-primary/30 rounded-2xl max-w-xl w-full shadow-2xl shadow-primary/10 z-10 max-h-[92vh] overflow-y-auto">
+      <div className="relative bg-[#141414] border border-primary/30 rounded-2xl max-w-2xl w-full shadow-2xl shadow-primary/10 z-10 max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-[#141414] border-b border-white/10 p-5 flex items-center justify-between rounded-t-2xl z-10">
           <div className="flex items-center gap-3">
@@ -387,8 +434,8 @@ export function KccApplicationModal() {
           {/* STEP 1: Choose Card Tier */}
           {step === "tier" && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-300">Select your Krivexa Credit Card plan to get started:</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <p className="text-sm text-gray-300">Select your Kisan Credit Card plan to apply and unlock all platform features:</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {KCC_TIERS.map(t => {
                   const Icon = t.icon;
                   const isSelected = selectedTier === t.id;
@@ -396,33 +443,35 @@ export function KccApplicationModal() {
                     <button
                       key={t.id}
                       onClick={() => setSelectedTier(t.id)}
-                      className={`text-left rounded-2xl p-5 border-2 transition-all cursor-pointer shadow-lg ${isSelected ? t.activeColor : t.color} hover:scale-[1.02]`}
+                      className={`text-left rounded-2xl p-4 border-2 transition-all cursor-pointer shadow-lg flex flex-col justify-between ${isSelected ? t.activeColor : t.color} hover:scale-[1.02]`}
                     >
-                      <div className="flex items-center gap-2 mb-3">
-                        <Icon className={`h-5 w-5 ${t.iconColor}`} />
-                        <span className="font-bold text-white text-sm">{t.name}</span>
-                        {isSelected && <Check className="h-4 w-4 text-white ml-auto" />}
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Icon className={`h-4 w-4 ${t.iconColor}`} />
+                          <span className="font-bold text-white text-xs">{t.name}</span>
+                          {isSelected && <Check className="h-3.5 w-3.5 text-primary ml-auto" />}
+                        </div>
+                        <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black border mb-2 ${t.badge}`}>
+                          {t.price === 0 ? "FREE / ₹0" : `₹${t.price}/year`}
+                        </div>
+                        <div className="text-[11px] text-gray-300 font-semibold mb-2">Limit: <span className="text-white font-black">{t.limit}</span></div>
+                        <ul className="space-y-1">
+                          {t.features.map((f, i) => (
+                            <li key={i} className="flex items-start gap-1 text-[10px] text-gray-400 leading-snug">
+                              <Check className="h-2.5 w-2.5 text-primary shrink-0 mt-0.5" /> {f}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black border mb-3 ${t.badge}`}>
-                        ₹{t.price}/year
-                      </div>
-                      <div className="text-xs text-gray-300 font-semibold mb-2">Credit Limit: <span className="text-white font-black">{t.limit}</span></div>
-                      <ul className="space-y-1">
-                        {t.features.map((f, i) => (
-                          <li key={i} className="flex items-start gap-1.5 text-[11px] text-gray-400">
-                            <Check className="h-3 w-3 text-primary shrink-0 mt-0.5" /> {f}
-                          </li>
-                        ))}
-                      </ul>
                     </button>
                   );
                 })}
               </div>
               <Button
                 onClick={() => setStep("form")}
-                className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 cursor-pointer"
+                className="w-full bg-primary text-black font-extrabold py-5 text-base hover:bg-primary/90 cursor-pointer shadow-lg"
               >
-                Continue with {tier.name} – ₹{tier.price} <ArrowRight className="h-5 w-5 ml-2" />
+                Continue with {tier.name} – {tier.price === 0 ? "Free Application" : `₹${tier.price}`} <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </div>
           )}

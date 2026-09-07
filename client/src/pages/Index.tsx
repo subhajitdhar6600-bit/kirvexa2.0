@@ -613,8 +613,14 @@ export default function Index() {
                         <div className="text-[9px] text-gray-400">Govt. Certified Agricultural Credit</div>
                       </div>
                     </div>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">
-                      {isKccIssued ? "Active & Issued" : "Zero Collateral"}
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                      isKccIssued 
+                        ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+                        : hasAppliedKcc
+                        ? "bg-amber-500/20 border-amber-500/30 text-amber-300"
+                        : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                    }`}>
+                      {isKccIssued ? "Active & Issued" : hasAppliedKcc ? "Under Review" : "Not Applied"}
                     </span>
                   </div>
 
@@ -633,21 +639,23 @@ export default function Index() {
                     </div>
 
                     <div className="mb-4">
-                      <div className="text-xs text-gray-400">{isKccIssued ? "Assigned Card Number" : "Pre-Approved Credit Limit"}</div>
+                      <div className="text-xs text-gray-400">{isKccIssued ? "Assigned Card Number" : "KCC Card Allotment"}</div>
                       <div className="text-xl sm:text-2xl font-black text-amber-300 tracking-wide font-mono">
-                        {isKccIssued ? (kccDetails?.cardNumber || "KCC-BH-2026-ACTIVE") : "₹1,60,000"}
-                        {!isKccIssued && <span className="text-xs text-gray-400 font-normal ml-1.5 font-sans">@ 4% Subsidised p.a.</span>}
+                        {isKccIssued ? (kccDetails?.cardNumber || user?.kccCardNumber || "KCC ALLOTTED") : "NOT ALLOTTED"}
+                        {!isKccIssued && <span className="text-xs text-amber-400/80 font-normal ml-2 font-sans">(Apply to unlock)</span>}
                       </div>
                     </div>
 
                     <div className="flex justify-between items-end pt-3 border-t border-amber-500/20 text-[11px]">
                       <div>
                         <div className="text-[9px] text-gray-400 uppercase">Card Holder</div>
-                        <div className="font-semibold text-white">{user?.name || "Verified Indian Farmer"}</div>
+                        <div className="font-semibold text-white">{user?.name || "Farmer / Dealer"}</div>
                       </div>
                       <div className="text-right">
                         <div className="text-[9px] text-gray-400 uppercase">Status</div>
-                        <div className="font-bold text-amber-400">{isKccIssued ? "ACTIVE" : "ELIGIBLE"}</div>
+                        <div className={`font-bold ${isKccIssued ? "text-emerald-400" : "text-amber-400"}`}>
+                          {isKccIssued ? "ACTIVE" : hasAppliedKcc ? "PENDING" : "NOT APPLIED"}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -657,8 +665,10 @@ export default function Index() {
                     <div className="text-xs text-gray-300">
                       {isKccIssued ? (
                         <span className="text-emerald-400 font-semibold">✓ Verified &amp; Active: All Features Unlocked</span>
+                      ) : hasAppliedKcc ? (
+                        <span className="text-amber-300 font-medium">Application under review by Admin</span>
                       ) : (
-                        <><span className="text-white font-semibold">1-Click Application:</span> Instant paperless approval</>
+                        <span className="text-gray-300"><span className="text-amber-300 font-bold">KCC Required:</span> Apply to unlock full platform features</span>
                       )}
                     </div>
                     {isKccIssued ? (
@@ -674,9 +684,9 @@ export default function Index() {
                       <Button
                         size="sm"
                         onClick={() => setIsKccAppModalOpen(true)}
-                        className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs px-4 py-2 rounded-full shadow-md shrink-0 cursor-pointer"
+                        className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs px-4 py-2 rounded-full shadow-md shrink-0 cursor-pointer animate-pulse"
                       >
-                        Apply Now →
+                        {hasAppliedKcc ? "Track Status →" : "Apply for KCC Now →"}
                       </Button>
                     )}
                   </div>
@@ -754,6 +764,32 @@ export default function Index() {
             </h2>
             <p className="text-gray-400 text-sm">{t.services.subtitle}</p>
           </div>
+
+          {/* KCC Status Alert Banner in Our Services */}
+          {!isKccIssued && (
+            <div className="mb-8 bg-linear-to-r from-amber-950/60 via-amber-900/30 to-black border-2 border-amber-500/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+                  <CreditCard className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-amber-300 uppercase tracking-wider mb-0.5">
+                    KCC Card Required to Unlock
+                  </div>
+                  <p className="text-xs text-gray-300">
+                    You can explore all services below, but applying for KCC is required to use buying, selling, and booking features.
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => setIsKccAppModalOpen(true)}
+                className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs px-5 py-2.5 rounded-xl shrink-0 cursor-pointer shadow-md border border-amber-300"
+              >
+                Apply for KCC to Unlock →
+              </Button>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {SERVICES.map((s, i) => (

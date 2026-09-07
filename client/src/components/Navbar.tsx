@@ -176,6 +176,18 @@ export default function Navbar() {
               )}
             </div>
 
+            {/* Prominent Apply for KCC Button (Shown only when user has NO active card number) */}
+            {!isKccIssued && (
+              <Button
+                size="sm"
+                onClick={() => setIsKccAppModalOpen(true)}
+                className="bg-linear-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-black font-extrabold text-xs h-8.5 px-3.5 rounded-xl border border-amber-300 shadow-md shadow-amber-500/20 cursor-pointer flex items-center gap-1.5 animate-pulse"
+              >
+                <CreditCard className="h-4 w-4 text-black" />
+                <span>Apply for KCC</span>
+              </Button>
+            )}
+
             {/* LOGGED IN VIEW vs GUEST VIEW */}
             {user ? (
               <div className="flex items-center gap-3 pl-2 border-l border-white/10">
@@ -420,6 +432,18 @@ export default function Navbar() {
           {/* Mobile Right Controls: Cart + Notification Bell (beside 3 dots) + 3-Dots Menu */}
           <div className="flex lg:hidden items-center gap-2">
             
+            {/* Mobile Apply KCC Button (Shown only when NO active KCC) */}
+            {!isKccIssued && (
+              <Button
+                size="sm"
+                onClick={() => setIsKccAppModalOpen(true)}
+                className="bg-linear-to-r from-amber-500 to-amber-400 text-black font-extrabold text-[11px] h-8 px-2.5 rounded-xl border border-amber-300 shadow-sm cursor-pointer flex items-center gap-1 shrink-0"
+              >
+                <CreditCard className="h-3.5 w-3.5" />
+                <span>Apply KCC</span>
+              </Button>
+            )}
+
             {/* Functional Cart Icon */}
             <Link
               to="/cart"
@@ -596,6 +620,26 @@ export default function Navbar() {
                   </div>
                   <ChevronRight className="h-5 w-5 text-primary" />
                 </Link>
+              </div>
+            )}
+
+            {/* Mobile Menu Apply for KCC Banner (Shown only when NO active KCC) */}
+            {!isKccIssued && (
+              <div className="mb-3">
+                <button
+                  type="button"
+                  onClick={() => { setMenuOpen(false); setIsKccAppModalOpen(true); }}
+                  className="w-full flex items-center gap-3 p-3 bg-linear-to-r from-amber-500/20 via-amber-500/10 to-transparent border-2 border-amber-500/50 rounded-2xl text-left cursor-pointer hover:border-amber-400 transition-all"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+                    <CreditCard className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-black text-amber-300">Apply for Kisan Credit Card</div>
+                    <div className="text-xs text-gray-300">Unlock 100% farming services & credit limit</div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-amber-400" />
+                </button>
               </div>
             )}
 

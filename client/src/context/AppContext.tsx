@@ -72,7 +72,7 @@ export interface KccApplication {
   status: "pending" | "approved" | "rejected";
   cardNumber?: string;
   issueDate?: string;
-  cardTier?: "nex" | "prime";
+  cardTier?: "standard" | "nex" | "prime";
   paymentStatus?: "pending" | "paid";
   paymentAmount?: number;
   creditLimit?: number;
@@ -437,9 +437,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // KCC State — hydrate from localStorage / DB
-  const [isKccIssuedState, setIsKccIssuedState] = useState<boolean>(() => {
-    return localStorage.getItem("krivexa_kcc_issued") === "true";
-  });
+  const [isKccIssuedState, setIsKccIssuedState] = useState<boolean>(false);
   const [kccApplications, setKccApplications] = useState<KccApplication[]>(() => {
     return safeJsonParse("krivexa_kcc_apps", []);
   });
@@ -1156,26 +1154,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         (profileData.name && a.fullName && a.fullName.trim().toLowerCase() === profileData.name.trim().toLowerCase())
     );
 
-    const isApprovedFromAcc = Boolean(existingAcc?.isKccIssued || existingAcc?.kccCardNumber);
-    const kccCardNumFromAcc = existingAcc?.kccCardNumber;
-    const kccLimitFromAcc = existingAcc?.kccCreditLimit;
+    const isApprovedFromAcc = Boolean(existingAcc?.isKccIssued && existingAcc?.kccCardNumber);
+    const kccCardNumFromAcc = isApprovedFromAcc ? existingAcc?.kccCardNumber : undefined;
+    const kccLimitFromAcc = isApprovedFromAcc ? existingAcc?.kccCreditLimit : undefined;
 
     const newUser: UserProfile = {
       ...profileData,
       id: `usr-${Date.now()}`,
-      isKccIssued: isApprovedFromAcc || profileData.isKccIssued || false,
-      kccCardNumber: kccCardNumFromAcc || profileData.kccCardNumber,
-      kccCreditLimit: kccLimitFromAcc || profileData.kccCreditLimit || 50000,
+      isKccIssued: isApprovedFromAcc,
+      kccCardNumber: kccCardNumFromAcc,
+      kccCreditLimit: kccLimitFromAcc || 50000,
       createdAt: new Date().toISOString(),
     };
 
-    if (newUser.isKccIssued && newUser.kccCardNumber) {
-      setIsKccIssuedState(true);
-      localStorage.setItem("krivexa_kcc_issued", "true");
-    } else {
-      setIsKccIssuedState(false);
-      localStorage.removeItem("krivexa_kcc_issued");
-    }
+    setIsKccIssuedState(isApprovedFromAcc);
 
     setUser(newUser);
     api.saveUser(newUser);
@@ -1315,13 +1307,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }) || null
     : null;
 
-  // isKccIssued: true if admin OR if logged-in user has KCC approved / card assigned
+  // isKccIssued: true if admin OR if logged-in user has KCC approved with an actual allotted card number
   const isKccIssued = Boolean(
     isAdminLoggedIn ||
     (user !== null && (
-      Boolean(user.isKccIssued) ||
       Boolean(user.kccCardNumber) ||
-      isKccIssuedState ||
+      (Boolean(user.isKccIssued) && Boolean(user.kccCardNumber)) ||
       (currentUserKccApp?.status === "approved" && Boolean(currentUserKccApp?.cardNumber))
     ))
   );
@@ -1345,12 +1336,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const kccDetails: KccApplication | null = currentUserKccApp
     ? {
         ...currentUserKccApp,
-        cardNumber: currentUserKccApp.cardNumber || user?.kccCardNumber || (isKccIssued ? "KCC-BH-2026-ACTIVE" : undefined),
+        cardNumber: currentUserKccApp.cardNumber || user?.kccCardNumber,
         creditLimit: currentUserKccApp.creditLimit || currentUserKccApp.paymentAmount || user?.kccCreditLimit || 50000,
         paymentAmount: currentUserKccApp.creditLimit || currentUserKccApp.paymentAmount || user?.kccCreditLimit || 50000,
-        status: isKccIssued ? "approved" : currentUserKccApp.status,
+        status: (isKccIssued || currentUserKccApp.status === "approved") ? "approved" : currentUserKccApp.status,
       }
-    : (user && (user.kccCardNumber || isKccIssued))
+    : (user && user.kccCardNumber)
     ? {
         id: `kcc-${user.id || Date.now()}`,
         fullName: user.name,
@@ -1360,7 +1351,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         district: user.district || "Patna",
         landSize: user.landSize || "2.5 Acres",
         status: "approved",
-        cardNumber: user.kccCardNumber || "KCC-BH-2026-ACTIVE",
+        cardNumber: user.kccCardNumber,
         creditLimit: user.kccCreditLimit || 50000,
         paymentAmount: user.kccCreditLimit || 50000,
         issueDate: new Date().toISOString().split("T")[0],
@@ -1372,11 +1363,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 1. Admin always has full access
     if (isAdminLoggedIn) return true;
 
-    // 2. Dealer role can access Customer Services & Add New Product/Service for FREE without KCC
+    // 2. Dealer role can access Customer Services & Product/Service Listings for FREE without KCC
     if (user?.role === "dealer" && (
       actionName === "dealer-tools" || 
       actionName === "customer-services" || 
-      actionName === "add-listing"
+      actionName === "add-listing" ||
+      actionName === "product-listing" ||
+      actionName === "manage-listings"
     )) {
       return true;
     }
@@ -1395,7 +1388,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 5. If application is currently pending admin review
     if (hasAppliedKcc && kccApplicationStatus === "pending") {
-      toast.info("Your KCC Application is under Admin review. All features will be unlocked once approved!");
+      toast.info("Your KCC Application is under Admin review. All features will be unlocked once your card is allotted!");
       setIsKccAlertOpen(true);
       return false;
     }

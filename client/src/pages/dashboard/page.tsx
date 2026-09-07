@@ -612,6 +612,18 @@ export default function DashboardPage() {
           })}
         </nav>
 
+        {/* Quick Apply for KCC in Sidebar (Shown only when NO active card) */}
+        {!isKccIssued && (
+          <div className="p-3 border-t border-white/10">
+            <button
+              onClick={() => { setSidebarOpen(false); setIsKccAppModalOpen(true); }}
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-linear-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-black rounded-xl text-xs font-extrabold shadow-md shadow-amber-500/20 transition-all cursor-pointer animate-pulse border border-amber-300"
+            >
+              <CreditCard className="h-4 w-4 text-black" /> Apply for KCC Now →
+            </button>
+          </div>
+        )}
+
         {/* Footer Actions in Sidebar */}
         <div className="p-3 border-t border-white/10 space-y-2">
           <Link

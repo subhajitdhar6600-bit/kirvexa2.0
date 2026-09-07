@@ -107,6 +107,12 @@ router.get('/search', async (req, res) => {
       return matchPhone || matchAadhaar || matchCard;
     });
 
+    res.json(matched || null);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // PUT update KCC limit for an application and user
 router.put('/update-limit', async (req, res) => {
   try {

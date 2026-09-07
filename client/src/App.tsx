@@ -37,12 +37,11 @@ import AuthGate from "./components/AuthGate.tsx";
 function AppInner() {
   useServiceWorker();
   return (
-    <>
+    <BrowserRouter>
+      <ScrollToTop />
       <KccAlertModal />
       <KccApplicationModal />
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
+      <Routes>
           {/* Public Auth Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -68,6 +67,7 @@ function AppInner() {
 
           {/* Protected Platform Routes (Requires Login / Account) */}
           <Route path="/dashboard" element={<AuthGate><DashboardPage /></AuthGate>} />
+          <Route path="/dealer-dashboard" element={<AuthGate><DashboardPage /></AuthGate>} />
           <Route path="/profile" element={<AuthGate><ProfilePage /></AuthGate>} />
           <Route path="/cart" element={<AuthGate><CartPage /></AuthGate>} />
           <Route path="/wallet" element={<AuthGate><WalletPage /></AuthGate>} />
@@ -80,7 +80,6 @@ function AppInner() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-    </>
   );
 }
 

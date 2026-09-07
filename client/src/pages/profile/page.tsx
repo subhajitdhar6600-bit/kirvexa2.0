@@ -216,7 +216,7 @@ export default function ProfilePage() {
         </div>
 
         {/* KCC Digital Card on Profile (Visible when approved) */}
-        {isKccApproved && (
+        {isKccApproved ? (
           <div className="bg-linear-to-br from-[#1a1508] via-[#120f02] to-[#0a0a0a] border-2 border-amber-500/60 rounded-2xl p-5 mb-6 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="flex items-center justify-between mb-3">
@@ -226,7 +226,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <div className="text-[10px] text-amber-400 font-black uppercase tracking-wider">Krivexa Kisan Credit Card</div>
-                  <div className="text-xs text-white font-bold">Allotted & Verified by Admin</div>
+                  <div className="text-xs text-white font-bold">Allotted &amp; Verified by Admin</div>
                 </div>
               </div>
               <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px] font-black">
@@ -236,7 +236,7 @@ export default function ProfilePage() {
             <div className="my-3 bg-black/60 rounded-xl p-3 border border-white/10">
               <div className="text-[10px] text-gray-400 font-medium">Allotted KCC Card Number</div>
               <div className="text-xl font-mono font-black text-amber-300 tracking-wider">
-                {user?.kccCardNumber || kccDetails?.cardNumber || "KCC-BH-2026-ACTIVE"}
+                {user?.kccCardNumber || kccDetails?.cardNumber || "KCC ALLOTTED"}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-white/10">
@@ -256,6 +256,44 @@ export default function ProfilePage() {
               <Link to="/wallet" className="text-primary hover:underline font-bold">
                 View in Wallet →
               </Link>
+            </div>
+          </div>
+        ) : (
+          /* KCC Application Section (Shown when user does NOT have an approved KCC) */
+          <div className="bg-linear-to-r from-amber-950/70 via-amber-900/30 to-[#0a0a0a] border-2 border-amber-500/50 rounded-2xl p-6 mb-6 shadow-2xl relative overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+                  <CreditCard className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 mb-1">
+                    {hasAppliedKcc ? "Verification Pending" : "Feature Usage Restricted"}
+                  </div>
+                  <h3 className="text-lg font-black text-white">
+                    {hasAppliedKcc ? "KCC Application Under Admin Review" : "Kisan Credit Card (KCC) Not Applied"}
+                  </h3>
+                  <p className="text-xs text-gray-300 max-w-xl mt-1 leading-relaxed">
+                    {hasAppliedKcc
+                      ? "Your KCC application has been submitted and is currently being verified by the Admin. Once approved with your allotted card number, all platform features will unlock automatically."
+                      : user?.role === "dealer"
+                      ? "Your dealer account is active. Customer Services & Product Listings are accessible. Apply for KCC to unlock all personal agricultural services and credit limit."
+                      : "You can explore the website, but direct crop selling, machinery booking, labour booking, and purchasing inputs are locked. Apply for KCC now to unlock all features."}
+                  </p>
+                </div>
+              </div>
+              {!hasAppliedKcc ? (
+                <Button
+                  onClick={() => setIsKccAppModalOpen(true)}
+                  className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs py-3 px-6 rounded-xl shrink-0 cursor-pointer shadow-lg animate-pulse border border-amber-300"
+                >
+                  <CreditCard className="h-4 w-4 mr-2 text-black" /> Apply for KCC Now →
+                </Button>
+              ) : (
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold shrink-0">
+                  <Clock className="h-4 w-4 animate-spin" /> Pending Allotment
+                </div>
+              )}
             </div>
           </div>
         )}
