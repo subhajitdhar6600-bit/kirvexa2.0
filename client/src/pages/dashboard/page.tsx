@@ -776,7 +776,7 @@ export default function DashboardPage() {
                     ✓ KCC Card Active · All Platform Features Unlocked
                   </div>
                   <div className="text-xs text-gray-300">
-                    Allotted Card Number: <span className="text-emerald-400 font-mono font-bold">{user?.kccCardNumber || kccDetails?.cardNumber || "KCC-APPROVED"}</span> | Limit: <span className="text-white font-bold">₹{(kccDetails?.paymentAmount || 150000).toLocaleString("en-IN")}</span>
+                    Allotted Card Number: <span className="text-emerald-400 font-mono font-bold">{user?.kccCardNumber || kccDetails?.cardNumber || "KCC-APPROVED"}</span> | Limit: <span className="text-white font-bold">₹{(kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000).toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               </div>

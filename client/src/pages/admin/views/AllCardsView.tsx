@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { api } from "@/services/api";
+import { useApp } from "@/context/AppContext.tsx";
 
 interface CardItem {
   id: string;
@@ -32,6 +33,7 @@ const CARD_BADGES = {
 };
 
 export default function AllCardsView() {
+  const { kccApplications } = useApp();
   const [cards, setCards] = useState<CardItem[]>([]);
   const [selectedCard, setSelectedCard] = useState<CardItem | null>(null);
   const [search, setSearch] = useState("");
@@ -51,32 +53,43 @@ export default function AllCardsView() {
   const [issueForm, setIssueForm] = useState({
     userId: "",
     cardType: "Kisan Card Basic" as "Kisan Card Basic" | "Kisan Card Premium" | "Kisan Card Gold",
-    creditLimit: 25000,
+    creditLimit: 50000,
   });
 
   const loadCards = async () => {
     try {
       setLoading(true);
-      const users = await api.getUsers();
+      const [users, dbApps] = await Promise.all([
+        api.getUsers().catch(() => []),
+        api.getKccApplications().catch(() => [])
+      ]);
+      const allApps = (Array.isArray(dbApps) && dbApps.length > 0 ? dbApps : kccApplications) || [];
       if (Array.isArray(users)) {
         setRawUsers(users);
         const mappedCards: CardItem[] = users.map((u: any, idx: number) => {
           const name = u.fullName || u.name || "Farmer User";
           const phone = u.phone || "—";
-          const last4 = phone.replace(/\D/g, "").slice(-4) || `${1000 + idx}`;
+          const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+          const last4 = cleanPhone.slice(-4) || `${1000 + idx}`;
           const isVerified = u.isVerified === true || u.verificationStatus === "Verified";
           const role = (u.role || "").toLowerCase();
           const cardType = role === "dealer" ? "Kisan Card Gold" : role === "service_provider" ? "Kisan Card Premium" : "Kisan Card Basic";
-          const creditLimit = role === "dealer" ? 50000 : role === "service_provider" ? 35000 : 25000;
+
+          const matchingKcc = allApps.find((k: any) => {
+            const kPhone = (k.phone || "").replace(/\D/g, "").slice(-10);
+            return (cleanPhone && kPhone && cleanPhone === kPhone) || (k.fullName && name && k.fullName.trim().toLowerCase() === name.trim().toLowerCase());
+          });
+
+          const cardNumber = u.kccCardNumber || matchingKcc?.cardNumber || `KCC-BH-2026-${last4}`;
+          const creditLimit = u.kccCreditLimit || matchingKcc?.creditLimit || matchingKcc?.paymentAmount || (role === "dealer" ? 100000 : 50000);
           const availableLimit = isVerified ? Math.round(creditLimit * 0.75) : 0;
           const status = (u.status === "inactive" || u.isActive === false) ? "Inactive" : "Active";
 
-          const mid4 = `${String(Math.floor(1000 + (phone.charCodeAt(3) || idx) * 97) % 9000 + 1000)}`;
           return {
             id: u.id || u._id || `c_${idx}`,
             name,
             phone,
-            cardNumber: u.kccCardNumber || `KVX 1256 ${mid4} ${last4}`,
+            cardNumber,
             cardType,
             creditLimit,
             availableLimit,
@@ -158,10 +171,10 @@ export default function AllCardsView() {
       id: `card_${Date.now()}`,
       name: targetUser.fullName || targetUser.name || "User",
       phone: targetUser.phone || "—",
-      cardNumber: `KVX 1256 ${targetUser.phone ? String(Math.floor(4000 + Math.random() * 5000)) : "8941"} ${targetUser.phone ? targetUser.phone.slice(-4) : "8899"}`,
+      cardNumber: targetUser.kccCardNumber || `KCC-BH-2026-${targetUser.phone ? targetUser.phone.replace(/\D/g, "").slice(-4) : "8899"}`,
       cardType: issueForm.cardType,
-      creditLimit: Number(issueForm.creditLimit) || 25000,
-      availableLimit: Number(issueForm.creditLimit) || 25000,
+      creditLimit: Number(issueForm.creditLimit) || 50000,
+      availableLimit: Number(issueForm.creditLimit) || 50000,
       status: "Active",
       issuedOn: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
       validThru: "31 Dec 2030",

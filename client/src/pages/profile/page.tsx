@@ -246,7 +246,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-right">
                 <span className="text-gray-400 text-[11px]">Credit Limit: </span>
-                <span className="font-bold text-emerald-400">₹{(kccDetails?.paymentAmount || 150000).toLocaleString("en-IN")}</span>
+                <span className="font-bold text-emerald-400">₹{(kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000).toLocaleString("en-IN")}</span>
               </div>
             </div>
             <div className="mt-3 flex items-center justify-between pt-2 border-t border-white/10 text-[11px]">

@@ -75,6 +75,7 @@ export interface KccApplication {
   cardTier?: "nex" | "prime";
   paymentStatus?: "pending" | "paid";
   paymentAmount?: number;
+  creditLimit?: number;
   createdAt: string;
 }
 
@@ -104,6 +105,7 @@ export interface UserProfile {
   isKccIssued?: boolean;
   isVerified?: boolean;
   kccCardNumber?: string;
+  kccCreditLimit?: number;
   createdAt: string;
 }
 
@@ -123,6 +125,7 @@ export interface RegisteredAccount {
   isKccIssued?: boolean;
   isVerified?: boolean;
   kccCardNumber?: string;
+  kccCreditLimit?: number;
   createdAt: string;
 }
 
@@ -567,8 +570,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const approveKccApplication = (id: string, customCardNumber?: string, customLimit?: number) => {
     const targetApp = kccApplications.find((a) => a.id === id);
-    const cardNumber = customCardNumber?.trim() || `KCC-BH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    const limit = customLimit || targetApp?.paymentAmount || 50000;
+    const cleanT = (targetApp?.phone || "").replace(/\D/g, "").slice(-10);
+    const matchesApplicant = (p?: string, n?: string) => {
+      if (!targetApp) return false;
+      const cleanP = (p || "").replace(/\D/g, "").slice(-10);
+      if (cleanT && cleanP && cleanT === cleanP) return true;
+      if (n && targetApp.fullName && n.trim().toLowerCase() === targetApp.fullName.trim().toLowerCase()) return true;
+      return false;
+    };
+
+    const existingNum = targetApp?.cardNumber || (user && matchesApplicant(user.phone, user.name) ? user.kccCardNumber : undefined);
+    const cleanPhoneDigits = (targetApp?.phone || "").replace(/\D/g, "").slice(-4);
+    const cardNumber = customCardNumber?.trim() || existingNum || `KCC-BH-2026-${cleanPhoneDigits || Math.floor(1000 + Math.random() * 9000)}`;
+    const limit = customLimit || targetApp?.creditLimit || targetApp?.paymentAmount || 50000;
 
     const updatedApps = kccApplications.map((app) => {
       if (app.id === id) {
@@ -576,6 +590,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...app,
           status: "approved" as const,
           cardNumber,
+          creditLimit: limit,
           paymentAmount: limit,
           issueDate: new Date().toISOString().split("T")[0],
         };
@@ -585,16 +600,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setKccApplications(updatedApps);
     localStorage.setItem("krivexa_kcc_apps", JSON.stringify(updatedApps));
 
-    api.approveKccApplication(id, cardNumber);
-
-    const cleanT = (targetApp?.phone || "").replace(/\D/g, "").slice(-10);
-    const matchesApplicant = (p?: string, n?: string) => {
-      if (!targetApp) return false;
-      const cleanP = (p || "").replace(/\D/g, "").slice(-10);
-      if (cleanT && cleanP && cleanT === cleanP) return true;
-      if (n && targetApp.fullName && n.trim().toLowerCase() === targetApp.fullName.trim().toLowerCase()) return true;
-      return false;
-    };
+    api.approveKccApplication(id, cardNumber, limit);
 
     // If matches currently logged-in user, unlock KCC immediately
     if (user && matchesApplicant(user.phone, user.name)) {
@@ -605,6 +611,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isKccIssued: true,
         isVerified: true,
         kccCardNumber: cardNumber,
+        kccCreditLimit: limit,
       };
       setUser(updatedUser);
       localStorage.setItem("krivexa_user_profile", JSON.stringify(updatedUser));
@@ -614,7 +621,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRegisteredAccounts((prev) => {
       const updated = prev.map((acc) => {
         if (matchesApplicant(acc.phone, acc.fullName)) {
-          return { ...acc, isKccIssued: true, isVerified: true, kccCardNumber: cardNumber };
+          return { ...acc, isKccIssued: true, isVerified: true, kccCardNumber: cardNumber, kccCreditLimit: limit };
         }
         return acc;
       });
@@ -626,7 +633,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRegisteredFarmers((prev) =>
       prev.map((f) => {
         if (matchesApplicant(f.phone, f.name)) {
-          return { ...f, isKccIssued: true, cardNumber };
+          return { ...f, isKccIssued: true, cardNumber, creditLimit: limit };
         }
         return f;
       })
@@ -1005,12 +1012,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const isApprovedFromAcc = Boolean(existingAcc?.isKccIssued || existingAcc?.kccCardNumber);
     const kccCardNumFromAcc = existingAcc?.kccCardNumber;
+    const kccLimitFromAcc = existingAcc?.kccCreditLimit;
 
     const newUser: UserProfile = {
       ...profileData,
       id: `usr-${Date.now()}`,
       isKccIssued: isApprovedFromAcc || profileData.isKccIssued || false,
       kccCardNumber: kccCardNumFromAcc || profileData.kccCardNumber,
+      kccCreditLimit: kccLimitFromAcc || profileData.kccCreditLimit || 50000,
       createdAt: new Date().toISOString(),
     };
 
@@ -1047,6 +1056,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 isKccIssued: true,
                 isVerified: true,
                 kccCardNumber: approvedApp.cardNumber,
+                kccCreditLimit: approvedApp.creditLimit || approvedApp.paymentAmount || u.kccCreditLimit || 50000,
               };
               localStorage.setItem("krivexa_user_profile", JSON.stringify(updated));
               return updated;
@@ -1190,6 +1200,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ? {
         ...currentUserKccApp,
         cardNumber: currentUserKccApp.cardNumber || user?.kccCardNumber || (isKccIssued ? "KCC-BH-2026-ACTIVE" : undefined),
+        creditLimit: currentUserKccApp.creditLimit || currentUserKccApp.paymentAmount || user?.kccCreditLimit || 50000,
+        paymentAmount: currentUserKccApp.creditLimit || currentUserKccApp.paymentAmount || user?.kccCreditLimit || 50000,
         status: isKccIssued ? "approved" : currentUserKccApp.status,
       }
     : (user && (user.kccCardNumber || isKccIssued))
@@ -1203,7 +1215,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         landSize: user.landSize || "2.5 Acres",
         status: "approved",
         cardNumber: user.kccCardNumber || "KCC-BH-2026-ACTIVE",
-        paymentAmount: 150000,
+        creditLimit: user.kccCreditLimit || 50000,
+        paymentAmount: user.kccCreditLimit || 50000,
         issueDate: new Date().toISOString().split("T")[0],
         createdAt: new Date().toISOString(),
       }
@@ -1275,7 +1288,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Check in kccApplications list if verified
     const matchedApp = kccApplications.find(a => a.cardNumber === cleaned && a.status === "approved");
     if (matchedApp) {
-      return { exists: true, cardHolder: matchedApp.fullName, balance: 20000, status: "active" };
+      return { exists: true, cardHolder: matchedApp.fullName, balance: matchedApp.creditLimit || matchedApp.paymentAmount || 50000, status: "active" };
     }
     return { exists: false };
   };
@@ -1526,10 +1539,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const cardInfo = checkFarmerCardBalance(cardLookupKey);
 
     if (matchedApp || matchedRegistered || cardInfo?.exists) {
+      const activeLimit = matchedApp?.creditLimit || matchedApp?.paymentAmount || 50000;
       return {
         exists: true,
         kccApp: matchedApp,
-        cardInfo: cardInfo?.exists ? cardInfo : { exists: true, cardHolder: matchedApp?.fullName || matchedRegistered?.name || "Farmer Account", balance: 25000, status: "active" },
+        cardInfo: cardInfo?.exists ? cardInfo : { exists: true, cardHolder: matchedApp?.fullName || matchedRegistered?.name || "Farmer Account", balance: activeLimit, status: "active" },
         profile: {
           name: matchedApp?.fullName || matchedRegistered?.name || user?.name || "Kishan Farmer",
           phone: matchedApp?.phone || matchedRegistered?.phone || user?.phone || cleanPhone || "9876543210",

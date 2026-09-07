@@ -31,7 +31,8 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
     email: k.email || "—",
     address: [k.address, k.district].filter(Boolean).join(", ") || "Bihar",
     cardType: k.cardTier === "nex" ? "Kisan Card Gold" : "Kisan Card Basic",
-    creditRequested: k.paymentAmount || 25000,
+    cardNumber: k.cardNumber || k.kccCardNumber,
+    creditRequested: k.creditLimit || k.paymentAmount || 50000,
     status: (k.status?.toLowerCase() === "approved" ? "Approved" : k.status?.toLowerCase() === "rejected" ? "Rejected" : "Pending") as "Pending" | "Approved" | "Rejected",
     appliedOn: k.createdAt ? new Date(k.createdAt).toLocaleDateString("en-IN") : "Today",
     idProof: k.aadhaar ? "Aadhaar Card" : "Government ID",
@@ -63,8 +64,9 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
 
   const openAllotModal = (req: any) => {
     setAllottingRequest(req);
+    const existingCard = req.cardNumber || rawList.find((k: any) => k.id === req.id)?.cardNumber;
     const cleanPhone = (req.phone || "9876").replace(/\D/g, "").slice(-4);
-    setAllottedCardNumber(`KVX 1256 8942 ${cleanPhone}`);
+    setAllottedCardNumber(existingCard || `KCC-BH-2026-${cleanPhone}`);
     setAllottedCreditLimit(req.creditRequested || 50000);
     setIsVerifyingUser(true);
     setAllotModalOpen(true);
@@ -446,18 +448,18 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
 
             <form onSubmit={handleConfirmAllotment} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Allot KCC Card Number (16-Digit) *</label>
+                <label className="block font-semibold text-gray-700 mb-1">Allot KCC Card Number *</label>
                 <div className="relative">
                   <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-600" />
                   <Input
                     value={allottedCardNumber}
                     onChange={e => setAllottedCardNumber(e.target.value)}
-                    placeholder="e.g. KVX 1256 8942 9876"
+                    placeholder="e.g. KCC-BH-2026-9876"
                     className="pl-9 h-9 text-xs font-mono font-bold text-emerald-900 rounded-xl"
                     required
                   />
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1">Format: KVX 1256 XXXX XXXX (Unmasked across platform)</p>
+                <p className="text-[10px] text-gray-400 mt-1">Format: KCC-BH-2026-XXXX (Synchronized across User Wallet & Admin)</p>
               </div>
 
               <div>

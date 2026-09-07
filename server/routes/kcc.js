@@ -32,11 +32,12 @@ router.post('/', async (req, res) => {
 // PUT approve KCC application
 router.put('/:id/approve', async (req, res) => {
   try {
+    const creditLimit = Number(req.body.creditLimit || req.body.paymentAmount) || 50000;
     const cardNumber = req.body.cardNumber || `KCC-BH-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const issueDate = new Date().toISOString().split('T')[0];
     const updated = await KccApplication.findOneAndUpdate(
       { id: req.params.id },
-      { status: 'approved', cardNumber, issueDate },
+      { status: 'approved', cardNumber, issueDate, creditLimit, paymentAmount: creditLimit },
       { new: true }
     );
 
@@ -46,7 +47,7 @@ router.put('/:id/approve', async (req, res) => {
       if (cleanPhone) {
         await User.updateMany(
           { phone: { $regex: cleanPhone } },
-          { isKccIssued: true, isVerified: true, kccCardNumber: cardNumber }
+          { isKccIssued: true, isVerified: true, kccCardNumber: cardNumber, kccCreditLimit: creditLimit, kccStatus: 'APPROVED' }
         );
       }
 
@@ -56,7 +57,7 @@ router.put('/:id/approve', async (req, res) => {
           id: `notif-${Date.now()}`,
           userId: updated.phone || 'broadcast',
           title: 'KCC Card Approved & Allotted 💳',
-          message: `Congratulations ${updated.fullName}! Your Kisan Credit Card (KCC) has been approved. Allotted Card Number: ${cardNumber}. All platform features are now unlocked!`,
+          message: `Congratulations ${updated.fullName}! Your Kisan Credit Card (KCC) has been approved. Allotted Card Number: ${cardNumber} with Credit Limit ₹${creditLimit.toLocaleString('en-IN')}. All platform features are now unlocked!`,
           type: 'success',
           link: '/wallet',
           category: 'kcc',

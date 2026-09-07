@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { api } from "@/services/api";
+import { useApp } from "@/context/AppContext.tsx";
 
 interface CardItem {
   id: string;
@@ -27,6 +28,7 @@ interface CardItem {
 }
 
 export default function KrivexaCardsManagementView() {
+  const { kccApplications } = useApp();
   const [cards, setCards] = useState<CardItem[]>([]);
   const [selectedCard, setSelectedCard] = useState<CardItem | null>(null);
   const [search, setSearch] = useState("");
@@ -39,15 +41,27 @@ export default function KrivexaCardsManagementView() {
 
   useEffect(() => {
     let mounted = true;
-    api.getUsers().then((users: any[] | null) => {
+    Promise.all([
+      api.getUsers().catch(() => []),
+      api.getKccApplications().catch(() => [])
+    ]).then(([users, dbApps]) => {
       if (!mounted || !users || !Array.isArray(users)) return;
+      const allApps = (Array.isArray(dbApps) && dbApps.length > 0 ? dbApps : kccApplications) || [];
       const mapped: CardItem[] = users.map((u, idx) => {
         const name = u.fullName || u.name || "Farmer";
         const phone = u.phone || "—";
-        const last4 = phone.replace(/\D/g, "").slice(-4) || `${1000 + idx}`;
+        const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+        const last4 = cleanPhone.slice(-4) || `${1000 + idx}`;
         const role = (u.role || "").toLowerCase();
         const cardType: "Basic" | "Premium" | "Gold" = role === "dealer" ? "Gold" : role === "service_provider" ? "Premium" : "Basic";
-        const creditLimit = role === "dealer" ? 50000 : role === "service_provider" ? 35000 : 25000;
+
+        const matchingKcc = allApps.find((k: any) => {
+          const kPhone = (k.phone || "").replace(/\D/g, "").slice(-10);
+          return (cleanPhone && kPhone && cleanPhone === kPhone) || (k.fullName && name && k.fullName.trim().toLowerCase() === name.trim().toLowerCase());
+        });
+
+        const cardNumber = u.kccCardNumber || matchingKcc?.cardNumber || `KCC-BH-2026-${last4}`;
+        const creditLimit = u.kccCreditLimit || matchingKcc?.creditLimit || matchingKcc?.paymentAmount || (role === "dealer" ? 100000 : 50000);
         const availableLimit = u.isVerified ? Math.round(creditLimit * 0.8) : 0;
         const status: "Active" | "Inactive" | "Blocked" = (u.status === "inactive" || u.isActive === false) ? "Inactive" : "Active";
 
@@ -56,7 +70,7 @@ export default function KrivexaCardsManagementView() {
           name,
           phone,
           district: u.district || "Patna",
-          cardNumber: `KVX 1256 **** ${last4}`,
+          cardNumber,
           cardType,
           creditLimit,
           availableLimit,

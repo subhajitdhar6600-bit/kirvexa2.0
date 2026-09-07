@@ -14,7 +14,8 @@ const kccApplicationSchema = new mongoose.Schema(
     issueDate: { type: String, default: '' },
     cardTier: { type: String, default: 'prime' },
     paymentStatus: { type: String, default: 'pending' },
-    paymentAmount: { type: Number, default: 0 },
+    paymentAmount: { type: Number, default: 50000 },
+    creditLimit: { type: Number, default: 50000 },
     createdAt: { type: String, default: () => new Date().toISOString() },
 
     // PRD fields
@@ -82,6 +83,12 @@ kccApplicationSchema.pre('save', function (next) {
   }
   if (!this.cardNumber && this.kccCardNumber) {
     this.cardNumber = this.kccCardNumber;
+  }
+  if (!this.creditLimit && this.paymentAmount) {
+    this.creditLimit = this.paymentAmount;
+  }
+  if (!this.paymentAmount && this.creditLimit) {
+    this.paymentAmount = this.creditLimit;
   }
   next();
 });

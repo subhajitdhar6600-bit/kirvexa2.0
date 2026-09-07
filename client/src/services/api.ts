@@ -125,7 +125,7 @@ export const api = {
   // KCC
   getKccApplications: () => apiFetch<any[]>('/kcc'),
   submitKccApplication: (app: any) => apiFetch<any>('/kcc', { method: 'POST', body: JSON.stringify(app) }),
-  approveKccApplication: (id: string, cardNumber?: string) => apiFetch<any>(`/kcc/${id}/approve`, { method: 'PUT', body: JSON.stringify({ cardNumber }) }),
+  approveKccApplication: (id: string, cardNumber?: string, creditLimit?: number) => apiFetch<any>(`/kcc/${id}/approve`, { method: 'PUT', body: JSON.stringify({ cardNumber, creditLimit }) }),
   rejectKccApplication: (id: string) => apiFetch<any>(`/kcc/${id}/reject`, { method: 'PUT' }),
 
   // Categories

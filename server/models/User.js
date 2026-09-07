@@ -21,6 +21,9 @@ const userSchema = new mongoose.Schema(
     },
     isVerified: { type: Boolean, default: false },
     verificationStatus: { type: String, default: 'Pending' },
+    isKccIssued: { type: Boolean, default: false },
+    kccCardNumber: { type: String, default: '' },
+    kccCreditLimit: { type: Number, default: 50000 },
     kccStatus: {
       type: String,
       enum: Object.values(KCC_STATUS),
