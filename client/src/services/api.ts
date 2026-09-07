@@ -127,6 +127,7 @@ export const api = {
   submitKccApplication: (app: any) => apiFetch<any>('/kcc', { method: 'POST', body: JSON.stringify(app) }),
   approveKccApplication: (id: string, cardNumber?: string, creditLimit?: number) => apiFetch<any>(`/kcc/${id}/approve`, { method: 'PUT', body: JSON.stringify({ cardNumber, creditLimit }) }),
   rejectKccApplication: (id: string) => apiFetch<any>(`/kcc/${id}/reject`, { method: 'PUT' }),
+  updateKccLimit: (data: { cardNumber?: string; phone?: string; id?: string; creditLimit: number }) => apiFetch<any>('/kcc/update-limit', { method: 'PUT', body: JSON.stringify(data) }),
 
   // Categories
   getCategories: () => apiFetch<any>('/categories'),
@@ -193,6 +194,8 @@ export const api = {
   approveDealerListing: (id: string) => apiFetch<any>(`/dealer/listings/${id}/approve`, { method: 'PUT' }),
   rejectDealerListing: (id: string) => apiFetch<any>(`/dealer/listings/${id}/reject`, { method: 'PUT' }),
   deleteDealerListing: (id: string) => apiFetch<any>(`/dealer/listings/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  allotDealerCredentials: (data: { id?: string; phone?: string; email?: string; dealerId: string; password: string }) => apiFetch<any>('/dealer/allot-credentials', { method: 'POST', body: JSON.stringify(data) }),
+  getDealerById: (dealerId: string) => apiFetch<any>(`/users/dealer/${encodeURIComponent(dealerId)}`),
 
   // Registered Farmers
   getRegisteredFarmers: () => apiFetch<any[]>('/farmers'),

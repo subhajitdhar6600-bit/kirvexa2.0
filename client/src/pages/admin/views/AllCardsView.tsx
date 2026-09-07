@@ -33,7 +33,7 @@ const CARD_BADGES = {
 };
 
 export default function AllCardsView() {
-  const { kccApplications } = useApp();
+  const { kccApplications, updateKccLimit } = useApp();
   const [cards, setCards] = useState<CardItem[]>([]);
   const [selectedCard, setSelectedCard] = useState<CardItem | null>(null);
   const [search, setSearch] = useState("");
@@ -193,12 +193,17 @@ export default function AllCardsView() {
     e.preventDefault();
     if (!editingCard) return;
 
+    const newLimit = Number(editingCard.creditLimit) || 50000;
+    const cardNum = editingCard.cardNumber;
+    const cardPhone = editingCard.phone;
+
     setCards(prev => prev.map(c => c.id === editingCard.id ? editingCard : c));
     if (selectedCard?.id === editingCard.id) {
       setSelectedCard(editingCard);
     }
+    updateKccLimit(cardNum, newLimit, cardPhone);
     setEditingCard(null);
-    toast.success(`Card #${editingCard.cardNumber} updated successfully!`);
+    toast.success(`Card #${cardNum} limit updated to ₹${newLimit.toLocaleString("en-IN")} and synced to user account!`);
   };
 
   // 3. Download CSV Report

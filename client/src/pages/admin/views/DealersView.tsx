@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import type { Dealer } from "../types.ts";
 import { toast } from "sonner";
+import { useApp } from "@/context/AppContext.tsx";
+import { sendDealerCredentialsEmail } from "@/services/emailService.ts";
 
 interface DealersViewProps {
   dealers: Dealer[];
@@ -17,6 +19,7 @@ interface DealersViewProps {
 }
 
 export default function DealersView({ dealers: propDealers, setDealers }: DealersViewProps) {
+  const { allotDealerCredentials } = useApp();
   const dealers = propDealers || [];
   const [selectedDealer, setSelectedDealer] = useState<Dealer | null>(dealers[0] || null);
   const [viewingModalDealer, setViewingModalDealer] = useState<Dealer | null>(null);
@@ -25,7 +28,7 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(10);
 
-  // Point 7: Dealer Credential Allotment Modal
+  // Dealer Credential Allotment Modal
   const [allotCredDealer, setAllotCredDealer] = useState<Dealer | null>(null);
   const [credLoginId, setCredLoginId] = useState("");
   const [credPassword, setCredPassword] = useState("");
@@ -49,23 +52,55 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
     setAllotCredDealer(dealer);
   };
 
-  const handleConfirmAllotCredentials = (e: React.FormEvent) => {
+  const handleConfirmAllotCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!allotCredDealer || !credLoginId.trim() || !credPassword.trim()) return;
     setCredIsAllotting(true);
-    setTimeout(() => {
+
+    try {
+      const allottedId = credLoginId.trim();
+      const allottedPass = credPassword.trim();
+
+      // 1. Sync to registeredAccounts and backend database
+      await allotDealerCredentials(
+        { id: allotCredDealer.id, phone: allotCredDealer.phone, email: allotCredDealer.email },
+        allottedId,
+        allottedPass
+      );
+
+      // 2. Send email via EmailJS / EmailService
+      if (credSendEmail && allotCredDealer.email && allotCredDealer.email.includes("@")) {
+        try {
+          await sendDealerCredentialsEmail({
+            to_email: allotCredDealer.email,
+            to_name: allotCredDealer.owner || allotCredDealer.businessName,
+            businessName: allotCredDealer.businessName,
+            dealerId: allottedId,
+            password: allottedPass,
+            loginUrl: `${window.location.origin}/login`,
+          });
+        } catch (emailErr) {
+          console.warn("Dealer credentials email dispatch warning:", emailErr);
+        }
+      }
+
+      // 3. Update local dealers view state
       setDealers(prev => prev.map(d =>
         d.id === allotCredDealer.id
-          ? { ...d, status: "active", verified: "verified", loginId: credLoginId, password: credPassword }
+          ? { ...d, status: "active", verified: "verified", loginId: allottedId, password: allottedPass }
           : d
       ));
       if (selectedDealer?.id === allotCredDealer.id) {
-        setSelectedDealer(prev => prev ? { ...prev, status: "active", verified: "verified" } : null);
+        setSelectedDealer(prev => prev ? { ...prev, status: "active", verified: "verified", loginId: allottedId, password: allottedPass } : null);
       }
-      toast.success(`Dealer "${allotCredDealer.businessName}" activated! Credentials allotted: ${credLoginId}${credSendEmail ? ` • Email dispatched to ${allotCredDealer.email || allotCredDealer.phone}` : ""}`);
+
+      toast.success(`Dealer "${allotCredDealer.businessName}" approved! Dealer ID: ${allottedId}${credSendEmail ? ` • Credentials dispatched via email to ${allotCredDealer.email}` : ""}`);
+    } catch (err: any) {
+      toast.error(`Failed to allot dealer credentials: ${err.message || err}`);
+    } finally {
       setCredIsAllotting(false);
       setAllotCredDealer(null);
-    }, 800);
+    }
   };
 
   const filtered = dealers.filter((d) => {

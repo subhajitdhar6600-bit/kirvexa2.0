@@ -247,4 +247,41 @@ router.get('/sales', authenticate, requireDealer, async (req, res) => {
   }
 });
 
+// POST allot dealer credentials (Admin sets Dealer ID and Password)
+router.post('/allot-credentials', async (req, res) => {
+  try {
+    const { id, phone, email, dealerId, password } = req.body;
+    if (!dealerId || !password) {
+      return res.status(400).json({ error: 'dealerId and password are required' });
+    }
+
+    const cleanPhone = (phone || '').replace(/\D/g, '').slice(-10);
+    const cleanEmail = (email || '').trim().toLowerCase();
+
+    const orClauses = [];
+    if (id) orClauses.push({ id });
+    if (cleanPhone) orClauses.push({ phone: { $regex: cleanPhone } });
+    if (cleanEmail) orClauses.push({ email: cleanEmail });
+    if (dealerId) orClauses.push({ dealerId });
+
+    const updatedUser = await User.findOneAndUpdate(
+      orClauses.length > 0 ? { $or: orClauses } : { id },
+      {
+        dealerId,
+        dealerPassword: password,
+        password,
+        status: 'active',
+        dealerStatus: 'approved',
+        verificationStatus: 'Verified',
+        isVerified: true,
+      },
+      { new: true, upsert: false }
+    );
+
+    return res.json({ success: true, user: updatedUser });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

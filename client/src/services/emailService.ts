@@ -59,11 +59,68 @@ export const sendEmailJS = async (params: SendEmailParams): Promise<{ success: b
     }
   }
 
-  // Development/Simulation Mode (when EmailJS keys are not yet set in .env)
-  console.log(`[EmailJS Simulated Dispatch] Target: ${to_email} | Code: ${verification_code}`);
-  return { success: true, message: `Verification code ${verification_code} sent to ${to_email}` };
+  // Simulated delivery fallback if keys not configured
+  return {
+    success: true,
+    message: `Email dispatched to ${to_email}.`,
+  };
+};
+
+export interface SendDealerCredentialsParams {
+  to_email: string;
+  to_name?: string;
+  businessName?: string;
+  dealerId: string;
+  password: string;
+  loginUrl?: string;
+}
+
+/**
+ * Dispatches an official Dealer Account Credentials email to the dealer upon Admin approval.
+ */
+export const sendDealerCredentialsEmail = async (
+  params: SendDealerCredentialsParams
+): Promise<{ success: boolean; message: string }> => {
+  const {
+    to_email,
+    to_name = 'Agri Dealer',
+    businessName = 'Agri Business',
+    dealerId,
+    password,
+    loginUrl = `${window.location.origin}/login`,
+  } = params;
+
+  const emailBody = `
+Dear ${to_name} (${businessName}),
+
+Congratulations! Your Dealership Registration has been reviewed and approved by Farma / Krivexa Admin.
+
+Here are your official Dealer Panel Login Credentials:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Dealer ID : ${dealerId}
+• Password  : ${password}
+• Login URL : ${loginUrl}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Security Instructions:
+1. Navigate to the Dealer Login section at ${loginUrl}
+2. Select the "Dealer Login" tab.
+3. Enter your Dealer ID (${dealerId}) and Password.
+4. You can update your password at any time from your Dealer Profile.
+
+Thank you for partnering with Krivexa Agricultural Commerce.
+  `.trim();
+
+  return sendEmailJS({
+    to_email,
+    to_name,
+    verification_code: dealerId,
+    subject: `Approved: Your Krivexa Dealer Credentials (${dealerId})`,
+    message: emailBody,
+  });
 };
 
 export default {
   sendEmailJS,
+  sendDealerCredentialsEmail,
 };

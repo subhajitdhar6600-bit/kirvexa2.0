@@ -29,6 +29,7 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
   const [adminId, setAdminId] = useState("");
+  const [dealerId, setDealerId] = useState("");
   const [password, setPassword] = useState("");
   const [inputCaptcha, setInputCaptcha] = useState("");
   const [captcha, setCaptcha] = useState(generateRandomCaptchaString);
@@ -45,8 +46,8 @@ export default function LoginPage() {
   const [isSubmittingForgot, setIsSubmittingForgot] = useState(false);
 
   const typeConfig = {
-    farmer: { label: "Farmer Login", subtitle: "Login as a Farmer", icon: User },
-    dealer: { label: "Dealer Login", subtitle: "Login as a Dealer", icon: Store },
+    farmer: { label: "Farmer Login", subtitle: "Login with Mobile", icon: User },
+    dealer: { label: "Dealer Login", subtitle: "Login with Dealer ID", icon: Store },
     admin: { label: "Admin Login", subtitle: "Login as System Administrator", icon: Shield },
   };
 
@@ -142,9 +143,143 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // 1. DEALER AUTHENTICATION (Dealer ID & Password Only)
+      if (loginType === "dealer") {
+        const enteredId = dealerId.trim();
+        if (!enteredId) {
+          toast.error("Please enter your Dealer ID (e.g. DLR-PATNA-102)");
+          setIsLoading(false);
+          return;
+        }
+        if (!password.trim()) {
+          toast.error("Please enter your Dealer Password");
+          setIsLoading(false);
+          return;
+        }
+
+        // Search in registeredAccounts
+        let dealerAccount = registeredAccounts.find(
+          (acc) =>
+            acc.role === "dealer" &&
+            (
+              (acc.dealerId && acc.dealerId.trim().toLowerCase() === enteredId.toLowerCase()) ||
+              (acc.id && acc.id.trim().toLowerCase() === enteredId.toLowerCase())
+            )
+        );
+
+        // If not found in memory, query backend API
+        if (!dealerAccount) {
+          try {
+            const remoteDealer = await api.getDealerById(enteredId);
+            if (remoteDealer) {
+              dealerAccount = {
+                id: remoteDealer.id || remoteDealer._id,
+                fullName: remoteDealer.fullName || remoteDealer.name || "Agri Dealer",
+                phone: remoteDealer.phone,
+                email: remoteDealer.email,
+                password: remoteDealer.dealerPassword || remoteDealer.password || "",
+                dealerId: remoteDealer.dealerId || remoteDealer.id,
+                dealerPassword: remoteDealer.dealerPassword,
+                role: "dealer",
+                state: remoteDealer.state || "Bihar",
+                district: remoteDealer.district || "Patna",
+                village: remoteDealer.village || "",
+                businessName: remoteDealer.businessName,
+                dealerType: remoteDealer.dealerType,
+                dealerStatus: remoteDealer.dealerStatus || "approved",
+                createdAt: remoteDealer.createdAt || new Date().toISOString(),
+              };
+            }
+          } catch (err) {
+            console.warn("Remote dealer query warning:", err);
+          }
+        }
+
+        // If still not found, check if dealer exists by ID in regular users
+        if (!dealerAccount) {
+          try {
+            const allUsers = await api.getUsers();
+            if (Array.isArray(allUsers)) {
+              const matched = allUsers.find(
+                (u: any) =>
+                  u.role === "dealer" &&
+                  (
+                    (u.dealerId && u.dealerId.trim().toLowerCase() === enteredId.toLowerCase()) ||
+                    (u.id && u.id.trim().toLowerCase() === enteredId.toLowerCase())
+                  )
+              );
+              if (matched) {
+                dealerAccount = {
+                  id: matched.id || matched._id,
+                  fullName: matched.fullName || matched.name || "Agri Dealer",
+                  phone: matched.phone,
+                  email: matched.email,
+                  password: matched.dealerPassword || matched.password || "",
+                  dealerId: matched.dealerId || matched.id,
+                  dealerPassword: matched.dealerPassword,
+                  role: "dealer",
+                  state: matched.state || "Bihar",
+                  district: matched.district || "Patna",
+                  village: matched.village || "",
+                  businessName: matched.businessName,
+                  dealerType: matched.dealerType,
+                  dealerStatus: matched.dealerStatus || "approved",
+                  createdAt: matched.createdAt || new Date().toISOString(),
+                };
+              }
+            }
+          } catch (err) {
+            console.warn("User list search warning:", err);
+          }
+        }
+
+        if (!dealerAccount) {
+          toast.error("Dealer ID not found! Please make sure your registration form has been approved by the Admin and check the Dealer ID sent to your email.");
+          handleRefreshCaptcha();
+          setInputCaptcha("");
+          setIsLoading(false);
+          return;
+        }
+
+        if (dealerAccount.dealerStatus === "pending" || (dealerAccount as any).status === "pending") {
+          toast.error("Your dealership registration is currently pending review by Admin. Your Dealer ID and Password will be dispatched to your email once approved.");
+          handleRefreshCaptcha();
+          setInputCaptcha("");
+          setIsLoading(false);
+          return;
+        }
+
+        const expectedPass = dealerAccount.dealerPassword || dealerAccount.password;
+        if (expectedPass && expectedPass.trim() !== password.trim()) {
+          toast.error("Invalid password for this Dealer ID! Please use the password sent to your email by Admin.");
+          handleRefreshCaptcha();
+          setInputCaptcha("");
+          setIsLoading(false);
+          return;
+        }
+
+        loginUser({
+          name: dealerAccount.fullName || (dealerAccount as any).name || "Agri Dealer",
+          phone: dealerAccount.phone,
+          email: dealerAccount.email,
+          role: "dealer",
+          state: dealerAccount.state,
+          district: dealerAccount.district,
+          village: dealerAccount.village,
+          businessName: dealerAccount.businessName,
+          dealerType: dealerAccount.dealerType,
+          dealerId: dealerAccount.dealerId || dealerAccount.id,
+        });
+
+        toast.success(`Welcome back ${dealerAccount.businessName || dealerAccount.fullName}! Logged into Dealer Panel.`);
+        navigate("/dealer-dashboard");
+        setIsLoading(false);
+        return;
+      }
+
       const identifier = (loginType === "admin" ? adminId : mobileNumber).trim();
 
-      // 1. Authenticate directly with seeded MongoDB database
+      // 2. Authenticate directly with seeded MongoDB database
       const authRes = await api.loginAuth({
         phone: identifier,
         email: identifier,
@@ -264,13 +399,9 @@ export default function LoginPage() {
         return;
       }
 
-      // Check Role Isolation (Farmers cannot login in Dealer tab & vice versa)
-      if (existingAccount.role !== loginType) {
-        if (existingAccount.role === "farmer") {
-          toast.error("This account is registered as a Farmer. Please switch to the Farmer Login tab.");
-        } else {
-          toast.error("This account is registered as a Dealer. Please switch to the Dealer Login tab.");
-        }
+      // Check Role Isolation (Dealers cannot login in Farmer tab)
+      if (existingAccount.role !== "farmer") {
+        toast.error("This account is registered as a Dealer. Please switch to the Dealer Login tab.");
         handleRefreshCaptcha();
         setInputCaptcha("");
         setIsLoading(false);
@@ -389,6 +520,31 @@ export default function LoginPage() {
                     />
                   </div>
                 </div>
+              ) : loginType === "dealer" ? (
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-gray-300 text-sm mb-1.5 flex items-center justify-between">
+                      <span>Dealer ID <span className="text-red-400">*</span></span>
+                      <span className="text-[11px] text-amber-400 font-normal">Allotted by Admin via Email</span>
+                    </Label>
+                    <div className="relative">
+                      <Store className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-400" />
+                      <Input 
+                        value={dealerId}
+                        onChange={(e) => setDealerId(e.target.value)}
+                        placeholder="Enter your Dealer ID (e.g. DLR-PATNA-102)" 
+                        className="pl-10 bg-white/5 border-amber-500/30 text-white placeholder:text-gray-500 font-mono font-bold tracking-wide" 
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl text-xs text-amber-200/90 flex items-start gap-2.5">
+                    <Shield className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="leading-relaxed">
+                      <span className="font-bold text-amber-300">Authorized Dealer Access Only:</span> Log in with the official <strong>Dealer ID</strong> &amp; <strong>Password</strong> sent to your email after admin approval of your dealership registration form.
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div>
                   <Label className="text-gray-300 text-sm mb-1.5 block">Mobile Number <span className="text-red-400">*</span></Label>
@@ -406,14 +562,16 @@ export default function LoginPage() {
               )}
 
               <div>
-                <Label className="text-gray-300 text-sm mb-1.5 block">Password <span className="text-red-400">*</span></Label>
+                <Label className="text-gray-300 text-sm mb-1.5 block">
+                  {loginType === "dealer" ? "Dealer Password" : "Password"} <span className="text-red-400">*</span>
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                   <Input
                     type={showPass ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder={loginType === "dealer" ? "Enter your allotted dealer password" : "Enter your password"}
                     className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600"
                     required
                   />
@@ -451,7 +609,7 @@ export default function LoginPage() {
                   onClick={() => {
                     setIsForgotOpen(true);
                     setForgotStep(1);
-                    setForgotIdentifier(mobileNumber);
+                    setForgotIdentifier(loginType === "dealer" ? (dealerId || "") : mobileNumber);
                   }}
                   className="text-primary hover:underline cursor-pointer font-semibold"
                 >
@@ -463,15 +621,26 @@ export default function LoginPage() {
                 {isLoading ? "Logging in..." : "Login →"}
               </Button>
 
-              <div className="text-center text-gray-500 text-sm">or</div>
-
-              <Button type="button" onClick={handleWhatsAppLogin} variant="ghost" className="w-full border border-white/10 text-white hover:bg-white/5 py-5 rounded-xl cursor-pointer">
-                Login with WhatsApp
-              </Button>
-
-              <p className="text-center text-gray-400 text-sm pt-2">
-                {"Don't have an account? "}<Link to="/register" className="text-primary font-semibold hover:underline">Register Now</Link>
-              </p>
+              {loginType === "dealer" ? (
+                <div className="pt-2 text-center space-y-2">
+                  <p className="text-xs text-gray-400">
+                    {"Don't have a Dealer ID yet? "}
+                    <Link to="/register" className="text-amber-400 font-semibold hover:underline">
+                      Register Dealership for Approval →
+                    </Link>
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="text-center text-gray-500 text-sm">or</div>
+                  <Button type="button" onClick={handleWhatsAppLogin} variant="ghost" className="w-full border border-white/10 text-white hover:bg-white/5 py-5 rounded-xl cursor-pointer">
+                    Login with WhatsApp
+                  </Button>
+                  <p className="text-center text-gray-400 text-sm pt-2">
+                    {"Don't have an account? "}<Link to="/register" className="text-primary font-semibold hover:underline">Register Now</Link>
+                  </p>
+                </>
+              )}
             </form>
           </div>
         </div>

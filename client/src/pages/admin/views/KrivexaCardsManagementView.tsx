@@ -4,7 +4,7 @@ import {
   Download, CheckCircle, XCircle, Clock, MapPin, Phone,
   Mail, CreditCard, Calendar, ArrowRight, ShieldCheck,
   Plus, MoreHorizontal, Users, UserCheck, Shield, Lock, RotateCcw,
-  Sliders, FileText, Check
+  Sliders, FileText, Check, X
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -28,7 +28,7 @@ interface CardItem {
 }
 
 export default function KrivexaCardsManagementView() {
-  const { kccApplications } = useApp();
+  const { kccApplications, updateKccLimit } = useApp();
   const [cards, setCards] = useState<CardItem[]>([]);
   const [selectedCard, setSelectedCard] = useState<CardItem | null>(null);
   const [search, setSearch] = useState("");
@@ -38,6 +38,33 @@ export default function KrivexaCardsManagementView() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 8;
   const [loading, setLoading] = useState(true);
+
+  // Edit Card Limit Modal
+  const [editingCard, setEditingCard] = useState<CardItem | null>(null);
+  const [newCreditLimit, setNewCreditLimit] = useState<number>(50000);
+
+  const handleOpenEditLimit = (card: CardItem) => {
+    setEditingCard(card);
+    setNewCreditLimit(card.creditLimit);
+  };
+
+  const handleSaveLimit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCard) return;
+    const numLimit = Number(newCreditLimit);
+    if (!numLimit || numLimit <= 0) {
+      toast.error("Please enter a valid credit limit");
+      return;
+    }
+
+    setCards(prev => prev.map(c => c.id === editingCard.id ? { ...c, creditLimit: numLimit } : c));
+    if (selectedCard?.id === editingCard.id) {
+      setSelectedCard(prev => prev ? { ...prev, creditLimit: numLimit } : null);
+    }
+    await updateKccLimit(editingCard.cardNumber, numLimit, editingCard.phone);
+    toast.success(`Credit limit for ${editingCard.name} updated to ₹${numLimit.toLocaleString("en-IN")}!`);
+    setEditingCard(null);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -356,10 +383,28 @@ export default function KrivexaCardsManagementView() {
               {/* Detail Rows */}
               <div className="space-y-2 mt-3 text-xs">
                 <div className="flex justify-between"><span className="text-gray-400">Card Type</span><span className="font-semibold text-emerald-700">{selectedCard.cardType}</span></div>
-                <div className="flex justify-between"><span className="text-gray-400">Credit Limit</span><span className="font-bold text-gray-800">₹ {selectedCard.creditLimit.toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">Credit Limit</span>
+                  <span className="font-bold text-gray-800 flex items-center gap-1.5">
+                    ₹ {selectedCard.creditLimit.toLocaleString("en-IN")}
+                    <button
+                      onClick={() => handleOpenEditLimit(selectedCard)}
+                      className="text-emerald-600 hover:text-emerald-700 hover:underline text-[11px] font-semibold cursor-pointer"
+                    >
+                      (Edit)
+                    </button>
+                  </span>
+                </div>
                 <div className="flex justify-between"><span className="text-gray-400">Validity</span><span className="font-semibold text-gray-700">5 Years</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Status</span>{getStatusBadge(selectedCard.status)}</div>
               </div>
+
+              <Button
+                onClick={() => handleOpenEditLimit(selectedCard)}
+                className="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 rounded-xl cursor-pointer"
+              >
+                <Edit2 className="h-3.5 w-3.5 mr-1.5" /> Adjust KCC Credit Limit
+              </Button>
             </div>
 
             {/* Real Card Status Distribution */}
@@ -383,6 +428,66 @@ export default function KrivexaCardsManagementView() {
           </div>
         )}
       </div>
+
+      {/* Adjust Credit Limit Modal */}
+      {editingCard && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full border border-gray-100 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-emerald-600" />
+                <h3 className="font-bold text-sm text-gray-900">Adjust KCC Credit Limit</h3>
+              </div>
+              <button
+                onClick={() => setEditingCard(null)}
+                className="text-gray-400 hover:text-black p-1 rounded-lg cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveLimit} className="space-y-4 text-xs">
+              <div>
+                <p className="text-gray-500 mb-1">User: <strong className="text-gray-800">{editingCard.name}</strong></p>
+                <p className="text-gray-500 font-mono">Card: <strong className="text-emerald-700">{editingCard.cardNumber}</strong></p>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1.5">New Credit Limit (₹) *</label>
+                <Input
+                  type="number"
+                  min="1000"
+                  step="1000"
+                  value={newCreditLimit}
+                  onChange={e => setNewCreditLimit(Number(e.target.value))}
+                  className="h-10 text-sm font-bold text-emerald-900 rounded-xl"
+                  required
+                />
+                <p className="text-[10px] text-gray-400 mt-1">
+                  This new limit will immediately synchronize to the user's card account, wallet, profile, and database.
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditingCard(null)}
+                  className="flex-1 rounded-xl text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs cursor-pointer shadow-sm"
+                >
+                  Save &amp; Sync Limit
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="text-center text-[11px] text-gray-400">
         © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Kisan Card Database

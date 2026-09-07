@@ -90,6 +90,11 @@ export interface UserProfile {
   village: string;
   businessName?: string;
   dealerType?: string;
+  dealerId?: string;
+  dealerPassword?: string;
+  dealerStatus?: "pending" | "approved" | "rejected";
+  gstNumber?: string;
+  licenseNumber?: string;
   occupation?: string;
   pincode?: string;
   landSize?: string;
@@ -121,6 +126,11 @@ export interface RegisteredAccount {
   village: string;
   businessName?: string;
   dealerType?: string;
+  dealerId?: string;
+  dealerPassword?: string;
+  dealerStatus?: "pending" | "approved" | "rejected";
+  gstNumber?: string;
+  licenseNumber?: string;
   occupation?: string;
   isKccIssued?: boolean;
   isVerified?: boolean;
@@ -336,11 +346,13 @@ interface AppContextType {
   approveKccApplication: (id: string, customCardNumber?: string, customLimit?: number) => void;
   rejectKccApplication: (id: string) => void;
   loadAllKccApplications: () => Promise<void>;
+  updateKccLimit: (cardNumber: string, newLimit: number, phone?: string) => Promise<void>;
 
   // Dealer KCC & POS Features
   dealerApplyFarmerKcc: (appData: Omit<KccApplication, "id" | "status" | "createdAt">) => void;
   checkFarmerCardBalance: (cardNumber: string) => { exists: boolean; cardHolder?: string; balance?: number; status?: string } | null;
   chargeFarmerCard: (cardNumber: string, amount: number, itemDesc: string) => { success: boolean; message: string; remainingBalance?: number };
+  allotDealerCredentials: (dealerIdentifier: { id?: string; phone?: string; email?: string }, dealerId: string, password: string) => Promise<void>;
 
   // Dealer Product / Service Listings (Point 4)
   dealerListings: DealerListing[];
@@ -664,6 +676,140 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } catch (e) {
       console.warn("Failed to load KCC applications:", e);
+    }
+  };
+
+  // Update KCC Credit Limit across applications, user profile, accounts, POS store & backend API
+  const updateKccLimit = async (cardNumber: string, newLimit: number, phone?: string) => {
+    const cleanCard = cardNumber.trim();
+    const cleanP = (phone || "").replace(/\D/g, "").slice(-10);
+
+    // 1. Update kccApplications state & localStorage
+    setKccApplications((prev) => {
+      const updated = prev.map((app) => {
+        const appP = (app.phone || "").replace(/\D/g, "").slice(-10);
+        const matchCard = app.cardNumber && app.cardNumber.trim().toLowerCase() === cleanCard.toLowerCase();
+        const matchPhone = cleanP && appP && cleanP === appP;
+        if (matchCard || matchPhone) {
+          return {
+            ...app,
+            creditLimit: newLimit,
+            paymentAmount: newLimit,
+          };
+        }
+        return app;
+      });
+      localStorage.setItem("krivexa_kcc_apps", JSON.stringify(updated));
+      return updated;
+    });
+
+    // 2. Update currently logged in user if this card belongs to them
+    if (user) {
+      const uPhone = (user.phone || "").replace(/\D/g, "").slice(-10);
+      const matchCard = user.kccCardNumber && user.kccCardNumber.trim().toLowerCase() === cleanCard.toLowerCase();
+      const matchPhone = cleanP && uPhone && cleanP === uPhone;
+      if (matchCard || matchPhone) {
+        const updatedUser: UserProfile = {
+          ...user,
+          kccCreditLimit: newLimit,
+        };
+        setUser(updatedUser);
+        localStorage.setItem("krivexa_user_profile", JSON.stringify(updatedUser));
+        api.saveUser(updatedUser).catch(() => {});
+      }
+    }
+
+    // 3. Update registeredAccounts state & localStorage
+    setRegisteredAccounts((prev) => {
+      const updated = prev.map((acc) => {
+        const accP = (acc.phone || "").replace(/\D/g, "").slice(-10);
+        const matchCard = acc.kccCardNumber && acc.kccCardNumber.trim().toLowerCase() === cleanCard.toLowerCase();
+        const matchPhone = cleanP && accP && cleanP === accP;
+        if (matchCard || matchPhone) {
+          return {
+            ...acc,
+            kccCreditLimit: newLimit,
+          };
+        }
+        return acc;
+      });
+      localStorage.setItem("krivexa_registered_accounts", JSON.stringify(updated));
+      return updated;
+    });
+
+    // 4. Update farmerCardStore for POS transactions
+    setFarmerCardStore((prev) => ({
+      ...prev,
+      [cleanCard]: {
+        ...(prev[cleanCard] || {}),
+        balance: newLimit,
+        status: "active",
+      },
+    }));
+
+    // 5. Call API backend to update database
+    try {
+      await api.updateKccLimit({ cardNumber: cleanCard, phone: cleanP, creditLimit: newLimit });
+    } catch (e) {
+      console.warn("Failed to update limit in backend API:", e);
+    }
+
+    // 6. Dispatch notification
+    addNotification(
+      "KCC Credit Limit Updated 💳",
+      `KCC Card limit for #${cleanCard} has been updated to ₹${newLimit.toLocaleString("en-IN")}.`,
+      "info",
+      "/wallet",
+      "kcc"
+    );
+  };
+
+  // Allot Dealer ID and Password upon Admin Review
+  const allotDealerCredentials = async (
+    dealerIdentifier: { id?: string; phone?: string; email?: string },
+    dealerId: string,
+    password: string
+  ) => {
+    const cleanId = (dealerIdentifier.id || "").trim();
+    const cleanP = (dealerIdentifier.phone || "").replace(/\D/g, "").slice(-10);
+    const cleanE = (dealerIdentifier.email || "").trim().toLowerCase();
+
+    // 1. Update registeredAccounts state & localStorage
+    setRegisteredAccounts((prev) => {
+      const updated = prev.map((acc) => {
+        const accP = (acc.phone || "").replace(/\D/g, "").slice(-10);
+        const accE = (acc.email || "").trim().toLowerCase();
+        const matchId = cleanId && acc.id === cleanId;
+        const matchP = cleanP && accP && cleanP === accP;
+        const matchE = cleanE && accE && cleanE === accE;
+        if (matchId || matchP || matchE || (acc.dealerId && acc.dealerId === dealerId)) {
+          return {
+            ...acc,
+            dealerId,
+            dealerPassword: password,
+            password,
+            dealerStatus: "approved" as const,
+            status: "active" as const,
+            isVerified: true,
+          };
+        }
+        return acc;
+      });
+      localStorage.setItem("krivexa_registered_accounts", JSON.stringify(updated));
+      return updated;
+    });
+
+    // 2. Call backend API to persist dealer credentials
+    try {
+      await api.allotDealerCredentials({
+        id: cleanId,
+        phone: cleanP,
+        email: cleanE,
+        dealerId,
+        password,
+      });
+    } catch (e) {
+      console.warn("Backend dealer credential allotment error:", e);
     }
   };
 
@@ -1775,10 +1921,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         approveKccApplication,
         rejectKccApplication,
         loadAllKccApplications,
+        updateKccLimit,
 
         dealerApplyFarmerKcc,
         checkFarmerCardBalance,
         chargeFarmerCard,
+        allotDealerCredentials,
 
         dealerListings,
         addDealerListing,

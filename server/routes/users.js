@@ -23,6 +23,26 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET dealer by Dealer ID
+router.get('/dealer/:dealerId', async (req, res) => {
+  try {
+    const { dealerId } = req.params;
+    const clean = (dealerId || '').trim();
+    if (!clean) return res.status(400).json({ error: 'Dealer ID is required' });
+
+    const dealer = await User.findOne({
+      $or: [
+        { dealerId: { $regex: new RegExp(`^${clean}$`, 'i') } },
+        { id: clean }
+      ],
+      role: 'dealer'
+    });
+    res.json(dealer || null);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST save/login user profile
 router.post('/', async (req, res) => {
   try {

@@ -107,7 +107,45 @@ router.get('/search', async (req, res) => {
       return matchPhone || matchAadhaar || matchCard;
     });
 
-    res.json(matched || null);
+// PUT update KCC limit for an application and user
+router.put('/update-limit', async (req, res) => {
+  try {
+    const { id, cardNumber, phone, creditLimit } = req.body;
+    const numLimit = Number(creditLimit);
+    if (!numLimit || isNaN(numLimit)) {
+      return res.status(400).json({ error: 'Valid credit limit is required' });
+    }
+
+    const cleanCard = (cardNumber || '').trim();
+    const cleanPhone = (phone || '').replace(/\D/g, '').slice(-10);
+
+    const appQueries = [];
+    if (id) appQueries.push({ id });
+    if (cleanCard) appQueries.push({ cardNumber: cleanCard });
+    if (cleanPhone) appQueries.push({ phone: { $regex: cleanPhone } });
+
+    let updated = null;
+    if (appQueries.length > 0) {
+      updated = await KccApplication.findOneAndUpdate(
+        { $or: appQueries },
+        { creditLimit: numLimit, paymentAmount: numLimit },
+        { new: true }
+      );
+    }
+
+    // Also update all matching users in database
+    const userQueries = [];
+    if (cleanCard) userQueries.push({ kccCardNumber: cleanCard });
+    if (cleanPhone) userQueries.push({ phone: { $regex: cleanPhone } });
+
+    if (userQueries.length > 0) {
+      await User.updateMany(
+        { $or: userQueries },
+        { kccCreditLimit: numLimit, ...(cleanCard ? { kccCardNumber: cleanCard } : {}) }
+      );
+    }
+
+    res.json({ success: true, updated, creditLimit: numLimit });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
