@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { CreditCard, X, AlertTriangle, CheckCircle2, Clock, Crown, Star, ArrowRight, Check, RefreshCw, Wallet, QrCode, ArrowLeft, ShieldCheck } from "lucide-react";
+import { CreditCard, X, AlertTriangle, CheckCircle2, Clock, Crown, Star, ArrowRight, Check, RefreshCw, Wallet, QrCode, ArrowLeft, ShieldCheck, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
@@ -8,6 +8,7 @@ import { useApp } from "@/context/AppContext.tsx";
 import { toast } from "sonner";
 import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
+import { sendEmailJS } from "@/services/emailService.ts";
 
 /** KCC blocked-action alert */
 export function KccAlertModal() {
@@ -116,9 +117,10 @@ export function KccApplicationModal() {
 
   // UPI payment state
   const [upiId, setUpiId] = useState("");
-  const [payOtp, setPayOtp] = useState("");
-  const [generatedPayOtp, setGeneratedPayOtp] = useState("");
-  const [payOtpSent, setPayOtpSent] = useState(false);
+  const [upiEmail, setUpiEmail] = useState("");
+  const [payCode, setPayCode] = useState("");
+  const [generatedPayCode, setGeneratedPayCode] = useState("");
+  const [payCodeSent, setPayCodeSent] = useState(false);
   const [payLoading, setPayLoading] = useState(false);
 
   // Form state & Preview
@@ -271,19 +273,26 @@ export function KccApplicationModal() {
     }, 600);
   };
 
-  // Payment via UPI OTP
-  const handleSendPayOtp = () => {
+  // Payment via UPI — Email Code verification
+  const handleSendPayCode = () => {
     if (!upiId.trim()) { toast.error("Please enter your UPI ID."); return; }
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedPayOtp(otp);
-    setPayOtpSent(true);
-    toast.success(`Demo OTP sent: ${otp}`, { duration: 8000 });
+    const email = upiEmail.trim() || user?.email || form.phone;
+    if (!email) { toast.error("Please enter your registered email address."); return; }
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedPayCode(code);
+    setPayCodeSent(true);
+    sendEmailJS({
+      to_email: email,
+      verification_code: code,
+      subject: "Krivexa UPI Payment Verification Code",
+    }).catch(() => {});
+    toast.success(`📧 Email Verification Code sent to ${email}: ${code}`, { duration: 8000 });
   };
 
-  const handleVerifyPayOtp = () => {
-    if (!payOtp || payOtp.trim() !== generatedPayOtp) {
-      toast.error("Incorrect OTP. Please try again.");
-      setPayOtp("");
+  const handleVerifyPayCode = () => {
+    if (!payCode || payCode.trim() !== generatedPayCode) {
+      toast.error("Incorrect Email Code. Please check your email and try again.");
+      setPayCode("");
       return;
     }
     setPayLoading(true);
@@ -316,9 +325,10 @@ export function KccApplicationModal() {
     setSelectedTier("nex");
     setPaymentMethod("wallet");
     setUpiId("");
-    setPayOtp("");
-    setGeneratedPayOtp("");
-    setPayOtpSent(false);
+    setUpiEmail("");
+    setPayCode("");
+    setGeneratedPayCode("");
+    setPayCodeSent(false);
     setPayLoading(false);
     setShowPreview(false);
     setForm({ fullName: "", phone: "", aadhaar: "", address: "", district: "", landSize: "" });
@@ -557,48 +567,65 @@ export function KccApplicationModal() {
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
                     <div className="space-y-3">
                       <Label className="text-gray-300 text-xs block">Enter UPI ID (GPay / PhonePe / Paytm)</Label>
+                      <Input
+                        value={upiId}
+                        onChange={e => setUpiId(e.target.value)}
+                        placeholder="e.g. 9876543210@upi or name@okicici"
+                        className="bg-white/5 border-white/10 text-white"
+                        disabled={payCodeSent}
+                      />
+
+                      <Label className="text-gray-300 text-xs block">Registered Email (for verification code)</Label>
                       <div className="flex gap-2">
-                        <Input
-                          value={upiId}
-                          onChange={e => setUpiId(e.target.value)}
-                          placeholder="e.g. 9876543210@upi or name@okicici"
-                          className="bg-white/5 border-white/10 text-white flex-1"
-                          disabled={payOtpSent}
-                        />
+                        <div className="relative flex-1">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                          <Input
+                            value={upiEmail}
+                            onChange={e => setUpiEmail(e.target.value)}
+                            placeholder="your@email.com"
+                            className="pl-10 bg-white/5 border-white/10 text-white"
+                            disabled={payCodeSent}
+                          />
+                        </div>
                         <Button
                           type="button"
-                          onClick={handleSendPayOtp}
-                          disabled={payOtpSent}
+                          onClick={handleSendPayCode}
+                          disabled={payCodeSent}
                           className="bg-primary text-black font-bold px-4 shrink-0 cursor-pointer"
                         >
-                          {payOtpSent ? <Check className="h-4 w-4" /> : "Send OTP"}
+                          {payCodeSent ? <Check className="h-4 w-4" /> : "Send Code"}
                         </Button>
                       </div>
 
-                      {payOtpSent && (
+                      {payCodeSent && (
                         <div className="space-y-3 pt-2 animate-in fade-in">
-                          <Label className="text-gray-300 text-xs block">Enter 6-digit OTP sent to UPI registered phone</Label>
+                          <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs space-y-1">
+                            <div className="font-bold text-primary">📧 Email Verification Code Sent</div>
+                            <div className="text-gray-300">Check your email for the 6-digit code: <strong className="text-primary font-mono">{generatedPayCode}</strong></div>
+                          </div>
+                          <Label className="text-gray-300 text-xs block">Enter 6-digit Email Verification Code</Label>
                           <div className="flex gap-2">
                             <Input
-                              value={payOtp}
-                              onChange={e => setPayOtp(e.target.value)}
-                              placeholder="Enter OTP"
+                              value={payCode}
+                              onChange={e => setPayCode(e.target.value)}
+                              placeholder="Enter Email Code"
                               maxLength={6}
                               className="bg-white/5 border-white/10 text-white font-mono text-center tracking-widest"
                             />
                             <Button
                               type="button"
-                              onClick={handleVerifyPayOtp}
-                              disabled={payLoading || !payOtp}
+                              onClick={handleVerifyPayCode}
+                              disabled={payLoading || !payCode}
                               className="bg-primary text-black font-bold px-4 shrink-0 cursor-pointer"
                             >
                               {payLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "Verify & Pay"}
                             </Button>
                           </div>
-                          <p className="text-[10px] text-amber-400">Demo OTP shown in top notification bar</p>
+                          <p className="text-[10px] text-amber-400">Code shown above and sent to your email.</p>
                         </div>
                       )}
                     </div>
+
                   </div>
                 )}
               </div>

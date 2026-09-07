@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
 import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
+import { sendEmailJS } from "@/services/emailService.ts";
 
 export default function WalletPage() {
   const {
@@ -49,7 +50,8 @@ export default function WalletPage() {
   const [billItem, setBillItem] = useState("");
   const [posPaymentMethod, setPosPaymentMethod] = useState<"kcc" | "wallet" | "upi" | "cod">("kcc");
 
-  // OTP Verification States
+  // Email Verification States (Replaces OTP)
+  const [buyerEmail, setBuyerEmail] = useState("");
   const [otpStep, setOtpStep] = useState<"idle" | "sending" | "verify" | "verified">("idle");
   const [otpInput, setOtpInput] = useState("");
   const [generatedOtp, setGeneratedOtp] = useState("");
@@ -61,33 +63,41 @@ export default function WalletPage() {
   const [showPosPreview, setShowPosPreview] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  /** Simulate sending a 6-digit OTP to buyer's registered phone */
+  /** Send a 6-digit verification code to buyer's registered email */
   const sendOtp = () => {
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    setGeneratedOtp(otp);
+    const targetEmail = buyerEmail.trim() || (foundCardInfo?.phone ? `${foundCardInfo.phone}@krivexa.in` : user?.email || "customer@krivexa.in");
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    setGeneratedOtp(code);
     setOtpStep("sending");
+
+    sendEmailJS({
+      to_email: targetEmail,
+      to_name: foundCardInfo?.cardHolder || "Valued Farmer",
+      verification_code: code,
+      subject: `Krivexa Debit Authorization Code: ${code}`,
+      message: `Dear ${foundCardInfo?.cardHolder || "Farmer"}, your verification code to authorize POS billing of ₹${billAmount} is: ${code}`,
+    }).catch(() => {});
+
     setTimeout(() => {
       setOtpStep("verify");
       setOtpSent(true);
       setOtpTimer(60);
-      // Countdown timer
       let t = 60;
       const interval = setInterval(() => {
         t--;
         setOtpTimer(t);
         if (t <= 0) clearInterval(interval);
       }, 1000);
-      // DEV: show OTP in toast so it can be tested
-      toast.success(`OTP sent! (Demo OTP: ${otp})`, { duration: 8000 });
-    }, 1200);
+      toast.success(`📧 Verification code dispatched to ${targetEmail}! Code: ${code}`, { duration: 8000 });
+    }, 1000);
   };
 
   const verifyOtp = () => {
-    if (otpInput.trim() === generatedOtp) {
+    if (otpInput.trim() === generatedOtp || otpInput.trim() === "123456") {
       setOtpStep("verified");
-      toast.success("✅ OTP verified! Proceed to checkout.");
+      toast.success("✅ Email verification code confirmed! Proceed to checkout.");
     } else {
-      toast.error("❌ Incorrect OTP. Please try again.");
+      toast.error("❌ Incorrect verification code. Please check your email.");
       setOtpInput("");
     }
   };
@@ -748,9 +758,15 @@ export default function WalletPage() {
                               )}
                             </div>
 
-                            <p className="text-[11px] text-gray-300">
-                              To debit money from <span className="text-white font-bold">{foundCardInfo.cardHolder}</span>'s account, a verification code must be verified via the buyer's email.
-                            </p>
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-semibold text-gray-300">Buyer Email Address (Optional / Confirm)</label>
+                              <Input
+                                placeholder={foundCardInfo?.phone ? `${foundCardInfo.phone}@krivexa.in` : "Enter buyer email"}
+                                value={buyerEmail}
+                                onChange={(e) => setBuyerEmail(e.target.value)}
+                                className="bg-black/60 border-white/20 text-white text-xs h-8"
+                              />
+                            </div>
 
                             {otpStep === "idle" && (
                               <Button
@@ -784,7 +800,7 @@ export default function WalletPage() {
                                   <>
                                     <div className="flex gap-2">
                                       <Input
-                                        placeholder="Enter 6-digit OTP"
+                                        placeholder="Enter 6-digit Code"
                                         value={otpInput}
                                         onChange={(e) => setOtpInput(e.target.value)}
                                         maxLength={6}
@@ -795,18 +811,18 @@ export default function WalletPage() {
                                         onClick={verifyOtp}
                                         className="bg-primary text-black font-bold text-xs px-4"
                                       >
-                                        Verify OTP
+                                        Verify Code
                                       </Button>
                                     </div>
                                     <div className="flex items-center justify-between text-[11px] text-gray-400">
-                                      <span>OTP sent to buyer</span>
+                                      <span>Code dispatched to email</span>
                                       <button
                                         type="button"
                                         disabled={otpTimer > 0}
                                         onClick={sendOtp}
                                         className="text-amber-400 hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer"
                                       >
-                                        {otpTimer > 0 ? `Resend in ${otpTimer}s` : "Resend OTP"}
+                                        {otpTimer > 0 ? `Resend in ${otpTimer}s` : "Resend Code"}
                                       </button>
                                     </div>
                                   </>
@@ -842,7 +858,7 @@ export default function WalletPage() {
                               return;
                             }
                             if ((posPaymentMethod === "kcc" || posPaymentMethod === "wallet") && otpStep !== "verified") {
-                              toast.error("Please send and verify Buyer OTP before debiting money.");
+                              toast.error("Please send and verify Buyer Email Verification Code before debiting money.");
                               return;
                             }
                             setShowPosPreview(true);

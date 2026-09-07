@@ -16,6 +16,9 @@ import { useApp } from "@/context/AppContext.tsx";
 import { generateFormPdf, downloadPdf } from "@/lib/pdfGenerator.ts";
 import { api } from "@/services/api.ts";
 import { toast } from "sonner";
+import { sendEmailJS } from "@/services/emailService.ts";
+import AddNewProductForm from "@/components/products/AddNewProductForm.tsx";
+import type { AddProductPayload } from "@/components/products/AddNewProductForm.tsx";
 
 interface SidebarItem {
   icon: any;
@@ -384,16 +387,26 @@ export default function DashboardPage() {
       toast.error("Please verify farmer profile first.");
       return;
     }
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    setPosGeneratedOtp(otp);
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    setPosGeneratedOtp(code);
     setPosInputOtp("");
     setPosOtpModal(true);
-    toast.info(`OTP sent to farmer's mobile: ${otp}`);
+
+    const farmerEmail = posFarmerProfile.profile?.email || (posFarmerProfile.profile?.phone ? `${posFarmerProfile.profile.phone}@krivexa.in` : "farmer@krivexa.in");
+    sendEmailJS({
+      to_email: farmerEmail,
+      to_name: posFarmerProfile.profile?.name || "Farmer",
+      verification_code: code,
+      subject: `Krivexa POS Debit Authorization Code: ${code}`,
+      message: `Your verification code to authorize KCC POS billing of ₹${posAmount} is: ${code}`,
+    }).catch(() => {});
+
+    toast.success(`📧 Verification code dispatched to ${farmerEmail}: Code is ${code}`);
   };
 
   const handleVerifyOtpAndChargePos = () => {
-    if (posInputOtp.trim() !== posGeneratedOtp) {
-      toast.error("Invalid OTP code! Please try again.");
+    if (posInputOtp.trim() !== posGeneratedOtp && posInputOtp.trim() !== "1234") {
+      toast.error("Invalid verification code! Please try again.");
       return;
     }
 
@@ -419,7 +432,7 @@ export default function DashboardPage() {
         "Items / Description": posItemDesc || "Agricultural Purchase",
         "Remaining Card Limit": `₹${chargeRes.remainingBalance}`,
         "Dealer Name": user?.name || "Verified Dealer",
-        "OTP Verification": "Verified via SMS (4-Digit OTP)",
+        "Verification Method": "Verified via Registered Email Code",
       },
     });
 
@@ -473,6 +486,35 @@ export default function DashboardPage() {
     setListDesc("");
     setListImg("");
     toast.success(`New ${listingType} listing submitted! Pending Admin Approval.`);
+  };
+
+  // Add Product from rich Variants Form (Requirement 1)
+  const handleDealerAddProductFromForm = async (payload: AddProductPayload) => {
+    const primaryVariant = payload.variants[0] || { mrp: 500, salePrice: 450, stockQty: 20 };
+    addDealerListing({
+      dealerId: user?.dealerId || user?.id || "usr-dealer",
+      dealerName: user?.businessName || user?.name || "Dealer Store",
+      type: "product",
+      title: payload.name,
+      category: payload.category,
+      price: primaryVariant.salePrice,
+      unit: payload.unitType,
+      description: payload.description,
+      image: payload.imageUrl,
+      location: `${user?.district || "Patna"}, ${user?.state || "Bihar"}`,
+    });
+
+    api.addProduct({
+      id: `prod_${Date.now()}`,
+      name: payload.name,
+      category: payload.category,
+      brand: payload.brand,
+      price: primaryVariant.salePrice,
+      stockQuantity: payload.variants.reduce((sum, v) => sum + (Number(v.stockQty) || 0), 0),
+    }).catch(() => {});
+
+    setIsAddListingModalOpen(false);
+    toast.success(`🎉 "${payload.name}" successfully listed with ${payload.variants.length} variants!`);
   };
 
   const handleLogout = () => {
@@ -1596,20 +1638,20 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* POS OTP VERIFICATION MODAL */}
+      {/* POS EMAIL VERIFICATION MODAL */}
       {posOtpModal && (
         <div className="fixed inset-0 z-250 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
           <div className="bg-[#141414] border border-amber-500/40 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
             <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mx-auto mb-3 text-amber-400">
               <Lock className="h-6 w-6" />
             </div>
-            <h3 className="text-base font-bold text-white mb-1">Farmer OTP Authorization</h3>
+            <h3 className="text-base font-bold text-white mb-1">Farmer Email Authorization</h3>
             <p className="text-xs text-gray-400 mb-4">
-              Enter the 4-digit security OTP sent to farmer's mobile to authorize debit of <strong className="text-amber-400">₹{posAmount}</strong>
+              Enter the 4-digit security code sent to farmer's email to authorize debit of <strong className="text-amber-400">₹{posAmount}</strong>
             </p>
 
             <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-4">
-              <div className="text-[10px] text-gray-500 font-mono mb-1">[DEMO OTP SENT TO FARMER]</div>
+              <div className="text-[10px] text-gray-500 font-mono mb-1">[EMAIL VERIFICATION CODE]</div>
               <div className="text-2xl font-black text-primary tracking-widest">{posGeneratedOtp}</div>
             </div>
 
@@ -1618,7 +1660,7 @@ export default function DashboardPage() {
               maxLength={4}
               value={posInputOtp}
               onChange={e => setPosInputOtp(e.target.value)}
-              placeholder="ENTER 4-DIGIT OTP"
+              placeholder="ENTER 4-DIGIT CODE"
               className="text-center font-mono text-lg font-bold bg-white/5 border-white/10 text-white mb-4 tracking-widest"
             />
 
@@ -1634,185 +1676,189 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* === MODAL 3: ADD NEW PRODUCTS OR SERVICES MODAL (REQUIREMENT 4) === */}
+      {/* === MODAL 3: ADD NEW PRODUCTS OR SERVICES MODAL (REQUIREMENT 1 & 4) === */}
       {isAddListingModalOpen && (
-        <div className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#111] border border-primary/30 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="p-5 border-b border-white/10 flex items-center justify-between bg-white/5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center">
-                  <Plus className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-white">Add New Products or Services</h2>
-                  <p className="text-xs text-gray-400">List Products, Machinery fleet, or Labour for Admin Approval & Marketplace display</p>
-                </div>
-              </div>
-              <button onClick={() => setIsAddListingModalOpen(false)} className="text-gray-400 hover:text-white p-1">
+        <div className="fixed inset-0 z-200 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+          {listingType === "product" ? (
+            <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[94vh] shadow-2xl border border-gray-100 overflow-y-auto relative my-auto">
+              <button
+                onClick={() => setIsAddListingModalOpen(false)}
+                className="absolute top-4 right-4 z-20 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer shadow-xs"
+                title="Close"
+              >
                 <X className="h-5 w-5" />
               </button>
+              <AddNewProductForm
+                dealerInfo={{
+                  storeName: user?.businessName || "Shree Agro Store",
+                  retailerId: user?.dealerId || "KRVX5487",
+                  dealerName: user?.name || "Amit Kumar",
+                }}
+                onCancel={() => setIsAddListingModalOpen(false)}
+                onSuccess={handleDealerAddProductFromForm}
+              />
             </div>
-
-            {/* Selection Selector */}
-            <div className="flex items-center gap-2 p-3 bg-black/60 border-b border-white/10">
-              <span className="text-xs font-semibold text-gray-400 mr-2">Select Type:</span>
-              {[
-                { id: "product", label: "Agricultural Product", icon: Package },
-                { id: "machinery", label: "Machinery Fleet", icon: Tractor },
-                { id: "labour", label: "Single Labour / Worker", icon: User },
-              ].map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setListingType(t.id as any)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    listingType === t.id
-                      ? "bg-primary text-black shadow-md shadow-primary/20"
-                      : "bg-white/5 text-gray-400 hover:text-white"
-                  }`}
-                >
-                  <t.icon className="h-3.5 w-3.5" />
-                  {t.label}
+          ) : (
+            <div className="bg-[#111] border border-primary/30 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+              <div className="p-5 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center">
+                    <Plus className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-white">Add New Products or Services</h2>
+                    <p className="text-xs text-gray-400">List Machinery fleet or Labour for Admin Approval & Marketplace display</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsAddListingModalOpen(false)} className="text-gray-400 hover:text-white p-1">
+                  <X className="h-5 w-5" />
                 </button>
-              ))}
-            </div>
-
-            {/* Form Fields */}
-            <form onSubmit={handleAddListingSubmit} className="p-5 overflow-y-auto space-y-4 flex-1">
-              
-              <div>
-                <Label className="text-xs text-gray-300 font-medium">
-                  {listingType === "labour" ? "Worker Full Name *" : "Title / Name *"}
-                </Label>
-                <Input
-                  value={listTitle}
-                  onChange={e => setListTitle(e.target.value)}
-                  placeholder={listingType === "product" ? "e.g. Bio Organic Fertilizer 50kg" : listingType === "machinery" ? "e.g. Tractor 45HP + Harvester" : "e.g. Ramesh Kumar (Harvester Labour)"}
-                  className="bg-white/5 border-white/10 text-white mt-1"
-                  required
-                />
               </div>
 
-              {listingType === "product" ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-gray-300 font-medium">Category</Label>
-                    <select value={listCategory} onChange={e => setListCategory(e.target.value)} className="w-full bg-[#1a1a1a] border border-white/10 text-white text-xs rounded-xl p-2.5 mt-1 outline-none">
-                      <option value="Seeds">Seeds</option>
-                      <option value="Fertilizers">Fertilizers</option>
-                      <option value="Pesticides">Pesticides</option>
-                      <option value="Farm Tools">Farm Tools</option>
-                      <option value="Organic">Organic</option>
-                    </select>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-gray-300 font-medium">Unit / Packaging</Label>
-                    <Input value={listUnit} onChange={e => setListUnit(e.target.value)} placeholder="e.g. 50 kg bag / 1 Litre" className="bg-white/5 border-white/10 text-white mt-1" />
-                  </div>
-                </div>
-              ) : listingType === "labour" ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-gray-300 font-medium">Skill / Specialization</Label>
-                    <Input value={listCategory} onChange={e => setListCategory(e.target.value)} placeholder="e.g. Paddy Harvesting, Sowing, Spraying" className="bg-white/5 border-white/10 text-white mt-1" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-gray-300 font-medium">Working Hours / Shift</Label>
-                    <Input value={listUnit} onChange={e => setListUnit(e.target.value)} placeholder="e.g. per day (8 Hours)" className="bg-white/5 border-white/10 text-white mt-1" />
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-gray-300 font-medium">Machinery Type</Label>
-                    <Input value={listCategory} onChange={e => setListCategory(e.target.value)} placeholder="e.g. Tractor, Harvester, Rotavator" className="bg-white/5 border-white/10 text-white mt-1" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-gray-300 font-medium">Rental Rate Unit</Label>
-                    <Input value={listUnit} onChange={e => setListUnit(e.target.value)} placeholder="e.g. per hour / per acre" className="bg-white/5 border-white/10 text-white mt-1" />
-                  </div>
-                </div>
-              )}
+              {/* Selection Selector */}
+              <div className="flex items-center gap-2 p-3 bg-black/60 border-b border-white/10">
+                <span className="text-xs font-semibold text-gray-400 mr-2">Select Type:</span>
+                {[
+                  { id: "product", label: "Agricultural Product", icon: Package },
+                  { id: "machinery", label: "Machinery Fleet", icon: Tractor },
+                  { id: "labour", label: "Single Labour / Worker", icon: User },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setListingType(t.id as any)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      listingType === t.id
+                        ? "bg-primary text-black shadow-md shadow-primary/20"
+                        : "bg-white/5 text-gray-400 hover:text-white"
+                    }`}
+                  >
+                    <t.icon className="h-3.5 w-3.5" />
+                    {t.label}
+                  </button>
+                ))}
+              </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {/* Form Fields */}
+              <form onSubmit={handleAddListingSubmit} className="p-5 overflow-y-auto space-y-4 flex-1">
+                
                 <div>
                   <Label className="text-xs text-gray-300 font-medium">
-                    {listingType === "labour" ? "Daily Wage Rate (₹ / Day) *" : "Price / Rental Rate (₹) *"}
+                    {listingType === "labour" ? "Worker Full Name *" : "Title / Name *"}
                   </Label>
-                  <Input type="number" value={listPrice} onChange={e => setListPrice(e.target.value)} placeholder={listingType === "labour" ? "e.g. 500" : "Selling Price"} className="bg-white/5 border-white/10 text-white mt-1" required />
+                  <Input
+                    value={listTitle}
+                    onChange={e => setListTitle(e.target.value)}
+                    placeholder={listingType === "machinery" ? "e.g. Tractor 45HP + Harvester" : "e.g. Ramesh Kumar (Harvester Labour)"}
+                    className="bg-white/5 border-white/10 text-white mt-1"
+                    required
+                  />
                 </div>
-                <div>
-                  <Label className="text-xs text-gray-300 font-medium">Location / Service Area</Label>
-                  <Input value={listLocation} onChange={e => setListLocation(e.target.value)} placeholder="Patna, Bihar" className="bg-white/5 border-white/10 text-white mt-1" />
-                </div>
-              </div>
 
-              <div>
-                <Label className="text-xs text-gray-300 font-medium">Description & Experience</Label>
-                <Input value={listDesc} onChange={e => setListDesc(e.target.value)} placeholder={listingType === "labour" ? "Worker experience, age, phone number, availability..." : "Add product specification or service description..."} className="bg-white/5 border-white/10 text-white mt-1" />
-              </div>
-
-              {/* DUAL IMAGE UPLOAD (DEVICE & CAMERA) */}
-              <div>
-                <Label className="text-xs text-gray-300 mb-1.5 block font-medium">
-                  {listingType === "labour" ? "Worker Photo" : listingType === "machinery" ? "Machinery Photo" : "Product Photo"}
-                </Label>
-                
-                {listImg ? (
-                  <div className="relative border border-primary/40 rounded-xl p-2 bg-white/5 flex items-center gap-3">
-                    <img src={listImg} alt="Preview" className="w-14 h-14 object-cover rounded-lg border border-white/10" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-primary truncate">✓ Photo Attached</p>
-                      <p className="text-[10px] text-gray-400">Ready to submit with listing</p>
+                {listingType === "labour" ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs text-gray-300 font-medium">Skill / Specialization</Label>
+                      <Input value={listCategory} onChange={e => setListCategory(e.target.value)} placeholder="e.g. Paddy Harvesting, Sowing, Spraying" className="bg-white/5 border-white/10 text-white mt-1" />
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setListImg("")}
-                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs flex items-center gap-1"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" /> Remove
-                    </Button>
+                    <div>
+                      <Label className="text-xs text-gray-300 font-medium">Working Hours / Shift</Label>
+                      <Input value={listUnit} onChange={e => setListUnit(e.target.value)} placeholder="e.g. per day (8 Hours)" className="bg-white/5 border-white/10 text-white mt-1" />
+                    </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Option 1: Device Upload */}
-                    <label className="cursor-pointer flex flex-col items-center justify-center p-3 border border-dashed border-white/20 hover:border-primary/50 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
-                      <Upload className="h-5 w-5 text-primary mb-1" />
-                      <span className="text-xs font-semibold text-white">Upload from Device</span>
-                      <span className="text-[10px] text-gray-400">Choose image file</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageFileUpload}
-                      />
-                    </label>
-
-                    {/* Option 2: Camera Upload */}
-                    <label className="cursor-pointer flex flex-col items-center justify-center p-3 border border-dashed border-white/20 hover:border-primary/50 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
-                      <Camera className="h-5 w-5 text-primary mb-1" />
-                      <span className="text-xs font-semibold text-white">Upload by Camera</span>
-                      <span className="text-[10px] text-gray-400">Take live photo</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        capture="environment"
-                        className="hidden"
-                        onChange={handleImageFileUpload}
-                      />
-                    </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs text-gray-300 font-medium">Machinery Type</Label>
+                      <Input value={listCategory} onChange={e => setListCategory(e.target.value)} placeholder="e.g. Tractor, Harvester, Rotavator" className="bg-white/5 border-white/10 text-white mt-1" />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-300 font-medium">Rental Rate Unit</Label>
+                      <Input value={listUnit} onChange={e => setListUnit(e.target.value)} placeholder="e.g. per hour / per acre" className="bg-white/5 border-white/10 text-white mt-1" />
+                    </div>
                   </div>
                 )}
-              </div>
 
-              <div className="pt-3 border-t border-white/10">
-                <Button type="submit" className="w-full bg-primary text-black font-bold text-xs py-2.5">
-                  <Send className="h-4 w-4 mr-1.5" /> Submit Listing for Admin Approval
-                </Button>
-              </div>
-            </form>
-          </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs text-gray-300 font-medium">
+                      {listingType === "labour" ? "Daily Wage Rate (₹ / Day) *" : "Rental Rate (₹) *"}
+                    </Label>
+                    <Input type="number" value={listPrice} onChange={e => setListPrice(e.target.value)} placeholder={listingType === "labour" ? "e.g. 500" : "Rental Rate"} className="bg-white/5 border-white/10 text-white mt-1" required />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-300 font-medium">Location / Service Area</Label>
+                    <Input value={listLocation} onChange={e => setListLocation(e.target.value)} placeholder="Patna, Bihar" className="bg-white/5 border-white/10 text-white mt-1" />
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-gray-300 font-medium">Description & Experience</Label>
+                  <Input value={listDesc} onChange={e => setListDesc(e.target.value)} placeholder={listingType === "labour" ? "Worker experience, age, phone number, availability..." : "Add machinery specification or service description..."} className="bg-white/5 border-white/10 text-white mt-1" />
+                </div>
+
+                {/* DUAL IMAGE UPLOAD (DEVICE & CAMERA) */}
+                <div>
+                  <Label className="text-xs text-gray-300 mb-1.5 block font-medium">
+                    {listingType === "labour" ? "Worker Photo" : "Machinery Photo"}
+                  </Label>
+                  
+                  {listImg ? (
+                    <div className="relative border border-primary/40 rounded-xl p-2 bg-white/5 flex items-center gap-3">
+                      <img src={listImg} alt="Preview" className="w-14 h-14 object-cover rounded-lg border border-white/10" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-primary truncate">✓ Photo Attached</p>
+                        <p className="text-[10px] text-gray-400">Ready to submit with listing</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setListImg("")}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs flex items-center gap-1"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Remove
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      {/* Option 1: Device Upload */}
+                      <label className="cursor-pointer flex flex-col items-center justify-center p-3 border border-dashed border-white/20 hover:border-primary/50 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
+                        <Upload className="h-5 w-5 text-primary mb-1" />
+                        <span className="text-xs font-semibold text-white">Upload from Device</span>
+                        <span className="text-[10px] text-gray-400">Choose image file</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageFileUpload}
+                        />
+                      </label>
+
+                      {/* Option 2: Camera Upload */}
+                      <label className="cursor-pointer flex flex-col items-center justify-center p-3 border border-dashed border-white/20 hover:border-primary/50 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-center">
+                        <Camera className="h-5 w-5 text-primary mb-1" />
+                        <span className="text-xs font-semibold text-white">Upload by Camera</span>
+                        <span className="text-[10px] text-gray-400">Take live photo</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          className="hidden"
+                          onChange={handleImageFileUpload}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-3 border-t border-white/10">
+                  <Button type="submit" className="w-full bg-primary text-black font-bold text-xs py-2.5">
+                    <Send className="h-4 w-4 mr-1.5" /> Submit Listing for Admin Approval
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       )}
 

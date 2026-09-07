@@ -10,6 +10,8 @@ import type { ProductItem } from "../types.ts";
 import { toast } from "sonner";
 import { api } from "@/services/api";
 import { useApp } from "@/context/AppContext.tsx";
+import AddNewProductForm from "@/components/products/AddNewProductForm.tsx";
+import type { AddProductPayload } from "@/components/products/AddNewProductForm.tsx";
 
 interface ProductsViewProps {
   products: ProductItem[];
@@ -283,16 +285,43 @@ export default function ProductsView({ products: propProducts, setProducts, prod
     await api.addProduct({
       id: added.id,
       name: added.name,
-      category: added.category || 'general',
-      categoryId: added.category || 'general',
       price: added.price,
       stockQuantity: added.stock,
-      unit: added.unit || 'kg',
+      category: added.category,
       brand: added.brand,
-      sku: added.sku,
-      status: added.status,
-      description: added.description,
-      images: added.image ? [added.image] : [],
+    }).catch(() => {});
+  };
+
+  // Add Product using the new rich Variants Form (Requirement 1)
+  const handleAddProductFromForm = async (payload: AddProductPayload) => {
+    const primaryVariant = payload.variants[0] || { mrp: 500, salePrice: 450, stockQty: 20 };
+    const added = {
+      id: `prod_${Date.now()}`,
+      name: payload.name,
+      category: payload.category,
+      brand: payload.brand,
+      description: payload.description,
+      image: payload.imageUrl,
+      imageUrl: payload.imageUrl,
+      price: primaryVariant.salePrice,
+      mrp: primaryVariant.mrp,
+      stock: payload.variants.reduce((sum, v) => sum + (Number(v.stockQty) || 0), 0),
+      unit: payload.unitType,
+      status: payload.isActive ? "active" : "inactive",
+      tags: payload.tags,
+      variants: payload.variants,
+    } as any;
+
+    setProducts(prev => [added, ...prev]);
+    setIsAddOpen(false);
+    toast.success(`🎉 "${added.name}" added successfully with ${payload.variants.length} variants!`);
+    await api.addProduct({
+      id: added.id,
+      name: added.name,
+      price: added.price,
+      stockQuantity: added.stock,
+      category: added.category,
+      brand: added.brand,
     }).catch(() => {});
   };
 
@@ -1214,123 +1243,27 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* ─── Add New Product Modal ─── */}
+      {/* ─── Add New Product Modal (Matches exact reference design) ─── */}
       {isAddOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 relative">
-            <button onClick={() => setIsAddOpen(false)} className="absolute top-4 right-4 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 cursor-pointer">
-              <X className="h-4 w-4" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[94vh] shadow-2xl border border-gray-100 overflow-y-auto relative my-auto">
+            <button
+              onClick={() => setIsAddOpen(false)}
+              className="absolute top-4 right-4 z-20 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer shadow-xs"
+              title="Close"
+            >
+              <X className="h-5 w-5" />
             </button>
-            <h3 className="text-sm font-bold text-gray-900 mb-1">Add New Product</h3>
-            <p className="text-[11px] text-gray-400 mb-4">Add a new product to the catalog</p>
-            <form onSubmit={handleAddProduct} className="space-y-3 text-xs max-h-[75vh] overflow-y-auto pr-1">
-
-              {/* Product Name */}
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Product Name *</label>
-                <Input placeholder="e.g. Bio NPK Growth Enhancer" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} className="h-9 text-xs rounded-xl" required />
-              </div>
-
-              {/* Category + Brand */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Category</label>
-                  <Input placeholder="e.g. Fertilizers" value={newProduct.category} onChange={e => setNewProduct({ ...newProduct, category: e.target.value })} className="h-9 text-xs rounded-xl" />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Brand</label>
-                  <Input placeholder="e.g. Krivexa Agro" value={newProduct.brand} onChange={e => setNewProduct({ ...newProduct, brand: e.target.value })} className="h-9 text-xs rounded-xl" />
-                </div>
-              </div>
-
-              {/* SKU + Unit */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">SKU</label>
-                  <Input placeholder="e.g. PRD-001" value={newProduct.sku} onChange={e => setNewProduct({ ...newProduct, sku: e.target.value })} className="h-9 text-xs rounded-xl" />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Unit / Weight</label>
-                  <Input placeholder="e.g. 1 kg, 500 ml" value={newProduct.unit} onChange={e => setNewProduct({ ...newProduct, unit: e.target.value })} className="h-9 text-xs rounded-xl" />
-                </div>
-              </div>
-
-              {/* Price + MRP */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Selling Price (₹) *</label>
-                  <Input type="number" min="0" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: Number(e.target.value) })} className="h-9 text-xs rounded-xl" required />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">MRP (₹)</label>
-                  <Input type="number" min="0" value={newProduct.mrp} onChange={e => setNewProduct({ ...newProduct, mrp: Number(e.target.value) })} className="h-9 text-xs rounded-xl" />
-                </div>
-              </div>
-
-              {/* Discount + Stock */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Discount (%)</label>
-                  <Input type="number" min="0" max="100" value={newProduct.discount} onChange={e => setNewProduct({ ...newProduct, discount: Number(e.target.value) })} className="h-9 text-xs rounded-xl" placeholder="0" />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Stock Qty</label>
-                  <Input type="number" min="0" value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: Number(e.target.value) })} className="h-9 text-xs rounded-xl" />
-                </div>
-              </div>
-
-              {/* Min Order Qty + Warranty */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Min. Order Qty</label>
-                  <Input type="number" min="1" value={newProduct.minOrderQty} onChange={e => setNewProduct({ ...newProduct, minOrderQty: Number(e.target.value) })} className="h-9 text-xs rounded-xl" />
-                </div>
-                <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Warranty</label>
-                  <Input placeholder="e.g. 6 months" value={newProduct.warranty} onChange={e => setNewProduct({ ...newProduct, warranty: e.target.value })} className="h-9 text-xs rounded-xl" />
-                </div>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Status</label>
-                <select value={newProduct.status} onChange={e => setNewProduct({ ...newProduct, status: e.target.value })} className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-xs font-medium cursor-pointer">
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-
-              {/* Image URL */}
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Image URL</label>
-                <Input placeholder="https://example.com/product.jpg" value={newProduct.imageUrl} onChange={e => setNewProduct({ ...newProduct, imageUrl: e.target.value })} className="h-9 text-xs rounded-xl" />
-              </div>
-
-              {/* Tags */}
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Tags (comma-separated)</label>
-                <Input placeholder="e.g. organic, fertilizer, bio" value={newProduct.tags} onChange={e => setNewProduct({ ...newProduct, tags: e.target.value })} className="h-9 text-xs rounded-xl" />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block font-semibold text-gray-700 mb-1">Description</label>
-                <textarea
-                  value={newProduct.description}
-                  onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
-                  rows={2}
-                  placeholder="Short product description (Hindi/English)"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 text-xs resize-none focus:outline-none focus:ring-2 focus:ring-emerald-300"
-                />
-              </div>
-
-              <div className="pt-2 flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)} className="h-9 text-xs rounded-xl font-semibold cursor-pointer">Cancel</Button>
-                <Button type="submit" className="h-9 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 rounded-xl font-semibold gap-1.5 cursor-pointer">
-                  <Check className="h-3.5 w-3.5" /> Add Product
-                </Button>
-              </div>
-            </form>
+            <AddNewProductForm
+              isAdmin={true}
+              dealerInfo={{
+                storeName: "Krivexa Central Admin Catalog",
+                retailerId: "ADMIN-001",
+                dealerName: "Admin Supervisor",
+              }}
+              onCancel={() => setIsAddOpen(false)}
+              onSuccess={handleAddProductFromForm}
+            />
           </div>
         </div>
       )}
