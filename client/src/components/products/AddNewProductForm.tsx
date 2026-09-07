@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Package, Plus, Trash2, Check, ArrowRight, UploadCloud,
-  Camera, Info, CheckCircle2, ChevronRight, X, Sparkles,
-  HelpCircle, Bell, User as UserIcon
+  Camera, Info, CheckCircle2, ChevronRight, X,
+  HelpCircle, Bell, User as UserIcon, Image as ImageIcon,
+  ChevronDown, ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -16,8 +17,21 @@ export interface ProductVariant {
   mrp: number;
   salePrice: number;
   stockQty: number;
-  imageType?: "pack" | "bottle";
+  variantImageUrl?: string;
 }
+
+const PACKING_TYPES = ["Pack", "Bottle", "Bag", "Box", "Can", "Pouch", "Drum"] as const;
+
+const packingEmoji = (p: string) => {
+  switch (p) {
+    case "Bottle": return "🍾";
+    case "Bag": return "🛍️";
+    case "Box": return "📦";
+    case "Can": return "🥫";
+    case "Drum": return "🪣";
+    default: return "📦";
+  }
+};
 
 export interface AddProductPayload {
   name: string;
@@ -66,11 +80,13 @@ export default function AddNewProductForm({
 
   // 2. Variants State
   const [variants, setVariants] = useState<ProductVariant[]>([
-    { id: "v-1", sizeWeight: "100 GM", packingType: "Pack", mrp: 120, salePrice: 105, stockQty: 45, imageType: "pack" },
-    { id: "v-2", sizeWeight: "250 GM", packingType: "Pack", mrp: 240, salePrice: 210, stockQty: 32, imageType: "pack" },
-    { id: "v-3", sizeWeight: "500 GM", packingType: "Pack", mrp: 450, salePrice: 390, stockQty: 28, imageType: "pack" },
-    { id: "v-4", sizeWeight: "1 LTR", packingType: "Bottle", mrp: 780, salePrice: 680, stockQty: 20, imageType: "bottle" },
+    { id: "v-1", sizeWeight: "100 GM", packingType: "Pack", mrp: 120, salePrice: 105, stockQty: 45 },
+    { id: "v-2", sizeWeight: "250 GM", packingType: "Pack", mrp: 240, salePrice: 210, stockQty: 32 },
+    { id: "v-3", sizeWeight: "500 GM", packingType: "Pack", mrp: 450, salePrice: 390, stockQty: 28 },
+    { id: "v-4", sizeWeight: "1 LTR", packingType: "Bottle", mrp: 780, salePrice: 680, stockQty: 20 },
   ]);
+  // Which variant row has its image panel open
+  const [expandedVariantImg, setExpandedVariantImg] = useState<string | null>(null);
 
   // 3. Additional Info
   const [unitType, setUnitType] = useState("Gram / Litre");
@@ -78,23 +94,13 @@ export default function AddNewProductForm({
   const [isActive, setIsActive] = useState(true);
   const [tagsInput, setTagsInput] = useState("Organic, Plant Nutrition, High Yield");
 
-  // Active step in the top wizard (1, 2, 3, 4)
-  const [currentStep, setCurrentStep] = useState<number>(2);
+  const mainImageRef = useRef<HTMLInputElement>(null);
 
   // Add a new variant row
   const handleAddVariant = () => {
-    const newId = `v-${Date.now()}`;
     setVariants(prev => [
       ...prev,
-      {
-        id: newId,
-        sizeWeight: "1 KG",
-        packingType: "Pack",
-        mrp: 500,
-        salePrice: 420,
-        stockQty: 10,
-        imageType: "pack",
-      },
+      { id: `v-${Date.now()}`, sizeWeight: "1 KG", packingType: "Pack", mrp: 500, salePrice: 420, stockQty: 10 },
     ]);
   };
 
@@ -114,19 +120,26 @@ export default function AddNewProductForm({
     );
   };
 
-  // Handle local image upload simulation
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ── Image helpers ──────────────────────────────────────────────────────────
+  const readFileAsDataUrl = (file: File, cb: (url: string) => void) => {
+    const reader = new FileReader();
+    reader.onload = () => { if (typeof reader.result === "string") cb(reader.result); };
+    reader.readAsDataURL(file);
+  };
+
+  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          setImageUrl(reader.result);
-          toast.success("Product image uploaded successfully!");
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+    if (file) readFileAsDataUrl(file, (url) => { setImageUrl(url); toast.success("Main product image updated!"); });
+  };
+
+  const handleVariantImageChange = (variantId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) readFileAsDataUrl(file, (url) => { handleUpdateVariant(variantId, "variantImageUrl", url); toast.success("Variant image uploaded!"); });
+  };
+
+  const removeVariantImage = (variantId: string) => {
+    handleUpdateVariant(variantId, "variantImageUrl", undefined);
+    toast.info("Variant image removed.");
   };
 
   // Form Submit / Publish
@@ -160,559 +173,506 @@ export default function AddNewProductForm({
   };
 
   return (
-    <div className="w-full bg-[#f8fafc] text-gray-800 font-sans min-h-screen p-3 md:p-6">
-      {/* Top Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-200 mb-6">
+    <div className="w-full bg-[#f0f4f8] text-gray-800 font-sans min-h-screen">
+
+      {/* ── Top Header ─────────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-gray-200 px-5 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 sticky top-0 z-20 shadow-sm">
         <div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-            Product List Karein
+          <h1 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+            <Package className="h-5 w-5 text-emerald-600" />
+            Add New Product
           </h1>
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1 font-medium">
+          <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-0.5 font-medium">
             <span>Dashboard</span>
-            <ChevronRight className="h-3 w-3 text-gray-400" />
+            <ChevronRight className="h-3 w-3" />
             <span>Products</span>
-            <ChevronRight className="h-3 w-3 text-gray-400" />
+            <ChevronRight className="h-3 w-3" />
             <span className="text-emerald-700 font-semibold">Add New Product</span>
           </div>
         </div>
-
-        <div className="flex items-center gap-3 self-end md:self-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-white border-gray-200 text-gray-700 hover:text-emerald-700 text-xs rounded-xl gap-1.5 shadow-xs"
-          >
-            <HelpCircle className="h-4 w-4 text-emerald-600" /> Help Center
-          </Button>
-
-          <div className="relative p-2 rounded-xl bg-white border border-gray-200 text-gray-600 shadow-xs cursor-pointer">
-            <Bell className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
-              3
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2.5 bg-white border border-gray-200 rounded-xl px-3 py-1.5 shadow-xs">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-300 overflow-hidden flex items-center justify-center">
-              <UserIcon className="h-4 w-4 text-emerald-800" />
+        <div className="flex items-center gap-2 self-end md:self-auto">
+          <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5">
+            <div className="w-7 h-7 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center">
+              <UserIcon className="h-3.5 w-3.5 text-emerald-800" />
             </div>
-            <div className="text-left">
-              <div className="text-xs font-bold text-gray-900 leading-none">
-                {dealerInfo.dealerName || "Amit Kumar"}
-              </div>
-              <div className="text-[10px] text-gray-500 font-medium leading-tight">
-                {isAdmin ? "Admin / Supervisor" : "Dukandaar"}
-              </div>
+            <div>
+              <div className="text-[11px] font-bold text-gray-900 leading-none">{dealerInfo.dealerName || "Amit Kumar"}</div>
+              <div className="text-[10px] text-gray-500">{isAdmin ? "Admin" : "Dealer"}</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Top 4-Step Wizard */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-4 md:p-6 mb-6 shadow-xs">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
-          {/* Step 1 */}
-          <div
-            onClick={() => setCurrentStep(1)}
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <div className="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold text-sm flex items-center justify-center shadow-xs shrink-0">
-              1
-            </div>
-            <div>
-              <div className="text-xs font-bold text-gray-900 group-hover:text-emerald-700">
-                Product Details
+      {/* ── Step Breadcrumb ─────────────────────────────────────────────── */}
+      <div className="bg-white border-b border-gray-200 px-5 py-3">
+        <div className="flex items-center gap-1 overflow-x-auto">
+          {[
+            { n: 1, label: "Product Details" },
+            { n: 2, label: "Variants" },
+            { n: 3, label: "Additional Info" },
+            { n: 4, label: "Review & Publish" },
+          ].map((s, i, arr) => (
+            <React.Fragment key={s.n}>
+              <div className="flex items-center gap-2 shrink-0">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black border-2 ${
+                  s.n <= 2 ? "bg-emerald-600 border-emerald-600 text-white" : "bg-white border-gray-300 text-gray-400"
+                }`}>
+                  {s.n <= 1 ? <Check className="h-3.5 w-3.5" /> : s.n}
+                </div>
+                <span className={`text-xs font-semibold whitespace-nowrap ${
+                  s.n <= 2 ? "text-emerald-700" : "text-gray-400"
+                }`}>{s.label}</span>
               </div>
-              <div className="text-[11px] text-gray-500 leading-tight">
-                Product ki basic jankari bharein
-              </div>
-            </div>
-          </div>
-
-          {/* Step 2 */}
-          <div
-            onClick={() => setCurrentStep(2)}
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <div className="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold text-sm flex items-center justify-center shadow-xs shrink-0 ring-4 ring-emerald-100">
-              2
-            </div>
-            <div>
-              <div className="text-xs font-bold text-emerald-800 group-hover:text-emerald-900">
-                Variants (Size / Weight)
-              </div>
-              <div className="text-[11px] text-gray-500 leading-tight">
-                Alag alag size / weight add karein
-              </div>
-            </div>
-          </div>
-
-          {/* Step 3 */}
-          <div
-            onClick={() => setCurrentStep(3)}
-            className="flex items-center gap-3 cursor-pointer group opacity-80 hover:opacity-100"
-          >
-            <div className="w-9 h-9 rounded-full bg-gray-100 text-gray-600 font-bold text-sm flex items-center justify-center border border-gray-200 shrink-0">
-              3
-            </div>
-            <div>
-              <div className="text-xs font-bold text-gray-700 group-hover:text-gray-900">
-                Additional Info
-              </div>
-              <div className="text-[11px] text-gray-400 leading-tight">
-                Aur jankari bharein
-              </div>
-            </div>
-          </div>
-
-          {/* Step 4 */}
-          <div
-            onClick={() => setCurrentStep(4)}
-            className="flex items-center gap-3 cursor-pointer group opacity-70 hover:opacity-100"
-          >
-            <div className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 font-bold text-sm flex items-center justify-center border border-gray-200 shrink-0">
-              4
-            </div>
-            <div>
-              <div className="text-xs font-bold text-gray-600 group-hover:text-gray-900">
-                Review & Publish
-              </div>
-              <div className="text-[11px] text-gray-400 leading-tight">
-                Review karke publish karein
-              </div>
-            </div>
-          </div>
+              {i < arr.length - 1 && (
+                <div className={`h-px flex-1 min-w-[20px] mx-1 ${
+                  s.n < 2 ? "bg-emerald-400" : "bg-gray-200"
+                }`} />
+              )}
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
-      {/* Main Form Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* LEFT COLUMN: Section 1 (Product Details) & Section 3 (Additional Info) */}
-        <div className="space-y-6">
-          
-          {/* Card 1: Product Details */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
-            <h2 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3">
-              1. Product Details
-            </h2>
+      {/* ── Main Content ────────────────────────────────────────────────── */}
+      <div className="p-4 md:p-6 space-y-5 max-w-7xl mx-auto">
 
-            {/* Product Name */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-gray-800">
-                  Product Name <span className="text-red-500">*</span>
-                </label>
-                <span className="text-[11px] text-gray-400 font-mono">
-                  {productName.length}/100
-                </span>
-              </div>
-              <Input
-                value={productName}
-                maxLength={100}
-                onChange={e => setProductName(e.target.value)}
-                placeholder="e.g. Profex Super / Nano Urea"
-                className="bg-gray-50/50 border-gray-200 text-gray-900 text-xs rounded-xl focus:bg-white"
-              />
+        {/* ─ Row 1: Product Details + Variants ─ */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+          {/* ╔══════════════════════════════╗
+              ║   Section 1: Product Details ║
+              ╚══════════════════════════════╝ */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-emerald-600 px-5 py-3 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-white/20 text-white text-xs font-black flex items-center justify-center">1</div>
+              <h2 className="text-sm font-bold text-white">Product Details</h2>
             </div>
+            <div className="p-5 space-y-4">
 
-            {/* Category & Brand */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Product Name */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1">
-                  Category <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                  className="w-full bg-gray-50/50 border border-gray-200 text-gray-900 text-xs rounded-xl p-2.5 outline-none focus:border-emerald-500 focus:bg-white cursor-pointer font-medium"
-                >
-                  <option value="Fertilizer / Plant Nutrition">🌾 Fertilizer / Plant Nutrition</option>
-                  <option value="Seeds & Hybrids">🌱 Seeds & Hybrids</option>
-                  <option value="Pesticides / Insecticides">🧪 Pesticides / Insecticides</option>
-                  <option value="Fungicides & Herbicides">🍂 Fungicides & Herbicides</option>
-                  <option value="Farm Equipment / Tools">🚜 Farm Equipment / Tools</option>
-                  <option value="Organic Bio-Fertilizer">🌿 Organic Bio-Fertilizer</option>
-                  <option value="Animal Feed & Veterinary">🐄 Animal Feed & Veterinary</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1">
-                  Brand <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={brand}
-                  onChange={e => setBrand(e.target.value)}
-                  className="w-full bg-gray-50/50 border border-gray-200 text-gray-900 text-xs rounded-xl p-2.5 outline-none focus:border-emerald-500 focus:bg-white cursor-pointer font-medium"
-                >
-                  <option value="Profex">Profex</option>
-                  <option value="Bayer CropScience">Bayer CropScience</option>
-                  <option value="Syngenta">Syngenta</option>
-                  <option value="IFFCO">IFFCO</option>
-                  <option value="UPL Limited">UPL Limited</option>
-                  <option value="Dhanuka Agritech">Dhanuka Agritech</option>
-                  <option value="Tata Rallis">Tata Rallis</option>
-                  <option value="Krivexa Agro Brand">Krivexa Agro Brand</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Product Description */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-gray-800">
-                  Product Description <span className="text-red-500">*</span>
-                </label>
-                <span className="text-[11px] text-gray-400 font-mono">
-                  {description.length}/500
-                </span>
-              </div>
-              <textarea
-                value={description}
-                maxLength={500}
-                rows={4}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Product ki khasiyat, fayde aur upyog karne ka tarika likhein..."
-                className="w-full bg-gray-50/50 border border-gray-200 text-gray-900 text-xs rounded-xl p-3 resize-none outline-none focus:border-emerald-500 focus:bg-white leading-relaxed"
-              />
-            </div>
-
-            {/* Product Image Section */}
-            <div>
-              <label className="block text-xs font-bold text-gray-800 mb-2">
-                Product Image <span className="text-red-500">*</span>
-              </label>
-              
-              <div className="grid grid-cols-2 gap-4">
-                {/* Image Preview Box */}
-                <div className="relative border border-gray-200 rounded-2xl bg-gray-50 p-2 flex flex-col items-center justify-center overflow-hidden min-h-[150px]">
-                  <img
-                    src={imageUrl}
-                    alt="Product preview"
-                    className="max-h-28 object-contain rounded-lg mb-2"
-                  />
-                  <label className="w-full">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageFileChange}
-                      className="hidden"
-                    />
-                    <span className="flex items-center justify-center gap-1 text-[11px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 py-1.5 px-2 rounded-lg cursor-pointer transition-colors shadow-2xs">
-                      <Camera className="h-3 w-3 text-gray-500" /> Change Image
-                    </span>
-                  </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-gray-700">Product Name <span className="text-red-500">*</span></label>
+                  <span className="text-[10px] text-gray-400 font-mono">{productName.length}/100</span>
                 </div>
-
-                {/* Upload Trigger Box */}
-                <label className="border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-2xl bg-emerald-50/30 hover:bg-emerald-50/60 p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageFileChange}
-                    className="hidden"
-                  />
-                  <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2">
-                    <UploadCloud className="h-5 w-5" />
-                  </div>
-                  <div className="text-xs font-bold text-gray-800">
-                    Ek product ka photo upload karein
-                  </div>
-                  <div className="text-[10px] text-gray-500 mt-0.5">
-                    (JPG, PNG, WEBP)
-                  </div>
-                  <div className="text-[10px] text-gray-400 mt-1">
-                    Max size 5MB
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Additional Information */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
-            <h2 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3">
-              3. Additional Information
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-              <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1">
-                  Unit Type <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={unitType}
-                  onChange={e => setUnitType(e.target.value)}
-                  className="w-full bg-gray-50/50 border border-gray-200 text-gray-900 text-xs rounded-xl p-2.5 outline-none focus:border-emerald-500 focus:bg-white cursor-pointer font-medium"
-                >
-                  <option value="Gram / Litre">Gram / Litre</option>
-                  <option value="Kilogram (KG)">Kilogram (KG)</option>
-                  <option value="Litre (LTR)">Litre (LTR)</option>
-                  <option value="Millilitre (ML)">Millilitre (ML)</option>
-                  <option value="Pieces (PCS)">Pieces (PCS)</option>
-                  <option value="Quintal / Ton">Quintal / Ton</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1">
-                  Shelf Life
-                </label>
-                <div className="flex rounded-xl overflow-hidden border border-gray-200 bg-gray-50/50">
-                  <Input
-                    type="number"
-                    value={shelfLife}
-                    onChange={e => setShelfLife(e.target.value)}
-                    className="border-0 bg-transparent text-xs text-gray-900 focus-visible:ring-0"
-                  />
-                  <span className="bg-gray-100 px-3 text-[11px] font-bold text-gray-600 flex items-center border-l border-gray-200">
-                    Months
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-3 sm:pt-0">
-                <label className="block text-xs font-bold text-gray-800 mb-2">
-                  Is Active
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setIsActive(!isActive)}
-                  className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
-                    isActive ? "bg-emerald-600" : "bg-gray-300"
-                  }`}
-                >
-                  <div
-                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                      isActive ? "translate-x-6" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-
-            {/* Tags (Optional) */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-gray-800">
-                  Tags (Optional)
-                </label>
-                <span className="text-[11px] text-gray-400 font-mono">
-                  {tagsInput.length}/100
-                </span>
-              </div>
-              <Input
-                value={tagsInput}
-                maxLength={100}
-                onChange={e => setTagsInput(e.target.value)}
-                placeholder="Eg. Organic, Best Quality, High Yield"
-                className="bg-gray-50/50 border-gray-200 text-gray-900 text-xs rounded-xl focus:bg-white"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: Section 2 (Variants) & Product Preview Card */}
-        <div className="space-y-6">
-
-          {/* Card 2: Variants (Size / Weight) */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 shadow-xs space-y-4">
-            <h2 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3">
-              2. Variants (Size / Weight)
-            </h2>
-
-            {/* Info notice banner */}
-            <div className="bg-blue-50/60 border border-blue-200/80 rounded-xl p-3 flex items-start gap-2.5 text-blue-900 text-xs leading-relaxed">
-              <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-              <div>
-                <strong className="font-bold">{productName || "Profex"}</strong> is product ko alag alag size / weight me bechein. Sabhi variants yahin add karein.
-              </div>
-            </div>
-
-            {/* Variants Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="text-gray-500 font-bold border-b border-gray-100">
-                    <th className="pb-2.5 font-bold">Size / Weight</th>
-                    <th className="pb-2.5 font-bold">Packing Type</th>
-                    <th className="pb-2.5 font-bold">MRP (₹) *</th>
-                    <th className="pb-2.5 font-bold">Sale Price (₹) *</th>
-                    <th className="pb-2.5 font-bold">Stock Qty *</th>
-                    <th className="pb-2.5 text-center font-bold">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {variants.map((v, index) => (
-                    <tr key={v.id} className="group hover:bg-gray-50/50 transition-colors">
-                      {/* Size / Weight */}
-                      <td className="py-2.5 pr-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-md bg-emerald-100/70 border border-emerald-200 flex items-center justify-center shrink-0">
-                            {v.packingType === "Bottle" ? "🍾" : "📦"}
-                          </div>
-                          <Input
-                            value={v.sizeWeight}
-                            onChange={e => handleUpdateVariant(v.id, "sizeWeight", e.target.value)}
-                            className="h-8 text-xs font-bold w-24 bg-white border-gray-200 rounded-lg"
-                          />
-                        </div>
-                      </td>
-
-                      {/* Packing Type */}
-                      <td className="py-2.5 pr-2">
-                        <select
-                          value={v.packingType}
-                          onChange={e => handleUpdateVariant(v.id, "packingType", e.target.value)}
-                          className="h-8 text-xs bg-white border border-gray-200 rounded-lg px-2 outline-none font-medium cursor-pointer"
-                        >
-                          <option value="Pack">Pack</option>
-                          <option value="Bottle">Bottle</option>
-                          <option value="Bag">Bag</option>
-                          <option value="Box">Box</option>
-                          <option value="Can">Can</option>
-                          <option value="Pouch">Pouch</option>
-                          <option value="Drum">Drum</option>
-                        </select>
-                      </td>
-
-                      {/* MRP */}
-                      <td className="py-2.5 pr-2">
-                        <Input
-                          type="number"
-                          value={v.mrp}
-                          onChange={e => handleUpdateVariant(v.id, "mrp", Number(e.target.value))}
-                          className="h-8 text-xs font-mono w-20 bg-white border-gray-200 rounded-lg"
-                        />
-                      </td>
-
-                      {/* Sale Price */}
-                      <td className="py-2.5 pr-2">
-                        <Input
-                          type="number"
-                          value={v.salePrice}
-                          onChange={e => handleUpdateVariant(v.id, "salePrice", Number(e.target.value))}
-                          className="h-8 text-xs font-bold font-mono text-emerald-700 w-20 bg-white border-emerald-200 rounded-lg"
-                        />
-                      </td>
-
-                      {/* Stock Qty */}
-                      <td className="py-2.5 pr-2">
-                        <Input
-                          type="number"
-                          value={v.stockQty}
-                          onChange={e => handleUpdateVariant(v.id, "stockQty", Number(e.target.value))}
-                          className="h-8 text-xs font-mono w-16 bg-white border-gray-200 rounded-lg"
-                        />
-                      </td>
-
-                      {/* Action */}
-                      <td className="py-2.5 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveVariant(v.id)}
-                          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
-                          title="Variant delete karein"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Add Variant Button */}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddVariant}
-              className="w-full sm:w-auto text-xs font-bold text-emerald-700 border-emerald-300 hover:bg-emerald-50 rounded-xl gap-1.5 cursor-pointer"
-            >
-              <Plus className="h-3.5 w-3.5 text-emerald-600" /> Add Another Variant
-            </Button>
-
-            {/* Helper Notice */}
-            <div className="flex items-center gap-2 text-xs text-emerald-800 font-medium pt-2 border-t border-gray-100">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span>Aap jitne chahein variants (size / weight) add kar sakte hain.</span>
-            </div>
-          </div>
-
-          {/* Product Preview Card */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs">
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
-              Product Preview
-            </h3>
-
-            <div className="flex items-center gap-4 bg-gray-50/70 border border-gray-100 rounded-2xl p-4">
-              <div className="w-16 h-16 rounded-xl bg-white border border-gray-200 p-1 flex items-center justify-center shrink-0 shadow-2xs">
-                <img
-                  src={imageUrl}
-                  alt="Thumbnail"
-                  className="max-h-full max-w-full object-contain"
+                <Input
+                  value={productName} maxLength={100}
+                  onChange={e => setProductName(e.target.value)}
+                  placeholder="e.g. Profex Super / Nano Urea"
+                  className="bg-gray-50 border-gray-300 text-gray-900 text-sm rounded-xl h-10 focus:border-emerald-500 focus:bg-white"
                 />
               </div>
 
-              <div className="flex-1 min-w-0">
-                <h4 className="text-base font-black text-gray-900 truncate">
-                  {productName || "Product Name"}
-                </h4>
-                <p className="text-xs text-gray-500 truncate mt-0.5">
-                  Available in: {variants.map(v => v.sizeWeight).filter(Boolean).join(", ") || "100 GM, 250 GM, 500 GM, 1 LTR"}
-                </p>
-                <div className="mt-2 flex items-center gap-2">
-                  <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
-                    {variants.length} Variants
-                  </Badge>
-                  {isActive && (
-                    <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Live on Store
-                    </span>
-                  )}
+              {/* Category & Brand */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Category <span className="text-red-500">*</span></label>
+                  <select value={category} onChange={e => setCategory(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl px-3 h-10 outline-none focus:border-emerald-500 focus:bg-white cursor-pointer font-medium">
+                    <option value="Fertilizer / Plant Nutrition">🌾 Fertilizer / Plant Nutrition</option>
+                    <option value="Seeds & Hybrids">🌱 Seeds & Hybrids</option>
+                    <option value="Pesticides / Insecticides">🧪 Pesticides / Insecticides</option>
+                    <option value="Fungicides & Herbicides">🍂 Fungicides & Herbicides</option>
+                    <option value="Farm Equipment / Tools">🚜 Farm Equipment / Tools</option>
+                    <option value="Organic Bio-Fertilizer">🌿 Organic Bio-Fertilizer</option>
+                    <option value="Animal Feed & Veterinary">🐄 Animal Feed & Veterinary</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Brand <span className="text-red-500">*</span></label>
+                  <select value={brand} onChange={e => setBrand(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl px-3 h-10 outline-none focus:border-emerald-500 focus:bg-white cursor-pointer font-medium">
+                    <option>Profex</option>
+                    <option>Bayer CropScience</option>
+                    <option>Syngenta</option>
+                    <option>IFFCO</option>
+                    <option>UPL Limited</option>
+                    <option>Dhanuka Agritech</option>
+                    <option>Tata Rallis</option>
+                    <option>Krivexa Agro Brand</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-gray-700">Product Description <span className="text-red-500">*</span></label>
+                  <span className="text-[10px] text-gray-400 font-mono">{description.length}/500</span>
+                </div>
+                <textarea
+                  value={description} maxLength={500} rows={4}
+                  onChange={e => setDescription(e.target.value)}
+                  placeholder="Product ki khasiyat, fayde aur upyog karne ka tarika likhein..."
+                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl px-3 py-2.5 resize-none outline-none focus:border-emerald-500 focus:bg-white leading-relaxed"
+                />
+              </div>
+
+              {/* Main Product Image */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-2">
+                  Main Product Image <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="border-2 border-gray-200 rounded-xl bg-gray-50 flex flex-col items-center justify-center overflow-hidden min-h-[140px] gap-2 p-2">
+                    <img src={imageUrl} alt="Product" className="max-h-24 object-contain rounded-lg" />
+                    <button
+                      type="button"
+                      onClick={() => mainImageRef.current?.click()}
+                      className="flex items-center gap-1 text-[11px] font-bold text-gray-600 bg-white border border-gray-300 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700 py-1.5 px-3 rounded-lg cursor-pointer transition-colors shadow-sm"
+                    >
+                      <Camera className="h-3 w-3" /> Change Image
+                    </button>
+                    <input ref={mainImageRef} type="file" accept="image/*" onChange={handleMainImageChange} className="hidden" />
+                  </div>
+                  <label className="border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-xl bg-emerald-50/40 hover:bg-emerald-50 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[140px] gap-1.5">
+                    <input type="file" accept="image/*" onChange={handleMainImageChange} className="hidden" />
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                      <UploadCloud className="h-5 w-5" />
+                    </div>
+                    <div className="text-xs font-bold text-gray-700">Upload Photo</div>
+                    <div className="text-[10px] text-gray-500">JPG, PNG, WEBP</div>
+                    <div className="text-[10px] text-gray-400">Max 5 MB</div>
+                  </label>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Bottom Actions Bar */}
-            <div className="flex flex-wrap items-center justify-end gap-3 pt-5 mt-4 border-t border-gray-100">
-              {onCancel && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCancel}
-                  className="h-10 px-5 rounded-xl text-xs font-bold text-gray-700 border-gray-300 hover:bg-gray-100 cursor-pointer"
-                >
-                  Cancel
-                </Button>
-              )}
+          {/* ╔══════════════════════════════════════╗
+              ║  Section 2: Variants (Size / Weight) ║
+              ╚══════════════════════════════════════╝ */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-blue-600 px-5 py-3 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-white/20 text-white text-xs font-black flex items-center justify-center">2</div>
+              <h2 className="text-sm font-bold text-white">Variants (Size / Weight)</h2>
+              <Badge className="ml-auto bg-white/20 text-white border-0 text-[10px] font-bold px-2">
+                {variants.length} added
+              </Badge>
+            </div>
+            <div className="p-4 space-y-3">
+              {/* Info banner */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2 text-blue-800 text-xs">
+                <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                <span>
+                  <strong>{productName || "Product"}</strong> ke alag alag size/weight variants add karein. Har variant ka apna alag image bhi upload kar sakte hain (image icon tap karein).
+                </span>
+              </div>
 
+              {/* Column headers */}
+              <div className="grid grid-cols-[32px_1fr_86px_68px_68px_52px_36px] gap-1 px-1 pb-1.5 border-b border-gray-200">
+                <div className="text-[10px] font-bold text-blue-500 text-center">Img</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase">Size / Weight</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase">Packing</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase">MRP ₹</div>
+                <div className="text-[10px] font-bold text-blue-600 uppercase">Sale ₹</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase">Stock</div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase text-center">Del</div>
+              </div>
+
+              {/* Variant rows */}
+              <div className="space-y-2">
+                {variants.map((v) => (
+                  <div key={v.id} className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50/60">
+                    {/* Main row */}
+                    <div className="grid grid-cols-[32px_1fr_86px_68px_68px_52px_36px] gap-1 items-center px-2 py-2">
+                      {/* Image indicator / toggle */}
+                      <button
+                        type="button"
+                        title="Toggle variant image"
+                        onClick={() => setExpandedVariantImg(expandedVariantImg === v.id ? null : v.id)}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer border overflow-hidden ${
+                          v.variantImageUrl
+                            ? "border-blue-400 bg-blue-50"
+                            : "border-gray-200 bg-white text-gray-400 hover:text-blue-500 hover:border-blue-300"
+                        }`}
+                      >
+                        {v.variantImageUrl
+                          ? <img src={v.variantImageUrl} alt="" className="w-full h-full object-cover" />
+                          : <ImageIcon className="h-4 w-4" />
+                        }
+                      </button>
+                      {/* Size / Weight */}
+                      <Input
+                        value={v.sizeWeight}
+                        onChange={e => handleUpdateVariant(v.id, "sizeWeight", e.target.value)}
+                        className="h-8 text-xs font-semibold bg-white border-gray-300 rounded-lg"
+                        placeholder="e.g. 500 GM"
+                      />
+                      {/* Packing type */}
+                      <select
+                        value={v.packingType}
+                        onChange={e => handleUpdateVariant(v.id, "packingType", e.target.value)}
+                        className="h-8 text-xs bg-white border border-gray-300 rounded-lg px-1.5 outline-none font-medium cursor-pointer w-full"
+                      >
+                        {PACKING_TYPES.map(p => <option key={p}>{p}</option>)}
+                      </select>
+                      {/* MRP */}
+                      <Input
+                        type="number" value={v.mrp}
+                        onChange={e => handleUpdateVariant(v.id, "mrp", Number(e.target.value))}
+                        className="h-8 text-xs font-mono bg-white border-gray-300 rounded-lg"
+                      />
+                      {/* Sale Price */}
+                      <Input
+                        type="number" value={v.salePrice}
+                        onChange={e => handleUpdateVariant(v.id, "salePrice", Number(e.target.value))}
+                        className="h-8 text-xs font-bold font-mono text-blue-700 bg-blue-50 border-blue-200 rounded-lg"
+                      />
+                      {/* Stock */}
+                      <Input
+                        type="number" value={v.stockQty}
+                        onChange={e => handleUpdateVariant(v.id, "stockQty", Number(e.target.value))}
+                        className="h-8 text-xs font-mono bg-white border-gray-300 rounded-lg"
+                      />
+                      {/* Delete */}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveVariant(v.id)}
+                        className="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-red-200"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    {/* ── Variant Image Panel (expandable) ── */}
+                    {expandedVariantImg === v.id && (
+                      <div className="border-t border-blue-100 bg-blue-50/40 px-3 py-3 animate-in slide-in-from-top-1 duration-150">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                            <ImageIcon className="h-3.5 w-3.5 text-blue-600" />
+                            Variant Image — <span className="text-blue-700 font-black">{v.sizeWeight}</span>
+                          </span>
+                          {v.variantImageUrl && (
+                            <button
+                              type="button"
+                              onClick={() => removeVariantImage(v.id)}
+                              className="text-[10px] font-bold text-red-500 hover:text-red-700 flex items-center gap-1 cursor-pointer"
+                            >
+                              <X className="h-3 w-3" /> Remove
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          {/* Preview */}
+                          <div className="border border-dashed border-blue-200 rounded-xl bg-blue-50/30 flex flex-col items-center justify-center min-h-[110px] overflow-hidden">
+                            {v.variantImageUrl ? (
+                              <>
+                                <img src={v.variantImageUrl} alt={v.sizeWeight} className="max-h-20 object-contain rounded-lg mb-1" />
+                                <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                                  <Check className="h-3 w-3" /> Uploaded
+                                </span>
+                              </>
+                            ) : (
+                              <div className="text-center text-gray-400 text-[10px] px-2">
+                                <ImageIcon className="h-6 w-6 mx-auto mb-1 text-gray-300" />
+                                No image yet
+                              </div>
+                            )}
+                          </div>
+                          {/* Upload */}
+                          <label className="border-2 border-dashed border-blue-300 hover:border-blue-500 rounded-xl bg-blue-50/30 hover:bg-blue-50 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[110px] gap-1.5">
+                            <input
+                              type="file" accept="image/*"
+                              onChange={e => handleVariantImageChange(v.id, e)}
+                              className="hidden"
+                            />
+                            <UploadCloud className="h-6 w-6 text-blue-500" />
+                            <div className="text-[11px] font-bold text-blue-700">Upload Variant Image</div>
+                            <div className="text-[10px] text-gray-500">JPG, PNG, WEBP · Max 5MB</div>
+                          </label>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-2">
+                          ℹ️ Yeh image sirf is variant ({v.sizeWeight}) ke liye hogi. Agar upload nahi karenge to main product image use hogi.
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Expand toggle */}
+                    <button
+                      type="button"
+                      onClick={() => setExpandedVariantImg(expandedVariantImg === v.id ? null : v.id)}
+                      className="w-full flex items-center justify-center gap-1 py-1 text-[10px] font-semibold text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer border-t border-gray-100"
+                    >
+                      {expandedVariantImg === v.id
+                        ? <><ChevronUp className="h-3 w-3" /> Hide Image Upload</>
+                        : <><ChevronDown className="h-3 w-3" /> {v.variantImageUrl ? "✅ Has Image · Change" : "📷 Add Variant Image"}</>
+                      }
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add variant */}
               <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  toast.success("Draft saved successfully!");
-                }}
-                className="h-10 px-5 rounded-xl text-xs font-bold text-emerald-800 bg-emerald-50/60 border-emerald-200 hover:bg-emerald-100 cursor-pointer"
+                type="button" variant="outline"
+                onClick={handleAddVariant}
+                className="w-full text-xs font-bold text-blue-700 border-blue-300 hover:bg-blue-50 rounded-xl gap-1.5 cursor-pointer h-9"
               >
-                Save as Draft
+                <Plus className="h-3.5 w-3.5" /> Add Another Variant
               </Button>
 
-              <Button
-                type="button"
-                onClick={handlePublish}
-                className="h-10 px-6 rounded-xl text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 shadow-md shadow-emerald-700/20 gap-2 cursor-pointer"
-              >
-                <span>Next: Additional Info</span>
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2 text-xs text-emerald-700 font-medium pt-1 border-t border-gray-100">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span>Har variant ka alag image bhi upload kar sakte hain (image icon tap karein).</span>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* ─ Row 2: Additional Info + Preview ─ */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+          {/* ╔══════════════════════════════════╗
+              ║  Section 3: Additional Info       ║
+              ╚══════════════════════════════════╝ */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-violet-600 px-5 py-3 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-white/20 text-white text-xs font-black flex items-center justify-center">3</div>
+              <h2 className="text-sm font-bold text-white">Additional Information</h2>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Unit Type <span className="text-red-500">*</span></label>
+                  <select value={unitType} onChange={e => setUnitType(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl px-3 h-10 outline-none focus:border-violet-500 focus:bg-white cursor-pointer font-medium">
+                    <option>Gram / Litre</option>
+                    <option>Kilogram (KG)</option>
+                    <option>Litre (LTR)</option>
+                    <option>Millilitre (ML)</option>
+                    <option>Pieces (PCS)</option>
+                    <option>Quintal / Ton</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Shelf Life</label>
+                  <div className="flex h-10 rounded-xl overflow-hidden border border-gray-300 bg-gray-50 focus-within:border-violet-500">
+                    <Input
+                      type="number" value={shelfLife}
+                      onChange={e => setShelfLife(e.target.value)}
+                      className="border-0 bg-transparent text-sm text-gray-900 focus-visible:ring-0 h-full rounded-none"
+                    />
+                    <span className="bg-gray-100 px-3 text-[11px] font-bold text-gray-600 flex items-center border-l border-gray-300 shrink-0">Months</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-2">Listing Status</label>
+                  <button
+                    type="button"
+                    onClick={() => setIsActive(!isActive)}
+                    className={`flex items-center gap-2 px-3 h-10 rounded-xl font-bold text-xs cursor-pointer transition-all border w-full ${
+                      isActive ? "bg-emerald-50 border-emerald-300 text-emerald-700" : "bg-gray-100 border-gray-300 text-gray-500"
+                    }`}
+                  >
+                    <div className={`w-9 h-5 flex items-center rounded-full p-0.5 transition-colors shrink-0 ${
+                      isActive ? "bg-emerald-500" : "bg-gray-300"
+                    }`}>
+                      <div className={`bg-white w-4 h-4 rounded-full shadow transition-transform ${isActive ? "translate-x-4" : "translate-x-0"}`} />
+                    </div>
+                    {isActive ? "Active / Live" : "Inactive / Draft"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-gray-700">Tags <span className="text-gray-400 font-normal">(optional, comma-separated)</span></label>
+                  <span className="text-[10px] text-gray-400 font-mono">{tagsInput.length}/100</span>
+                </div>
+                <Input
+                  value={tagsInput} maxLength={100}
+                  onChange={e => setTagsInput(e.target.value)}
+                  placeholder="e.g. Organic, High Yield, Best Quality"
+                  className="bg-gray-50 border-gray-300 text-gray-900 text-sm rounded-xl focus:border-violet-500 focus:bg-white h-10"
+                />
+                {tagsInput && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {tagsInput.split(",").map(t => t.trim()).filter(Boolean).map(t => (
+                      <span key={t} className="bg-violet-100 text-violet-700 text-[11px] font-bold px-2 py-0.5 rounded-full border border-violet-200">{t}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ╔══════════════════════════════╗
+              ║  Section 4: Preview & Publish ║
+              ╚══════════════════════════════╝ */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-gray-800 px-5 py-3 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-white/20 text-white text-xs font-black flex items-center justify-center">4</div>
+              <h2 className="text-sm font-bold text-white">Product Preview & Publish</h2>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-2xl p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-20 h-20 rounded-xl bg-white border-2 border-gray-200 p-1.5 flex items-center justify-center shrink-0 shadow-sm">
+                    <img src={imageUrl} alt="Preview" className="max-h-full max-w-full object-contain" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-base font-black text-gray-900 truncate">{productName || "Product Name"}</h4>
+                    <p className="text-[11px] text-gray-500 mt-0.5">{brand} · {category}</p>
+                    <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{description.slice(0, 80)}{description.length > 80 ? "…" : ""}</p>
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-[10px] font-bold px-2 py-0">{variants.length} Variants</Badge>
+                      {isActive
+                        ? <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] font-bold px-2 py-0">🟢 Live</Badge>
+                        : <Badge className="bg-gray-100 text-gray-500 border-gray-200 text-[10px] font-bold px-2 py-0">⚪ Draft</Badge>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                {/* Variant mini-list */}
+                <div className="mt-3 border-t border-gray-200 pt-3 space-y-1.5">
+                  {variants.map(v => (
+                    <div key={v.id} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        {v.variantImageUrl
+                          ? <img src={v.variantImageUrl} alt={v.sizeWeight} className="w-6 h-6 rounded object-cover border border-blue-200" />
+                          : <span className="text-sm">{packingEmoji(v.packingType)}</span>
+                        }
+                        <span className="font-semibold text-gray-700">{v.sizeWeight}</span>
+                        <span className="text-gray-400">{v.packingType}</span>
+                        {v.variantImageUrl && <span className="text-[10px] text-blue-600 font-bold">📷</span>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400 line-through text-[10px]">₹{v.mrp}</span>
+                        <span className="font-black text-emerald-700">₹{v.salePrice}</span>
+                        <span className="text-gray-400 text-[10px]">Qty: {v.stockQty}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-gray-100">
+                {onCancel && (
+                  <Button type="button" variant="outline" onClick={onCancel}
+                    className="h-10 px-5 rounded-xl text-xs font-bold text-gray-600 border-gray-300 hover:bg-gray-100 cursor-pointer">
+                    Cancel
+                  </Button>
+                )}
+                <Button type="button" variant="outline"
+                  onClick={() => toast.success("Draft saved successfully!")}
+                  className="h-10 px-5 rounded-xl text-xs font-bold text-violet-700 bg-violet-50 border-violet-200 hover:bg-violet-100 cursor-pointer">
+                  💾 Save as Draft
+                </Button>
+                <Button type="button" onClick={handlePublish}
+                  className="h-10 px-6 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/25 gap-2 cursor-pointer">
+                  Publish Product <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );
 }
+
