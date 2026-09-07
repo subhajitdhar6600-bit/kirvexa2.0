@@ -82,6 +82,7 @@ export interface UserProfile {
   id: string;
   name: string;
   phone: string;
+  email?: string;
   role: "farmer" | "dealer";
   state: string;
   district: string;
@@ -106,6 +107,7 @@ export interface RegisteredAccount {
   id: string;
   fullName: string;
   phone: string;
+  email?: string;
   password?: string;
   role: "farmer" | "dealer";
   state: string;

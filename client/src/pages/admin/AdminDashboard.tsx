@@ -467,25 +467,24 @@ export default function AdminDashboard() {
       });
       setVerifications(verifItems);
 
-        // Populate payouts for dealers
-        const payoutList: PayoutItem[] = [];
-        dealerUsers.forEach((d: any, idx: number) => {
-          const gross = 25000 + idx * 15000;
-          const comm = 5;
-          const net = gross * (1 - comm / 100);
-          payoutList.push({
-            id: `PAY-${1000 + idx}`,
-            recipient: d.businessName || d.owner,
-            recipientType: "Dealer",
-            grossAmount: gross,
-            commissionPct: comm,
-            netPayout: net,
-            status: idx === 0 ? "processed" : "pending",
-            date: "Today, 11:30 AM",
-          });
+      // Populate payouts for dealers
+      const payoutList: PayoutItem[] = [];
+      dealerUsers.forEach((d: any, idx: number) => {
+        const gross = 25000 + idx * 15000;
+        const comm = 5;
+        const net = gross * (1 - comm / 100);
+        payoutList.push({
+          id: `PAY-${1000 + idx}`,
+          recipient: d.businessName || d.owner,
+          recipientType: "Dealer",
+          grossAmount: gross,
+          commissionPct: comm,
+          netPayout: net,
+          status: idx === 0 ? "processed" : "pending",
+          date: "Today, 11:30 AM",
         });
-        if (payoutList.length > 0) setPayouts(payoutList);
-      }
+      });
+      if (payoutList.length > 0) setPayouts(payoutList);
 
       // Process orders & transactions
       const txList: TransactionItem[] = [];

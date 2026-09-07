@@ -232,10 +232,6 @@ export default function RegisterPage() {
       if (nextInput) nextInput.focus();
     }
   };
-      const nextInput = document.getElementById(`otp-input-${index + 1}`);
-      if (nextInput) nextInput.focus();
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
