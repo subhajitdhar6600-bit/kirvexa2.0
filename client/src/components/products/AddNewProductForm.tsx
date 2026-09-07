@@ -95,6 +95,7 @@ export default function AddNewProductForm({
   const [tagsInput, setTagsInput] = useState("Organic, Plant Nutrition, High Yield");
 
   const mainImageRef = useRef<HTMLInputElement>(null);
+  const variantFileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Add a new variant row
   const handleAddVariant = () => {
@@ -134,7 +135,13 @@ export default function AddNewProductForm({
 
   const handleVariantImageChange = (variantId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) readFileAsDataUrl(file, (url) => { handleUpdateVariant(variantId, "variantImageUrl", url); toast.success("Variant image uploaded!"); });
+    if (file) {
+      readFileAsDataUrl(file, (url) => {
+        handleUpdateVariant(variantId, "variantImageUrl", url);
+        toast.success("Variant image uploaded!");
+      });
+    }
+    e.target.value = "";
   };
 
   const removeVariantImage = (variantId: string) => {
@@ -376,22 +383,37 @@ export default function AddNewProductForm({
                   <div key={v.id} className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50/60">
                     {/* Main row */}
                     <div className="grid grid-cols-[32px_1fr_86px_68px_68px_52px_36px] gap-1 items-center px-2 py-2">
-                      {/* Image indicator / toggle */}
+                      {/* Image icon - Click directly to upload image */}
                       <button
                         type="button"
-                        title="Toggle variant image"
-                        onClick={() => setExpandedVariantImg(expandedVariantImg === v.id ? null : v.id)}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer border overflow-hidden ${
+                        title={v.variantImageUrl ? "Click to change variant image" : "Click to upload image for this variant"}
+                        onClick={() => variantFileRefs.current[v.id]?.click()}
+                        className={`group relative w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer border overflow-hidden shrink-0 ${
                           v.variantImageUrl
-                            ? "border-blue-400 bg-blue-50"
-                            : "border-gray-200 bg-white text-gray-400 hover:text-blue-500 hover:border-blue-300"
+                            ? "border-blue-400 bg-blue-50 ring-1 ring-blue-200"
+                            : "border-dashed border-gray-300 bg-white text-gray-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50/60"
                         }`}
                       >
-                        {v.variantImageUrl
-                          ? <img src={v.variantImageUrl} alt="" className="w-full h-full object-cover" />
-                          : <ImageIcon className="h-4 w-4" />
-                        }
+                        {v.variantImageUrl ? (
+                          <>
+                            <img src={v.variantImageUrl} alt="" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                              <Camera className="h-3 w-3 text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-center">
+                            <Camera className="h-3.5 w-3.5 text-gray-400 group-hover:text-blue-600 group-hover:scale-110 transition-transform" />
+                          </div>
+                        )}
                       </button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={el => { variantFileRefs.current[v.id] = el; }}
+                        onChange={e => handleVariantImageChange(v.id, e)}
+                      />
                       {/* Size / Weight */}
                       <Input
                         value={v.sizeWeight}
@@ -495,8 +517,8 @@ export default function AddNewProductForm({
                       className="w-full flex items-center justify-center gap-1 py-1 text-[10px] font-semibold text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer border-t border-gray-100"
                     >
                       {expandedVariantImg === v.id
-                        ? <><ChevronUp className="h-3 w-3" /> Hide Image Upload</>
-                        : <><ChevronDown className="h-3 w-3" /> {v.variantImageUrl ? "✅ Has Image · Change" : "📷 Add Variant Image"}</>
+                        ? <><ChevronUp className="h-3 w-3" /> Hide Preview</>
+                        : <><ChevronDown className="h-3 w-3" /> {v.variantImageUrl ? "✅ Image Uploaded · View / Remove" : "🔍 Preview & Image Info"}</>
                       }
                     </button>
                   </div>
