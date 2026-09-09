@@ -22,7 +22,7 @@ export const authenticate = async (req, res, next) => {
       return sendError(res, 'User not found or deleted', ERROR_CODES.UNAUTHORIZED, 401);
     }
 
-    // Rule 2 â Suspended or blocked account cannot transact or access protected endpoints
+    // Rule 2 — Suspended or blocked account cannot transact or access protected endpoints
     if (user.status === USER_STATUS.SUSPENDED || user.status === USER_STATUS.BLOCKED) {
       return sendError(
         res,

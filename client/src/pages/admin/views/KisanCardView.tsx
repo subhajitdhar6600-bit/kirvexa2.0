@@ -144,7 +144,7 @@ export default function KisanCardView() {
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-gray-900">{app.fullName}</div>
                       <div className="text-[11px] text-gray-400 font-mono">
-                        Aadhaar: {app.aadhaar ? `â¢â¢â¢â¢ ${app.aadhaar.slice(-4)}` : "Not provided"}
+                        Aadhaar: {app.aadhaar ? `•••• ${app.aadhaar.slice(-4)}` : "Not provided"}
                       </div>
                     </td>
                     <td className="py-3.5 px-4">

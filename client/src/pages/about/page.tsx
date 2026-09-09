@@ -24,7 +24,7 @@ const MILESTONES = [
   { year: "2021", event: "Launched Mandi Bhav and Agri Market services across 5 states" },
   { year: "2022", event: "Reached 1 Lakh registered farmers; launched Expert Advice platform" },
   { year: "2023", event: "Expanded to 20 states; launched Machinery Booking and Soil Testing" },
-  { year: "2024", event: "10L+ registered farmers; â¹500 Cr+ in transactions facilitated" },
+  { year: "2024", event: "10L+ registered farmers; ₹500 Cr+ in transactions facilitated" },
 ];
 
 export default function AboutPage() {
@@ -59,14 +59,14 @@ export default function AboutPage() {
               Empowering India's <span className="text-primary">140 Million Farmers</span>
             </h2>
             <p className="text-gray-400 leading-relaxed mb-4">
-              Krivexo is a complete digital platform built for India's farming community. We believe every farmer deserves access to fair prices, modern technology, and expert guidance â regardless of where they live or how much land they own.
+              Krivexo is a complete digital platform built for India's farming community. We believe every farmer deserves access to fair prices, modern technology, and expert guidance — regardless of where they live or how much land they own.
             </p>
             <p className="text-gray-400 leading-relaxed mb-6">
               From live mandi prices and machinery booking to soil testing and expert consultations, Krivexo puts the power of smart farming in every farmer's hands.
             </p>
             <Link to="/register">
               <Button className="bg-primary text-black font-bold hover:bg-primary/90">
-                Join Krivexo Today â
+                Join Krivexo Today →
               </Button>
             </Link>
           </div>
@@ -82,7 +82,7 @@ export default function AboutPage() {
             { value: "10L+", label: "Registered Farmers" },
             { value: "500+", label: "Mandis Covered" },
             { value: "20+", label: "States" },
-            { value: "â¹500Cr+", label: "Transactions Facilitated" },
+            { value: "₹500Cr+", label: "Transactions Facilitated" },
           ].map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
               className="bg-[#111] border border-white/10 rounded-2xl p-6 text-center">
@@ -161,7 +161,7 @@ export default function AboutPage() {
           <p className="text-gray-400 mb-8 max-w-xl mx-auto">Join over 10 lakh farmers who are already benefiting from Krivexo's smart farming platform.</p>
           <Link to="/register">
             <Button size="lg" className="bg-primary text-black font-bold px-10 hover:bg-primary/90">
-              Register for Free â
+              Register for Free →
             </Button>
           </Link>
         </div>

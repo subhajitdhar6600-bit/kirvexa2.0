@@ -121,7 +121,7 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
       id: l.id || `SRV${250150000 + idx}`,
       service: `${l.labourType || "Labour"} Service`,
       farmer: l.userName || "Farmer",
-      farmerId: l.phone || "â",
+      farmerId: l.phone || "—",
       provider: "Assigned Labour Team",
       status: l.status === "assigned" ? "Completed" : l.status === "pending" ? "Pending" : "In Progress",
       date: l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "Today",
@@ -131,7 +131,7 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
       id: m.id || `SRV${250160000 + idx}`,
       service: `${m.machineryType || "Machinery"} Service`,
       farmer: m.userName || "Farmer",
-      farmerId: m.phone || "â",
+      farmerId: m.phone || "—",
       provider: m.allottedMachineDetails || "Agri Machinery",
       status: m.status === "allotted" ? "Completed" : m.status === "pending" ? "Pending" : "In Progress",
       date: m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "Today",
@@ -468,7 +468,7 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
-                ð¨âð¼
+                👨‍💼
               </div>
               <div className="flex-1">
                 <p className="text-xs font-bold text-gray-800 mb-1">Need Help?</p>
@@ -487,7 +487,7 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
 
       {/* Footer */}
       <div className="text-center text-[11px] text-gray-400 pb-2">
-        Â© 2025 Krivexo. All rights reserved. &nbsp; Made with care for Farmers ð¿
+        © 2025 Krivexo. All rights reserved. &nbsp; Made with care for Farmers 🌿
       </div>
     </div>
   );

@@ -23,7 +23,7 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
           <p className="text-xs text-gray-500 mt-0.5">View and manage booking information</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span>âº</span><span>Booking Management</span><span>âº</span>
+          <span>Dashboard</span><span>›</span><span>Booking Management</span><span>›</span>
           <span className="text-emerald-600 font-medium">Booking Details</span>
         </div>
       </div>
@@ -68,7 +68,7 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
 
           {/* 3D Tractor Illustration Box */}
           <div className="w-28 h-24 rounded-2xl bg-gradient-to-br from-emerald-100 via-teal-50 to-emerald-200 flex flex-col items-center justify-center text-3xl shadow-inner border border-emerald-200/50">
-            <span>ð</span>
+            <span>🚜</span>
             <span className="text-[9px] font-black text-emerald-950 mt-1">45 HP TRACTOR</span>
           </div>
 
@@ -79,11 +79,11 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
               <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold">Paid</span>
             </div>
             <div className="flex justify-between"><span className="text-gray-500">Payment Method</span><span className="font-semibold text-gray-800">Online (UPI)</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Total Amount</span><span className="font-bold text-gray-900">â¹ 2,450.00</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Paid Amount</span><span className="font-bold text-emerald-700">â¹ 2,450.00</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Total Amount</span><span className="font-bold text-gray-900">₹ 2,450.00</span></div>
+            <div className="flex justify-between"><span className="text-gray-500">Paid Amount</span><span className="font-bold text-emerald-700">₹ 2,450.00</span></div>
             <div className="flex justify-between"><span className="text-gray-500">Transaction ID</span><span className="font-mono text-[10px] text-gray-700">UPI25M5250001</span></div>
             <button onClick={() => toast.info("Viewing payment")} className="text-emerald-700 font-bold text-[11px] hover:underline block pt-1">
-              View Payment Details â
+              View Payment Details →
             </button>
           </div>
         </div>
@@ -94,11 +94,11 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
           <div className="flex items-center justify-between relative">
             <div className="absolute top-4 left-6 right-6 h-0.5 bg-emerald-500 -z-0" />
             {[
-              { title: "Booking Placed", date: "25 May 2025", time: "10:30 AM", icon: "ð", done: true },
-              { title: "Confirmed", date: "25 May 2025", time: "10:35 AM", icon: "â³", done: true },
-              { title: "In Progress", date: "26 May 2025", time: "08:00 AM", icon: "ð", done: true },
-              { title: "Completed", date: "â", time: "â", icon: "ð", done: false },
-              { title: "Reviewed", date: "â", time: "â", icon: "â­", done: false },
+              { title: "Booking Placed", date: "25 May 2025", time: "10:30 AM", icon: "📅", done: true },
+              { title: "Confirmed", date: "25 May 2025", time: "10:35 AM", icon: "⏳", done: true },
+              { title: "In Progress", date: "26 May 2025", time: "08:00 AM", icon: "🚜", done: true },
+              { title: "Completed", date: "—", time: "—", icon: "🏁", done: false },
+              { title: "Reviewed", date: "—", time: "—", icon: "⭐", done: false },
             ].map((st, i) => (
               <div key={i} className="flex flex-col items-center text-center relative z-10 bg-white px-2">
                 <div className={`w-8 h-8 rounded-full ${st.done ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-400"} flex items-center justify-center font-bold text-xs shadow-md mb-1`}>
@@ -119,7 +119,7 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-2 text-xs">
           <p className="font-bold text-gray-800">Service Information</p>
           <div className="flex items-center gap-3 pb-2 border-b border-gray-100">
-            <span className="text-3xl">ð</span>
+            <span className="text-3xl">🚜</span>
             <div>
               <p className="font-bold text-gray-900 text-sm">Tractor Booking - 45 HP</p>
               <p className="text-gray-500 text-[11px]">Sonalika DI 745 III</p>
@@ -149,7 +149,7 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
             <p className="text-[11px]">Tehsil - Darbhanga, District - Darbhanga, Bihar - 846004</p>
           </div>
           <button onClick={() => toast.info("View Profile")} className="text-emerald-600 font-bold text-[11px] hover:underline block pt-1">
-            View Customer Profile â
+            View Customer Profile →
           </button>
         </div>
 
@@ -173,11 +173,11 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
         {/* Booking Summary */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-2 text-xs">
           <p className="font-bold text-gray-800 mb-2">Booking Summary</p>
-          <div className="flex justify-between"><span className="text-gray-400">Subtotal</span><span className="font-semibold text-gray-800">â¹ 2,450.00</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">GST (12%)</span><span className="font-semibold text-gray-800">â¹ 294.00</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Discount</span><span className="text-gray-800">â¹ 0.00</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Subtotal</span><span className="font-semibold text-gray-800">₹ 2,450.00</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">GST (12%)</span><span className="font-semibold text-gray-800">₹ 294.00</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Discount</span><span className="text-gray-800">₹ 0.00</span></div>
           <div className="flex justify-between pt-2 border-t border-gray-100 text-sm font-bold text-emerald-700">
-            <span>Total Amount</span><span>â¹ 2,450.00</span>
+            <span>Total Amount</span><span>₹ 2,450.00</span>
           </div>
         </div>
 
@@ -193,7 +193,7 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
             </div>
           </div>
           <button onClick={() => toast.info("View Assignment")} className="text-emerald-600 font-bold text-[11px] hover:underline pt-2 block">
-            View Assignment â
+            View Assignment →
           </button>
         </div>
 
@@ -214,7 +214,7 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
           <p className="font-bold text-gray-800">Location Details</p>
           <div className="h-32 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-50 border border-emerald-200 relative overflow-hidden flex items-center justify-center">
             <div className="p-2 rounded-xl bg-white shadow-md border border-gray-200 text-center text-xs">
-              <span className="text-red-500 font-bold">ð Belhari Village</span>
+              <span className="text-red-500 font-bold">📍 Belhari Village</span>
               <p className="text-[10px] text-gray-400">Darbhanga, Bihar</p>
             </div>
           </div>
@@ -280,14 +280,14 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
       {/* Footer Navigation */}
       <div className="flex justify-between items-center pt-2">
         <Button onClick={() => toast.info("Previous")} variant="outline" className="h-8 text-xs gap-1.5 rounded-xl border-gray-200">
-          â Previous Booking
+          ← Previous Booking
         </Button>
         <Button onClick={() => toast.info("Next")} variant="outline" className="h-8 text-xs gap-1.5 rounded-xl border-gray-200">
-          Next Booking â
+          Next Booking →
         </Button>
       </div>
 
-      <div className="text-center text-[11px] text-gray-400">Â© 2025 Krivexo. All rights reserved. &nbsp; Made with â¤ï¸ for Farmers ð¿</div>
+      <div className="text-center text-[11px] text-gray-400">© 2025 Krivexo. All rights reserved. &nbsp; Made with ❤️ for Farmers 🌿</div>
     </div>
   );
 }

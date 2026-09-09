@@ -261,7 +261,7 @@ export default function ProfilePage() {
                   <p className="text-gray-400 flex items-center gap-2">
                     <User className="h-3.5 w-3.5 text-primary shrink-0" />
                     <span>
-                      {[user?.gender ? `Gender: ${user.gender}` : null, user?.dob ? `DOB: ${user.dob}` : null].filter(Boolean).join(" â¢ ")}
+                      {[user?.gender ? `Gender: ${user.gender}` : null, user?.dob ? `DOB: ${user.dob}` : null].filter(Boolean).join(" • ")}
                     </span>
                   </p>
                 )}
@@ -303,7 +303,7 @@ export default function ProfilePage() {
                 </div>
               </div>
               <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px] font-black">
-                ACTIVE ð³
+                ACTIVE 💳
               </Badge>
             </div>
             <div className="my-3 bg-black/60 rounded-xl p-3 border border-white/10">
@@ -319,7 +319,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-right">
                 <span className="text-gray-400 text-[11px]">Credit Limit: </span>
-                <span className="font-bold text-emerald-400">â¹{(kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000).toLocaleString("en-IN")}</span>
+                <span className="font-bold text-emerald-400">₹{(kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000).toLocaleString("en-IN")}</span>
               </div>
             </div>
             <div className="mt-3 flex items-center justify-between pt-2 border-t border-white/10 text-[11px]">
@@ -327,7 +327,7 @@ export default function ProfilePage() {
                 <CheckCircle2 className="h-3.5 w-3.5" /> All 100% Platform Features Unlocked
               </span>
               <Link to="/wallet" className="text-primary hover:underline font-bold">
-                View in Wallet â
+                View in Wallet →
               </Link>
             </div>
           </div>
@@ -360,7 +360,7 @@ export default function ProfilePage() {
                   onClick={() => setIsKccAppModalOpen(true)}
                   className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs py-3 px-6 rounded-xl shrink-0 cursor-pointer shadow-lg animate-pulse border border-amber-300"
                 >
-                  <CreditCard className="h-4 w-4 mr-2 text-black" /> Apply for KCC Now â
+                  <CreditCard className="h-4 w-4 mr-2 text-black" /> Apply for KCC Now →
                 </Button>
               ) : (
                 <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold shrink-0">
@@ -485,14 +485,14 @@ export default function ProfilePage() {
                     : "Apply for Kisan Credit Card (KCC)"}
                 </span>
                 {isKccApproved && (
-                  <span className="text-[10px] text-emerald-400">All features unlocked Â· 100% active</span>
+                  <span className="text-[10px] text-emerald-400">All features unlocked · 100% active</span>
                 )}
               </div>
             </div>
             {isKccApproved ? (
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Active ð³</Badge>
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Active 💳</Badge>
             ) : hasAppliedKcc ? (
-              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px]">Under Review â³</Badge>
+              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px]">Under Review ⏳</Badge>
             ) : (
               <button
                 type="button"
@@ -502,7 +502,7 @@ export default function ProfilePage() {
                 }}
                 className="text-xs text-amber-400 hover:underline font-bold"
               >
-                Apply Now â
+                Apply Now →
               </button>
             )}
           </Link>
@@ -532,7 +532,7 @@ export default function ProfilePage() {
               <div>
                 <span className="block font-semibold">
                   {isKccApproved
-                    ? `KCC Credit Facility (â¹${(kccDetails?.paymentAmount || 150000).toLocaleString("en-IN")})`
+                    ? `KCC Credit Facility (₹${(kccDetails?.paymentAmount || 150000).toLocaleString("en-IN")})`
                     : hasAppliedKcc
                     ? "Application for Loan (Submitted)"
                     : "Application for Loan"}
@@ -543,7 +543,7 @@ export default function ProfilePage() {
               </div>
             </div>
             {isKccApproved ? (
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Approved â</Badge>
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Approved ✅</Badge>
             ) : hasAppliedKcc ? (
               <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">Under Review</Badge>
             ) : (
@@ -555,7 +555,7 @@ export default function ProfilePage() {
                 }}
                 className="text-xs text-primary hover:underline font-bold"
               >
-                Apply Now â
+                Apply Now →
               </button>
             )}
           </Link>
@@ -675,7 +675,7 @@ export default function ProfilePage() {
                 />
               </div>
               <Button type="submit" disabled={isSubmittingPass} className="w-full bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer">
-                {isSubmittingPass ? "Updating Password..." : "Update Password â"}
+                {isSubmittingPass ? "Updating Password..." : "Update Password →"}
               </Button>
             </form>
           </div>

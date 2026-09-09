@@ -61,7 +61,7 @@ router.post('/charge', async (req, res) => {
     if (card.balance < amount) {
       return res.json({
         success: false,
-        message: `Insufficient balance on KCC. Current available limit: â¹${card.balance}`,
+        message: `Insufficient balance on KCC. Current available limit: ₹${card.balance}`,
       });
     }
 
@@ -70,7 +70,7 @@ router.post('/charge', async (req, res) => {
 
     res.json({
       success: true,
-      message: `Payment of â¹${amount} debited successfully!`,
+      message: `Payment of ₹${amount} debited successfully!`,
       remainingBalance: card.balance,
       cardHolder: card.cardHolder,
     });

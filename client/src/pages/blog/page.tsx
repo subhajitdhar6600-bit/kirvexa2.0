@@ -24,7 +24,7 @@ const POSTS = [
   {
     title: "PM Kisan Samman Nidhi: How to Apply and Check Status",
     category: "Government Schemes", date: "12 Aug 2026", readTime: "4 min read",
-    desc: "Complete step-by-step guide to applying for PM Kisan Samman Nidhi and receiving â¹6000 annually.",
+    desc: "Complete step-by-step guide to applying for PM Kisan Samman Nidhi and receiving ₹6000 annually.",
     img: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600&q=80", tag: "Popular",
   },
   {
@@ -101,7 +101,7 @@ export default function BlogPage() {
                   <span className="text-xs text-primary font-semibold flex items-center gap-1">
                     <Tag className="h-3 w-3" /> {post.category}
                   </span>
-                  <span className="text-gray-600 text-xs">â¢</span>
+                  <span className="text-gray-600 text-xs">•</span>
                   <span className="text-xs text-gray-500 flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> {post.date}
                   </span>
@@ -112,7 +112,7 @@ export default function BlogPage() {
                   <span className="text-xs text-gray-500 flex items-center gap-1">
                     <Clock className="h-3 w-3" /> {post.readTime}
                   </span>
-                  <button className="text-xs text-primary font-semibold hover:underline cursor-pointer">Read More â</button>
+                  <button className="text-xs text-primary font-semibold hover:underline cursor-pointer">Read More →</button>
                 </div>
               </div>
             </div>

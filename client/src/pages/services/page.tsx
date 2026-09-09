@@ -16,10 +16,10 @@ const SERVICES = [
 ];
 
 const ACTIVE_SERVICES = [
-  { icon:"?????", title:"Doctor Visit", sub:"Dr. Suresh Kumar", detail:"25 May 2025 Â 10:30 AM", status:"Scheduled", statusColor:"text-blue-600 bg-blue-50 border-blue-200" },
-  { icon:"??", title:"Soil Testing", sub:"Lab No. 7845", detail:"24 May 2025 Â 02:15 PM", status:"In Progress", statusColor:"text-amber-600 bg-amber-50 border-amber-200" },
-  { icon:"??", title:"Tractor Booking", sub:"Mahindra 575 DI", detail:"26 May 2025 Â 08:00 AM", status:"Confirmed", statusColor:"text-emerald-700 bg-emerald-50 border-emerald-200" },
-  { icon:"??", title:"Dava (Pesticide)", sub:"Bayer Insecticide", detail:"22 May 2025 Â 04:20 PM", status:"Delivered", statusColor:"text-violet-600 bg-violet-50 border-violet-200" },
+  { icon:"?????", title:"Doctor Visit", sub:"Dr. Suresh Kumar", detail:"25 May 2025  10:30 AM", status:"Scheduled", statusColor:"text-blue-600 bg-blue-50 border-blue-200" },
+  { icon:"??", title:"Soil Testing", sub:"Lab No. 7845", detail:"24 May 2025  02:15 PM", status:"In Progress", statusColor:"text-amber-600 bg-amber-50 border-amber-200" },
+  { icon:"??", title:"Tractor Booking", sub:"Mahindra 575 DI", detail:"26 May 2025  08:00 AM", status:"Confirmed", statusColor:"text-emerald-700 bg-emerald-50 border-emerald-200" },
+  { icon:"??", title:"Dava (Pesticide)", sub:"Bayer Insecticide", detail:"22 May 2025  04:20 PM", status:"Delivered", statusColor:"text-violet-600 bg-violet-50 border-violet-200" },
 ];
 
 const RECENT_REQUESTS = [

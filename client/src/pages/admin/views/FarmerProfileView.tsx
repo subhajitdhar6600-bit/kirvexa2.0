@@ -77,14 +77,14 @@ export default function FarmerProfileView({ farmer, onBack }: FarmerProfileViewP
             <span>Total Sales</span>
             <DollarSign className="h-4 w-4 text-emerald-400" />
           </div>
-          <p className="text-2xl font-black text-emerald-400">â¹{farmer.totalSales.toLocaleString("en-IN")}</p>
+          <p className="text-2xl font-black text-emerald-400">₹{farmer.totalSales.toLocaleString("en-IN")}</p>
         </div>
         <div className="bg-[#111] border border-white/10 rounded-2xl p-4">
           <div className="flex items-center justify-between text-gray-400 text-xs mb-2">
             <span>Total Earnings</span>
             <Award className="h-4 w-4 text-emerald-400" />
           </div>
-          <p className="text-2xl font-black text-emerald-400">â¹{farmer.totalEarnings.toLocaleString("en-IN")}</p>
+          <p className="text-2xl font-black text-emerald-400">₹{farmer.totalEarnings.toLocaleString("en-IN")}</p>
         </div>
       </div>
 
@@ -106,11 +106,11 @@ export default function FarmerProfileView({ farmer, onBack }: FarmerProfileViewP
             </div>
             <div>
               <p className="text-gray-400">Gender</p>
-              <p className="font-bold text-white mt-0.5">{farmer.gender || "â"}</p>
+              <p className="font-bold text-white mt-0.5">{farmer.gender || "—"}</p>
             </div>
             <div>
               <p className="text-gray-400">Date of Birth</p>
-              <p className="font-bold text-white mt-0.5">{farmer.dob || "â"}</p>
+              <p className="font-bold text-white mt-0.5">{farmer.dob || "—"}</p>
             </div>
             <div>
               <p className="text-gray-400">Phone</p>
@@ -118,7 +118,7 @@ export default function FarmerProfileView({ farmer, onBack }: FarmerProfileViewP
             </div>
             <div>
               <p className="text-gray-400">Email</p>
-              <p className="font-bold text-white mt-0.5">{farmer.email || "â"}</p>
+              <p className="font-bold text-white mt-0.5">{farmer.email || "—"}</p>
             </div>
             <div className="col-span-2">
               <p className="text-gray-400">Address</p>
@@ -195,7 +195,7 @@ export default function FarmerProfileView({ farmer, onBack }: FarmerProfileViewP
           )}
           {activeTab === "products" && <p className="text-gray-400">Displaying {farmer.totalProducts} active product listings submitted by farmer.</p>}
           {activeTab === "orders" && <p className="text-gray-400">Total {farmer.totalOrders} purchase orders completed successfully.</p>}
-          {activeTab === "earnings" && <p className="text-gray-400">Total earnings processed via Krivexo Agri Portal: â¹{farmer.totalEarnings.toLocaleString("en-IN")}</p>}
+          {activeTab === "earnings" && <p className="text-gray-400">Total earnings processed via Krivexo Agri Portal: ₹{farmer.totalEarnings.toLocaleString("en-IN")}</p>}
           {activeTab === "activity" && <p className="text-gray-400">Last activity recorded: Logged in today at 10:15 AM</p>}
           {activeTab === "notes" && <p className="text-gray-400">Admin Note: Verified top-tier organic farmer with clean credit record.</p>}
         </div>

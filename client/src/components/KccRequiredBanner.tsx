@@ -28,7 +28,7 @@ export default function KccRequiredBanner() {
           className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-[11px] h-7 px-3.5 rounded-full shadow-sm cursor-pointer shrink-0 border border-amber-300"
         >
           <CreditCard className="h-3 w-3 mr-1.5" />
-          {hasAppliedKcc && kccApplicationStatus === "pending" ? "Track KCC Status â" : "Apply for KCC Now â"}
+          {hasAppliedKcc && kccApplicationStatus === "pending" ? "Track KCC Status →" : "Apply for KCC Now →"}
         </Button>
       </div>
     </div>

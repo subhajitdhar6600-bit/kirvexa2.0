@@ -66,7 +66,7 @@ export default function KisanPathshalaPage() {
               Kisan <span className="text-primary">Pathshala</span>
             </h1>
             <p className="text-gray-400 text-sm mt-1">
-              Free expert farming videos curated by Krivexo â learn modern techniques, earn more.
+              Free expert farming videos curated by Krivexo — learn modern techniques, earn more.
             </p>
           </div>
         </div>

@@ -1,4 +1,4 @@
-// mockData.ts â All initial arrays are EMPTY [].
+// mockData.ts — All initial arrays are EMPTY [].
 // Admin panel loads 100% of all data dynamically live from MongoDB database via API.
 import type {
   Farmer,

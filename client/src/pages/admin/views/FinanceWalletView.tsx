@@ -208,7 +208,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
       };
 
       setAllTransactions((prev) => [newTx, ...prev]);
-      toast.success(`Successfully added â¹ ${fundAmount.toLocaleString("en-IN")} to platform balance and saved to MongoDB!`);
+      toast.success(`Successfully added ₹ ${fundAmount.toLocaleString("en-IN")} to platform balance and saved to MongoDB!`);
       setIsAddFundsOpen(false);
       setFundAmount(5000);
     } catch (err: any) {
@@ -256,11 +256,11 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
       {/* 5 KPI Cards - Aggregated from MongoDB */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: "Total Platform Volume", value: `â¹ ${totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${allTransactions.length} DB records`, isPositive: true, icon: Wallet, bg: "bg-emerald-50", tc: "text-emerald-600" },
-          { label: "Available Balance", value: `â¹ ${availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${deliveredList.length} delivered/settled`, isPositive: true, icon: CheckCircle2, bg: "bg-blue-50", tc: "text-blue-600" },
-          { label: "On Hold Balance", value: `â¹ ${onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${pendingList.length} in transit/pending`, isPositive: false, icon: Clock, bg: "bg-amber-50", tc: "text-amber-500" },
+          { label: "Total Platform Volume", value: `₹ ${totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${allTransactions.length} DB records`, isPositive: true, icon: Wallet, bg: "bg-emerald-50", tc: "text-emerald-600" },
+          { label: "Available Balance", value: `₹ ${availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${deliveredList.length} delivered/settled`, isPositive: true, icon: CheckCircle2, bg: "bg-blue-50", tc: "text-blue-600" },
+          { label: "On Hold Balance", value: `₹ ${onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${pendingList.length} in transit/pending`, isPositive: false, icon: Clock, bg: "bg-amber-50", tc: "text-amber-500" },
           { label: "Total Transactions", value: allTransactions.length.toString(), trend: "MongoDB transactions", isPositive: true, icon: RefreshCw, bg: "bg-violet-50", tc: "text-violet-600" },
-          { label: "Refunds / Cancelled", value: `â¹ ${totalWithdrawn.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${cancelledList.length} cancelled`, isPositive: false, icon: ArrowUpRight, bg: "bg-red-50", tc: "text-red-500" },
+          { label: "Refunds / Cancelled", value: `₹ ${totalWithdrawn.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${cancelledList.length} cancelled`, isPositive: false, icon: ArrowUpRight, bg: "bg-red-50", tc: "text-red-500" },
         ].map((s, i) => (
           <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
@@ -286,7 +286,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col justify-between">
           <div>
             <p className="text-xs font-bold text-gray-700 mb-2">Main Platform Balance</p>
-            <p className="text-3xl font-black text-emerald-600 mb-4">â¹ {totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
+            <p className="text-3xl font-black text-emerald-600 mb-4">₹ {totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
 
             {/* Wallet card visual */}
             <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 mb-4 relative overflow-hidden text-white shadow-md">
@@ -302,11 +302,11 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
                 <div className="space-y-1">
                   <div>
                     <p className="text-emerald-100 text-[9px] font-medium">Available Balance</p>
-                    <p className="text-white font-bold text-sm">â¹ {availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
+                    <p className="text-white font-bold text-sm">₹ {availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
                   </div>
                   <div className="pt-1">
                     <p className="text-emerald-100 text-[9px] font-medium">On Hold (Pending Orders &amp; Services)</p>
-                    <p className="text-white font-bold text-sm">â¹ {onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
+                    <p className="text-white font-bold text-sm">₹ {onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
                   </div>
                 </div>
               </div>
@@ -354,7 +354,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
                   <div key={idx}>
                     <div className="flex items-center justify-between text-xs mb-1">
                       <span className="font-medium text-gray-600">{b.label} ({b.count})</span>
-                      <span className="font-bold text-gray-800">â¹ {b.value.toLocaleString("en-IN")} ({pct}%)</span>
+                      <span className="font-bold text-gray-800">₹ {b.value.toLocaleString("en-IN")} ({pct}%)</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                       <div className={`h-full rounded-full ${b.color}`} style={{ width: `${pct}%` }} />
@@ -444,10 +444,10 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-gray-800 truncate">{t.label}</p>
-                  <p className="text-[10px] text-gray-400 truncate">{t.customer} â¢ {t.date}</p>
+                  <p className="text-[10px] text-gray-400 truncate">{t.customer} • {t.date}</p>
                 </div>
                 <span className={`text-xs font-bold ${t.status === "Cancelled" ? "text-red-500" : "text-emerald-600"} shrink-0`}>
-                  â¹ {t.amount.toLocaleString("en-IN")}
+                  ₹ {t.amount.toLocaleString("en-IN")}
                 </span>
               </div>
             ))}
@@ -471,7 +471,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
 
             <form onSubmit={handleAddFundsSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-gray-700 mb-1 block">Deposit Amount (â¹) <span className="text-red-500">*</span></label>
+                <label className="text-xs font-bold text-gray-700 mb-1 block">Deposit Amount (₹) <span className="text-red-500">*</span></label>
                 <Input
                   type="number"
                   value={fundAmount}
@@ -519,7 +519,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Financial Database
+        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Financial Database
       </div>
     </div>
   );

@@ -117,7 +117,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
     description: "", tags: "", warranty: "",
   });
 
-  // Computed KPIs â real data only
+  // Computed KPIs — real data only
   const totalProducts = products.length;
   const activeProducts = products.filter(p => p.status === "active" || p.status === "approved").length;
   const lowStock = products.filter(p => {
@@ -207,8 +207,8 @@ export default function ProductsView({ products: propProducts, setProducts, prod
   // CSV export
   const handleExport = () => {
     if (filtered.length === 0) { toast.error("No products to export"); return; }
-    const headers = ["ID", "Name", "Category", "Price (â¹)", "Stock", "Status"];
-    const rows = filtered.map((p: any) => [p.id, p.name, p.category, p.price, p.stock ?? "â", p.status]);
+    const headers = ["ID", "Name", "Category", "Price (₹)", "Stock", "Status"];
+    const rows = filtered.map((p: any) => [p.id, p.name, p.category, p.price, p.stock ?? "—", p.status]);
     const csv = [headers, ...rows].map(r => r.map((c: any) => `"${c ?? ""}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -314,7 +314,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
 
     setProducts(prev => [added, ...prev]);
     setIsAddOpen(false);
-    toast.success(`ð "${added.name}" added successfully with ${payload.variants.length} variants!`);
+    toast.success(`🎉 "${added.name}" added successfully with ${payload.variants.length} variants!`);
     await api.addProduct({
       id: added.id,
       name: added.name,
@@ -334,7 +334,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
           <p className="text-xs text-gray-500 mt-0.5">Manage all products, inventory and pricing</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span>âº</span><span>Products Management</span><span>âº</span>
+          <span>Dashboard</span><span>›</span><span>Products Management</span><span>›</span>
           <span className="text-emerald-600 font-medium">
             {mainCatalogSection === "farmer" ? "Farmer Products" : mainCatalogSection === "dealer" ? "Dealer Products" : "Platform Products"}
           </span>
@@ -389,7 +389,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
 
       {mainCatalogSection === "platform" && (
         <>
-          {/* Stat Cards â real data */}
+          {/* Stat Cards — real data */}
       <div className="grid grid-cols-4 gap-4">
         {[
           { label: "Total Products", value: totalProducts.toLocaleString("en-IN"), sub: "Total catalog items", Icon: Package, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -455,7 +455,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
                   <th className="py-3 px-4 text-left w-14">Image</th>
                   <th className="py-3 px-4 text-left">Product List</th>
                   <th className="py-3 px-4 text-left">Category</th>
-                  <th className="py-3 px-4 text-left">Price (â¹)</th>
+                  <th className="py-3 px-4 text-left">Price (₹)</th>
                   <th className="py-3 px-4 text-left">Stock</th>
                   <th className="py-3 px-4 text-left">Status</th>
                   <th className="py-3 px-4 text-left">Actions</th>
@@ -482,11 +482,11 @@ export default function ProductsView({ products: propProducts, setProducts, prod
                           <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[11px] font-medium">{p.category}</span>
                         </td>
                         <td className="py-3 px-4">
-                          <p className="font-semibold text-gray-800">â¹ {Number(prod.price || p.price || 0).toLocaleString("en-IN")}</p>
-                          {prod.mrp && <p className="text-[10px] text-gray-400">MRP: â¹ {Number(prod.mrp).toLocaleString("en-IN")}</p>}
+                          <p className="font-semibold text-gray-800">₹ {Number(prod.price || p.price || 0).toLocaleString("en-IN")}</p>
+                          {prod.mrp && <p className="text-[10px] text-gray-400">MRP: ₹ {Number(prod.mrp).toLocaleString("en-IN")}</p>}
                         </td>
                         <td className="py-3 px-4">
-                          <p className="font-semibold text-gray-800">{prod.stock !== undefined ? prod.stock.toLocaleString("en-IN") : "â"}</p>
+                          <p className="font-semibold text-gray-800">{prod.stock !== undefined ? prod.stock.toLocaleString("en-IN") : "—"}</p>
                         </td>
                         <td className="py-3 px-4">{getStockBadge(prod.stock)}</td>
                         <td className="py-3 px-4">
@@ -513,7 +513,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
             </table>
           </div>
 
-          {/* Pagination â real */}
+          {/* Pagination — real */}
           <div className="p-4 border-t border-gray-100 flex items-center justify-between flex-wrap gap-2">
             <p className="text-[11px] text-gray-500">
               Showing {filtered.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1} to{" "}
@@ -541,7 +541,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
 
         {/* Right Panel */}
         <div className="w-72 space-y-4 shrink-0">
-          {/* Inventory Overview â real donut */}
+          {/* Inventory Overview — real donut */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
             <p className="text-xs font-bold text-gray-800 mb-4">Inventory Overview</p>
             <div className="flex items-center justify-center mb-4">
@@ -584,7 +584,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
             </button>
           </div>
 
-          {/* Top Categories â real */}
+          {/* Top Categories — real */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-bold text-gray-800">Top Categories</p>
@@ -636,7 +636,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
       </>
       )}
 
-      {/* âââ FARMER PRODUCTS SECTION (Point 2) âââ */}
+      {/* ─── FARMER PRODUCTS SECTION (Point 2) ─── */}
       {mainCatalogSection === "farmer" && (
         <div className="space-y-4">
           {/* Farmer Products Stats */}
@@ -742,7 +742,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
                             <p className="text-[10px] text-gray-400">{[c.district, c.city].filter(Boolean).join(", ") || "Bihar"}</p>
                           </td>
                           <td className="py-3 px-4">
-                            <p className="font-bold text-emerald-700">â¹ {Number(c.price || 0).toLocaleString("en-IN")}</p>
+                            <p className="font-bold text-emerald-700">₹ {Number(c.price || 0).toLocaleString("en-IN")}</p>
                             <p className="text-[10px] text-gray-400">per Quintal</p>
                           </td>
                           <td className="py-3 px-4">
@@ -806,7 +806,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* âââ DEALER PRODUCTS SECTION (Point 2) âââ */}
+      {/* ─── DEALER PRODUCTS SECTION (Point 2) ─── */}
       {mainCatalogSection === "dealer" && (
         <div className="space-y-4">
           {/* Dealer Products Stats */}
@@ -924,7 +924,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
                             <p className="text-[10px] text-gray-400">{d.unit || "per item"}</p>
                           </td>
                           <td className="py-3 px-4">
-                            <p className="font-bold text-emerald-700">â¹ {Number(d.price || 0).toLocaleString("en-IN")}</p>
+                            <p className="font-bold text-emerald-700">₹ {Number(d.price || 0).toLocaleString("en-IN")}</p>
                           </td>
                           <td className="py-3 px-4">
                             {d.status === "approved" ? (
@@ -987,7 +987,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* âââ View Farmer Crop Modal âââ */}
+      {/* ─── View Farmer Crop Modal ─── */}
       {viewCrop && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -1017,10 +1017,10 @@ export default function ProductsView({ products: propProducts, setProducts, prod
                 ["Farmer / Seller", viewCrop.sellerName],
                 ["Phone Number", viewCrop.phone],
                 ["District & City", [viewCrop.district, viewCrop.city].filter(Boolean).join(", ")],
-                ["Address", viewCrop.address || "â"],
-                ["Pincode", viewCrop.pincode || "â"],
+                ["Address", viewCrop.address || "—"],
+                ["Pincode", viewCrop.pincode || "—"],
                 ["Quantity / Weight", viewCrop.weight],
-                ["Target Price", `â¹ ${Number(viewCrop.price || 0).toLocaleString("en-IN")} / Quintal`],
+                ["Target Price", `₹ ${Number(viewCrop.price || 0).toLocaleString("en-IN")} / Quintal`],
                 ["Current Status", viewCrop.status],
                 ["Submitted On", viewCrop.createdAt ? new Date(viewCrop.createdAt).toLocaleDateString("en-IN") : "Recent"],
               ].map(([label, val], i) => (
@@ -1061,7 +1061,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* âââ View Dealer Product Modal âââ */}
+      {/* ─── View Dealer Product Modal ─── */}
       {viewDealerItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -1084,8 +1084,8 @@ export default function ProductsView({ products: propProducts, setProducts, prod
                 ["Dealer Name", viewDealerItem.dealerName],
                 ["Listing Type", viewDealerItem.type],
                 ["Category", viewDealerItem.category || "General"],
-                ["Price / Wage", `â¹ ${Number(viewDealerItem.price || 0).toLocaleString("en-IN")}`],
-                ["Unit / Duration", viewDealerItem.unit || "â"],
+                ["Price / Wage", `₹ ${Number(viewDealerItem.price || 0).toLocaleString("en-IN")}`],
+                ["Unit / Duration", viewDealerItem.unit || "—"],
                 ["Location", viewDealerItem.location || "Patna, Bihar"],
                 ["Current Status", viewDealerItem.status],
               ].map(([label, val], i) => (
@@ -1138,7 +1138,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* âââ View Product Modal âââ */}
+      {/* ─── View Product Modal ─── */}
       {viewProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -1155,11 +1155,11 @@ export default function ProductsView({ products: propProducts, setProducts, prod
             <div className="space-y-2 text-xs text-gray-700">
               {[
                 ["Category", viewProduct.category],
-                ["Price", `â¹ ${Number(viewProduct.price || 0).toLocaleString("en-IN")}`],
-                ["MRP", viewProduct.mrp ? `â¹ ${Number(viewProduct.mrp).toLocaleString("en-IN")}` : "â"],
-                ["Stock", viewProduct.stock !== undefined ? viewProduct.stock : "â"],
-                ["Brand", viewProduct.brand || "â"],
-                ["Status", viewProduct.status || "â"],
+                ["Price", `₹ ${Number(viewProduct.price || 0).toLocaleString("en-IN")}`],
+                ["MRP", viewProduct.mrp ? `₹ ${Number(viewProduct.mrp).toLocaleString("en-IN")}` : "—"],
+                ["Stock", viewProduct.stock !== undefined ? viewProduct.stock : "—"],
+                ["Brand", viewProduct.brand || "—"],
+                ["Status", viewProduct.status || "—"],
               ].map(([label, val], i) => (
                 <div key={i} className="flex items-center justify-between border-b border-gray-50 pb-1.5">
                   <span className="text-gray-500 font-medium">{label}</span>
@@ -1177,7 +1177,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* âââ Edit Product Modal âââ */}
+      {/* ─── Edit Product Modal ─── */}
       {editProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -1203,11 +1203,11 @@ export default function ProductsView({ products: propProducts, setProducts, prod
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Price (â¹) *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Price (₹) *</label>
                   <Input type="number" min="0" value={editProduct.price || 0} onChange={e => setEditProduct({ ...editProduct, price: Number(e.target.value) })} className="h-9 text-xs rounded-xl" required />
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">MRP (â¹)</label>
+                  <label className="block font-semibold text-gray-700 mb-1">MRP (₹)</label>
                   <Input type="number" min="0" value={editProduct.mrp || 0} onChange={e => setEditProduct({ ...editProduct, mrp: Number(e.target.value) })} className="h-9 text-xs rounded-xl" />
                 </div>
               </div>
@@ -1243,7 +1243,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* âââ Add New Product Modal (Matches exact reference design) âââ */}
+      {/* ─── Add New Product Modal (Matches exact reference design) ─── */}
       {isAddOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[94vh] shadow-2xl border border-gray-100 overflow-y-auto relative my-auto">
@@ -1268,7 +1268,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* âââ Categories Manager Modal âââ */}
+      {/* ─── Categories Manager Modal ─── */}
       {isCategoriesOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -1343,7 +1343,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* âââ Brands Manager Modal âââ */}
+      {/* ─── Brands Manager Modal ─── */}
       {isBrandsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -1417,7 +1417,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
         </div>
       )}
 
-      {/* âââ Units Manager Modal âââ */}
+      {/* ─── Units Manager Modal ─── */}
       {isUnitsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -1475,7 +1475,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        Â© {new Date().getFullYear()} Krivexo. All rights reserved. &nbsp; Real-time Product Catalog
+        © {new Date().getFullYear()} Krivexo. All rights reserved. &nbsp; Real-time Product Catalog
       </div>
     </div>
   );

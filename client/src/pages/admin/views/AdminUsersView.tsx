@@ -136,7 +136,7 @@ export default function AdminUsersView({ adminUsers, setAdminUsers }: AdminUsers
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2 font-mono text-gray-300 bg-white/5 px-2.5 py-1 rounded-lg border border-white/10 w-fit">
                           <Key className="h-3 w-3 text-amber-400" />
-                          <span>{isVisible ? passwordDisplay : "â¢â¢â¢â¢â¢â¢â¢â¢"}</span>
+                          <span>{isVisible ? passwordDisplay : "••••••••"}</span>
                           <button
                             type="button"
                             onClick={() => togglePasswordVisibility(a.id)}

@@ -7,16 +7,16 @@ import Footer from "@/components/Footer.tsx";
 const SEASONS = ["All", "Kharif (Monsoon)", "Rabi (Winter)", "Zaid (Summer)"];
 
 const CROPS = [
-  { name: "Paddy (Rice)", season: "Kharif (Monsoon)", sowing: "JuneâJuly", harvest: "OctoberâNovember", duration: "120â150 days", water: "High", temp: "20â35Â°C", img: "ð¾", states: "UP, Bihar, WB, Punjab" },
-  { name: "Maize", season: "Kharif (Monsoon)", sowing: "JuneâJuly", harvest: "SeptemberâOctober", duration: "85â95 days", water: "Medium", temp: "21â27Â°C", img: "ð½", states: "UP, Bihar, Karnataka" },
-  { name: "Soyabean", season: "Kharif (Monsoon)", sowing: "JuneâJuly", harvest: "OctoberâNovember", duration: "90â120 days", water: "Medium", temp: "20â30Â°C", img: "ð¡", states: "MP, Maharashtra, Rajasthan" },
-  { name: "Cotton", season: "Kharif (Monsoon)", sowing: "AprilâMay", harvest: "OctoberâJanuary", duration: "170â180 days", water: "Medium", temp: "25â35Â°C", img: "ð±", states: "Gujarat, Maharashtra, Telangana" },
-  { name: "Wheat", season: "Rabi (Winter)", sowing: "OctoberâDecember", harvest: "MarchâMay", duration: "120â150 days", water: "Low-Medium", temp: "10â25Â°C", img: "ð¾", states: "UP, Punjab, Haryana, MP" },
-  { name: "Mustard", season: "Rabi (Winter)", sowing: "SeptemberâOctober", harvest: "FebruaryâMarch", duration: "110â140 days", water: "Low", temp: "10â25Â°C", img: "ð¼", states: "Rajasthan, UP, Haryana" },
-  { name: "Gram (Chickpea)", season: "Rabi (Winter)", sowing: "OctoberâNovember", harvest: "FebruaryâMarch", duration: "90â110 days", water: "Low", temp: "15â25Â°C", img: "ð¤", states: "MP, Rajasthan, Maharashtra" },
-  { name: "Potato", season: "Rabi (Winter)", sowing: "OctoberâNovember", harvest: "JanuaryâMarch", duration: "75â120 days", water: "High", temp: "15â20Â°C", img: "ð¥", states: "UP, West Bengal, Bihar" },
-  { name: "Watermelon", season: "Zaid (Summer)", sowing: "FebruaryâMarch", harvest: "AprilâJune", duration: "85â95 days", water: "Medium", temp: "25â35Â°C", img: "ð", states: "UP, Karnataka, AP" },
-  { name: "Muskmelon", season: "Zaid (Summer)", sowing: "FebruaryâMarch", harvest: "MayâJune", duration: "80â90 days", water: "Medium", temp: "25â35Â°C", img: "ð", states: "UP, Rajasthan, Gujarat" },
+  { name: "Paddy (Rice)", season: "Kharif (Monsoon)", sowing: "June–July", harvest: "October–November", duration: "120–150 days", water: "High", temp: "20–35°C", img: "🌾", states: "UP, Bihar, WB, Punjab" },
+  { name: "Maize", season: "Kharif (Monsoon)", sowing: "June–July", harvest: "September–October", duration: "85–95 days", water: "Medium", temp: "21–27°C", img: "🌽", states: "UP, Bihar, Karnataka" },
+  { name: "Soyabean", season: "Kharif (Monsoon)", sowing: "June–July", harvest: "October–November", duration: "90–120 days", water: "Medium", temp: "20–30°C", img: "🟡", states: "MP, Maharashtra, Rajasthan" },
+  { name: "Cotton", season: "Kharif (Monsoon)", sowing: "April–May", harvest: "October–January", duration: "170–180 days", water: "Medium", temp: "25–35°C", img: "🌱", states: "Gujarat, Maharashtra, Telangana" },
+  { name: "Wheat", season: "Rabi (Winter)", sowing: "October–December", harvest: "March–May", duration: "120–150 days", water: "Low-Medium", temp: "10–25°C", img: "🌾", states: "UP, Punjab, Haryana, MP" },
+  { name: "Mustard", season: "Rabi (Winter)", sowing: "September–October", harvest: "February–March", duration: "110–140 days", water: "Low", temp: "10–25°C", img: "🌼", states: "Rajasthan, UP, Haryana" },
+  { name: "Gram (Chickpea)", season: "Rabi (Winter)", sowing: "October–November", harvest: "February–March", duration: "90–110 days", water: "Low", temp: "15–25°C", img: "🟤", states: "MP, Rajasthan, Maharashtra" },
+  { name: "Potato", season: "Rabi (Winter)", sowing: "October–November", harvest: "January–March", duration: "75–120 days", water: "High", temp: "15–20°C", img: "🥔", states: "UP, West Bengal, Bihar" },
+  { name: "Watermelon", season: "Zaid (Summer)", sowing: "February–March", harvest: "April–June", duration: "85–95 days", water: "Medium", temp: "25–35°C", img: "🍉", states: "UP, Karnataka, AP" },
+  { name: "Muskmelon", season: "Zaid (Summer)", sowing: "February–March", harvest: "May–June", duration: "80–90 days", water: "Medium", temp: "25–35°C", img: "🍈", states: "UP, Rajasthan, Gujarat" },
 ];
 
 const waterColor = (level: string) =>

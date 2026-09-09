@@ -9,10 +9,10 @@ import Footer from "@/components/Footer.tsx";
 import { toast } from "sonner";
 
 const CONTACT_INFO = [
-  { icon: Phone, label: "Phone", value: "+91 87087 42170", sub: "MonâSat, 9 AM â 6 PM" },
+  { icon: Phone, label: "Phone", value: "+91 87087 42170", sub: "Mon–Sat, 9 AM – 6 PM" },
   { icon: Mail, label: "Email", value: "support@krivexo.com", sub: "We reply within 24 hours" },
-  { icon: MapPin, label: "Address", value: "Kanpur, Uttar Pradesh", sub: "India â 208001" },
-  { icon: Clock, label: "Working Hours", value: "9 AM â 6 PM", sub: "Monday to Saturday" },
+  { icon: MapPin, label: "Address", value: "Kanpur, Uttar Pradesh", sub: "India – 208001" },
+  { icon: Clock, label: "Working Hours", value: "9 AM – 6 PM", sub: "Monday to Saturday" },
 ];
 
 const SUBJECTS = ["General Enquiry", "Technical Support", "Machinery Booking", "Expert Advice", "Soil Testing", "Mandi Prices", "Billing", "Other"];

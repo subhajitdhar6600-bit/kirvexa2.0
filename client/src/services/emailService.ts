@@ -96,11 +96,11 @@ Dear ${to_name} (${businessName}),
 Congratulations! Your Dealership Registration has been reviewed and approved by Farma / Krivexo Admin.
 
 Here are your official Dealer Panel Login Credentials:
-âââââââââââââââââââââââââââââââââââââ
-â¢ Dealer ID : ${dealerId}
-â¢ Password  : ${password}
-â¢ Login URL : ${loginUrl}
-âââââââââââââââââââââââââââââââââââââ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Dealer ID : ${dealerId}
+• Password  : ${password}
+• Login URL : ${loginUrl}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Security Instructions:
 1. Navigate to the Dealer Login section at ${loginUrl}

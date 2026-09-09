@@ -43,8 +43,8 @@ const DEFAULT_SETTINGS_STATE = {
   whatsappPhone: "+91 91234 56789",
 
   // General - Other Settings
-  currencyCode: "INR (â¹)",
-  copyrightText: "Â© 2026 Krivexo Agri Solutions Pvt. Ltd. All rights reserved.",
+  currencyCode: "INR (₹)",
+  copyrightText: "© 2026 Krivexo Agri Solutions Pvt. Ltd. All rights reserved.",
   footerDescription: "Empowering farmers with smart agriculture tools, mandi rates, and direct market access.",
   itemsPerPage: "25",
 
@@ -74,7 +74,7 @@ const DEFAULT_SETTINGS_STATE = {
 
   // Payment Settings
   razorpayKeyId: "rzp_live_9832749823",
-  razorpaySecret: "â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢",
+  razorpaySecret: "••••••••••••••••",
   upiVpa: "krivexo@upi",
   commissionRatePct: "5",
   minPayoutThreshold: "500",
@@ -83,7 +83,7 @@ const DEFAULT_SETTINGS_STATE = {
   smtpHost: "smtp.gmail.com",
   smtpPort: "587",
   smtpUser: "notifications@krivexo.com",
-  smtpPassword: "â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢",
+  smtpPassword: "••••••••••••",
   smtpEncryption: "TLS",
   smtpFromName: "Krivexo System",
 
@@ -130,7 +130,7 @@ const DEFAULT_SETTINGS_STATE = {
   privacyPolicyUrl: "https://krivexo.com/privacy",
 
   // Language Settings
-  defaultLanguage: "Hindi (à¤¹à¤¿à¤à¤¦à¥)",
+  defaultLanguage: "Hindi (हिंदी)",
 
   // Logs & Activity
   logLevel: "Info",
@@ -286,7 +286,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>âº</span>
+          <span>›</span>
           <span className="text-emerald-600 font-semibold">System Settings</span>
         </div>
       </div>
@@ -318,7 +318,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
               <p className="text-[10px] text-gray-400 mt-0.5 leading-snug line-clamp-2">{item.desc}</p>
             </div>
             <span className="text-[10.5px] font-bold text-emerald-700 mt-3 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-              Configure â
+              Configure →
             </span>
           </div>
         ))}
@@ -501,7 +501,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                           ) : (
                             <div className="text-center">
                               <div className="flex items-center gap-1 text-emerald-700 font-black text-sm">
-                                <span className="text-lg">ð¿</span> {formData.siteName}
+                                <span className="text-lg">🌿</span> {formData.siteName}
                               </div>
                               <p className="text-[8px] text-gray-400">{formData.tagline}</p>
                             </div>
@@ -541,7 +541,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                               </button>
                             </>
                           ) : (
-                            <span className="text-2xl">ð±</span>
+                            <span className="text-2xl">🌱</span>
                           )}
                         </div>
 
@@ -851,7 +851,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">Current Password</label>
                   <input
                     type="password"
-                    placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
+                    placeholder="••••••••"
                     value={formData.currentPassword}
                     onChange={(e) => updateField("currentPassword", e.target.value)}
                     className="w-full h-9 px-3 rounded-xl border border-gray-200 focus:outline-none focus:border-emerald-500 text-gray-800"
@@ -861,7 +861,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">New Password</label>
                   <input
                     type="password"
-                    placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
+                    placeholder="••••••••"
                     value={formData.newPassword}
                     onChange={(e) => updateField("newPassword", e.target.value)}
                     className="w-full h-9 px-3 rounded-xl border border-gray-200 focus:outline-none focus:border-emerald-500 text-gray-800"
@@ -871,7 +871,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">Confirm New Password</label>
                   <input
                     type="password"
-                    placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
+                    placeholder="••••••••"
                     value={formData.confirmPassword}
                     onChange={(e) => updateField("confirmPassword", e.target.value)}
                     className="w-full h-9 px-3 rounded-xl border border-gray-200 focus:outline-none focus:border-emerald-500 text-gray-800"
@@ -1009,7 +1009,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-700 mb-1">Minimum Payout Threshold (â¹)</label>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1">Minimum Payout Threshold (₹)</label>
                 <input
                   type="number"
                   value={formData.minPayoutThreshold}
@@ -1423,17 +1423,17 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                   onChange={(e) => updateField("defaultLanguage", e.target.value)}
                   className="w-full max-w-md h-9 px-3 rounded-xl border border-gray-200 focus:outline-none focus:border-emerald-500 text-gray-800 bg-white"
                 >
-                  <option>Hindi (à¤¹à¤¿à¤à¤¦à¥)</option>
+                  <option>Hindi (हिंदी)</option>
                   <option>English (US)</option>
-                  <option>Bhojpuri (à¤­à¥à¤à¤ªà¥à¤°à¥)</option>
-                  <option>Maithili (à¤®à¥à¤¥à¤¿à¤²à¥)</option>
+                  <option>Bhojpuri (भोजपुरी)</option>
+                  <option>Maithili (मैथिली)</option>
                 </select>
               </div>
 
               <div className="pt-2">
                 <p className="text-[11px] font-semibold text-gray-700 mb-2">Supported Portal Languages</p>
                 <div className="flex flex-wrap gap-2">
-                  {["Hindi (à¤¹à¤¿à¤à¤¦à¥)", "English", "Bhojpuri (à¤­à¥à¤à¤ªà¥à¤°à¥)", "Maithili (à¤®à¥à¤¥à¤¿à¤²à¥)", "Punjabi", "Bengali"].map((lang) => (
+                  {["Hindi (हिंदी)", "English", "Bhojpuri (भोजपुरी)", "Maithili (मैथिली)", "Punjabi", "Bengali"].map((lang) => (
                     <span key={lang} className="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-semibold flex items-center gap-1.5">
                       <Check className="h-3 w-3 text-emerald-600" /> {lang}
                     </span>
@@ -1515,7 +1515,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={() => setActiveMenu("Maintenance Mode")}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors cursor-pointer"
           >
-            â Manage
+            ⚙ Manage
           </button>
         </div>
 
@@ -1541,7 +1541,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={() => toast.info("Running in Production mode (v2.5.0)")}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors cursor-pointer"
           >
-            â Manage
+            ⚙ Manage
           </button>
         </div>
 
@@ -1567,7 +1567,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={handleClearCache}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
           >
-            ð Clear Cache
+            🗑 Clear Cache
           </button>
         </div>
 
@@ -1591,7 +1591,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={handleBackup}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
           >
-            â Create Backup
+            ☁ Create Backup
           </button>
         </div>
 
@@ -1615,7 +1615,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={() => setActiveMenu("Logs & Activity")}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
           >
-            â View Logs
+            → View Logs
           </button>
         </div>
 

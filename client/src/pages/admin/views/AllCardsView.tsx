@@ -68,7 +68,7 @@ export default function AllCardsView() {
         setRawUsers(users);
         const mappedCards: CardItem[] = users.map((u: any, idx: number) => {
           const name = u.fullName || u.name || "Farmer User";
-          const phone = u.phone || "â";
+          const phone = u.phone || "—";
           const cleanPhone = phone.replace(/\D/g, "").slice(-10);
           const last4 = cleanPhone.slice(-4) || `${1000 + idx}`;
           const isVerified = u.isVerified === true || u.verificationStatus === "Verified";
@@ -170,7 +170,7 @@ export default function AllCardsView() {
     const newCard: CardItem = {
       id: `card_${Date.now()}`,
       name: targetUser.fullName || targetUser.name || "User",
-      phone: targetUser.phone || "â",
+      phone: targetUser.phone || "—",
       cardNumber: targetUser.kccCardNumber || `KCC-BH-2026-${targetUser.phone ? targetUser.phone.replace(/\D/g, "").slice(-4) : "8899"}`,
       cardType: issueForm.cardType,
       creditLimit: Number(issueForm.creditLimit) || 50000,
@@ -203,7 +203,7 @@ export default function AllCardsView() {
     }
     updateKccLimit(cardNum, newLimit, cardPhone);
     setEditingCard(null);
-    toast.success(`Card #${cardNum} limit updated to â¹${newLimit.toLocaleString("en-IN")} and synced to user account!`);
+    toast.success(`Card #${cardNum} limit updated to ₹${newLimit.toLocaleString("en-IN")} and synced to user account!`);
   };
 
   // 3. Download CSV Report
@@ -246,9 +246,9 @@ export default function AllCardsView() {
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>âº</span>
+          <span>›</span>
           <span>Krivexo Card</span>
-          <span>âº</span>
+          <span>›</span>
           <span className="text-emerald-600 font-medium">All Cards</span>
         </div>
       </div>
@@ -391,8 +391,8 @@ export default function AllCardsView() {
                           {c.cardType}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-semibold text-gray-800">â¹ {c.creditLimit.toLocaleString("en-IN")}</td>
-                      <td className="py-3.5 px-4 font-bold text-emerald-600">â¹ {c.availableLimit.toLocaleString("en-IN")}</td>
+                      <td className="py-3.5 px-4 font-semibold text-gray-800">₹ {c.creditLimit.toLocaleString("en-IN")}</td>
+                      <td className="py-3.5 px-4 font-bold text-emerald-600">₹ {c.availableLimit.toLocaleString("en-IN")}</td>
                       <td className="py-3.5 px-4">{getStatusBadge(c.status)}</td>
                       <td className="py-3.5 px-4 text-gray-500">{c.issuedOn}</td>
                       <td className="py-3.5 px-4 text-center">
@@ -501,8 +501,8 @@ export default function AllCardsView() {
                 <div className="flex justify-between"><span className="text-gray-400">Card Number</span><span className="font-mono text-gray-700">{selectedCard.cardNumber}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Card Type</span><span className="font-semibold text-emerald-600">{selectedCard.cardType}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Status</span>{getStatusBadge(selectedCard.status)}</div>
-                <div className="flex justify-between"><span className="text-gray-400">Credit Limit</span><span className="font-bold text-gray-900">â¹ {selectedCard.creditLimit.toLocaleString("en-IN")}</span></div>
-                <div className="flex justify-between"><span className="text-gray-400">Available Limit</span><span className="font-bold text-emerald-600">â¹ {selectedCard.availableLimit.toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Credit Limit</span><span className="font-bold text-gray-900">₹ {selectedCard.creditLimit.toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Available Limit</span><span className="font-bold text-emerald-600">₹ {selectedCard.availableLimit.toLocaleString("en-IN")}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Issued On</span><span className="text-gray-600">{selectedCard.issuedOn}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Valid Thru</span><span className="text-gray-600">{selectedCard.validThru}</span></div>
               </div>
@@ -518,7 +518,7 @@ export default function AllCardsView() {
         )}
       </div>
 
-      {/* âââ Issue New Card Modal âââ */}
+      {/* ─── Issue New Card Modal ─── */}
       {isIssueModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -557,14 +557,14 @@ export default function AllCardsView() {
                   onChange={(e: any) => setIssueForm({ ...issueForm, cardType: e.target.value })}
                   className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-xs font-medium cursor-pointer"
                 >
-                  <option value="Kisan Card Basic">Kisan Card Basic (â¹ 25,000 Limit)</option>
-                  <option value="Kisan Card Premium">Kisan Card Premium (â¹ 50,000 Limit)</option>
-                  <option value="Kisan Card Gold">Kisan Card Gold (â¹ 1,00,000 Limit)</option>
+                  <option value="Kisan Card Basic">Kisan Card Basic (₹ 25,000 Limit)</option>
+                  <option value="Kisan Card Premium">Kisan Card Premium (₹ 50,000 Limit)</option>
+                  <option value="Kisan Card Gold">Kisan Card Gold (₹ 1,00,000 Limit)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Credit Limit (â¹)</label>
+                <label className="block font-semibold text-gray-700 mb-1">Credit Limit (₹)</label>
                 <Input
                   type="number"
                   value={issueForm.creditLimit}
@@ -595,7 +595,7 @@ export default function AllCardsView() {
         </div>
       )}
 
-      {/* âââ Edit Card Modal âââ */}
+      {/* ─── Edit Card Modal ─── */}
       {editingCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -607,7 +607,7 @@ export default function AllCardsView() {
             </button>
 
             <h3 className="text-base font-bold text-gray-900 mb-1">Modify Kisan Card</h3>
-            <p className="text-xs text-gray-500 mb-4">{editingCard.name} â¢ {editingCard.cardNumber}</p>
+            <p className="text-xs text-gray-500 mb-4">{editingCard.name} • {editingCard.cardNumber}</p>
 
             <form onSubmit={handleSaveEditCard} className="space-y-3 text-xs">
               <div>
@@ -625,7 +625,7 @@ export default function AllCardsView() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Credit Limit (â¹)</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Credit Limit (₹)</label>
                   <Input
                     type="number"
                     value={editingCard.creditLimit}
@@ -635,7 +635,7 @@ export default function AllCardsView() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Available Limit (â¹)</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Available Limit (₹)</label>
                   <Input
                     type="number"
                     value={editingCard.availableLimit}
@@ -681,7 +681,7 @@ export default function AllCardsView() {
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Kisan Cards Database
+        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Kisan Cards Database
       </div>
     </div>
   );

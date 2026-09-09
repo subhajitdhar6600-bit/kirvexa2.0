@@ -103,7 +103,7 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
         awb,
         orderId: `#${o.id || `ORD${8000 + idx}`}`,
         customer: o.buyer || o.userName || "Customer",
-        phone: o.phone || "â",
+        phone: o.phone || "—",
         courier: courier.name,
         courierInitial: courier.initial,
         courierColor: courier.color,
@@ -187,7 +187,7 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
       awb: newAwb,
       orderId: `#${createForm.orderId.replace(/^#/, "")}`,
       customer: createForm.customer,
-      phone: createForm.phone || "â",
+      phone: createForm.phone || "—",
       courier: courierObj.name,
       courierInitial: courierObj.initial,
       courierColor: courierObj.color,
@@ -795,7 +795,7 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
               {/* Rates */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-1.5">Free Shipping Threshold (â¹)</label>
+                  <label className="block text-gray-700 font-semibold mb-1.5">Free Shipping Threshold (₹)</label>
                   <Input
                     type="number"
                     value={tempSettings.freeShippingThreshold}
@@ -806,7 +806,7 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
                   <p className="text-[10px] text-gray-400 mt-0.5">Orders above this get free shipping</p>
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-1.5">Flat Shipping Rate (â¹)</label>
+                  <label className="block text-gray-700 font-semibold mb-1.5">Flat Shipping Rate (₹)</label>
                   <Input
                     type="number"
                     value={tempSettings.flatShippingRate}
@@ -899,7 +899,7 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
         </div>
       )}
 
-      <div className="text-center text-[11px] text-gray-400">Â© {new Date().getFullYear()} Krivexo. All rights reserved.</div>
+      <div className="text-center text-[11px] text-gray-400">© {new Date().getFullYear()} Krivexo. All rights reserved.</div>
     </div>
   );
 }

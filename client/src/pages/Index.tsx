@@ -247,7 +247,7 @@ export default function Index() {
       return;
     }
     if (amt > posFarmerProfile.kccBalance) {
-      toast.error(`Insufficient KCC limit! Available: â¹${posFarmerProfile.kccBalance.toLocaleString()}`);
+      toast.error(`Insufficient KCC limit! Available: ₹${posFarmerProfile.kccBalance.toLocaleString()}`);
       return;
     }
     const code = Math.floor(1000 + Math.random() * 9000).toString();
@@ -260,10 +260,10 @@ export default function Index() {
       to_name: posFarmerProfile?.name || "Farmer",
       verification_code: code,
       subject: `Krivexo POS Debit Authorization Code: ${code}`,
-      message: `Your verification code to authorize KCC POS billing of â¹${posAmount} is: ${code}`,
+      message: `Your verification code to authorize KCC POS billing of ₹${posAmount} is: ${code}`,
     }).catch(() => {});
 
-    toast.success(`ð§ Verification code dispatched to ${farmerEmail}: Code is ${code}`);
+    toast.success(`📧 Verification code dispatched to ${farmerEmail}: Code is ${code}`);
   };
 
   const handleVerifyOtpAndChargePos = () => {
@@ -298,8 +298,8 @@ export default function Index() {
         "KCC Card Number": cardNum,
         "Phone Number": posFarmerProfile?.phone || "N/A",
         "Item Description": posItemDesc || "Agri Inputs POS Purchase",
-        "Amount Charged": `â¹${amt.toLocaleString()}`,
-        "Remaining KCC Limit": `â¹${remainingLim.toLocaleString()}`,
+        "Amount Charged": `₹${amt.toLocaleString()}`,
+        "Remaining KCC Limit": `₹${remainingLim.toLocaleString()}`,
         "Transaction Date": new Date().toLocaleString("en-IN"),
         "Verification": "Verified via Registered Email Code",
         "Authorized Dealer": user?.name || "Authorized Dealer"
@@ -392,7 +392,7 @@ export default function Index() {
       overview: "Sell Crops enables farmers to list their harvested produce directly on the platform to reach verified bulk buyers, traders, and mills across the state without dealing with exploitative intermediaries.",
       keyBenefits: [
         "Get maximum value for your hard-earned harvest",
-        "No commission deduction â 100% earnings go to the farmer",
+        "No commission deduction — 100% earnings go to the farmer",
         "Fast verification by Admin to broadcast listings widely",
         "Direct buyer calls and WhatsApp negotiation"
       ],
@@ -406,7 +406,7 @@ export default function Index() {
       overview: "Machinery Booking solves the high cost of equipment ownership by offering on-demand rental for tractors, rotavators, combine harvesters, power tillers, and sprayers directly to your field location.",
       keyBenefits: [
         "Access modern farm machinery without capital investment",
-        "Fair hourly rental rates starting as low as â¹350/hr",
+        "Fair hourly rental rates starting as low as ₹350/hr",
         "Nearest machine allotment coordinated by local fleet admins",
         "Timely field work completion during peak harvesting seasons"
       ],
@@ -680,7 +680,7 @@ export default function Index() {
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <div className="text-xs text-gray-300">
                       {isKccIssued ? (
-                        <span className="text-emerald-400 font-semibold">â Verified &amp; Active: All Features Unlocked</span>
+                        <span className="text-emerald-400 font-semibold">✓ Verified &amp; Active: All Features Unlocked</span>
                       ) : hasAppliedKcc ? (
                         <span className="text-amber-300 font-medium">Application under review by Admin</span>
                       ) : (
@@ -693,7 +693,7 @@ export default function Index() {
                           size="sm"
                           className="bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs px-4 py-2 rounded-full shadow-md shrink-0 cursor-pointer"
                         >
-                          View Wallet â
+                          View Wallet →
                         </Button>
                       </Link>
                     ) : (
@@ -702,7 +702,7 @@ export default function Index() {
                         onClick={() => setIsKccAppModalOpen(true)}
                         className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs px-4 py-2 rounded-full shadow-md shrink-0 cursor-pointer animate-pulse"
                       >
-                        {hasAppliedKcc ? "Track Status â" : "Apply for KCC Now â"}
+                        {hasAppliedKcc ? "Track Status →" : "Apply for KCC Now →"}
                       </Button>
                     )}
                   </div>
@@ -714,7 +714,7 @@ export default function Index() {
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="text-xs font-bold text-white uppercase tracking-wider">Live Mandi Bhav</span>
-                      <span className="text-[10px] text-gray-400">â¢ Bihar & UP</span>
+                      <span className="text-[10px] text-gray-400">• Bihar & UP</span>
                     </div>
                     <Link to="/mandi-bhav" className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-0.5">
                       All Mandis &gt;
@@ -723,19 +723,19 @@ export default function Index() {
 
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="bg-white/5 border border-white/5 rounded-xl p-2">
-                      <div className="text-[11px] text-gray-400">Wheat (à¤à¥à¤¹à¥à¤)</div>
-                      <div className="text-sm font-bold text-white" style={{ fontFamily: "Rajdhani, sans-serif" }}>â¹2,275<span className="text-[9px] text-gray-400">/q</span></div>
-                      <span className="text-[10px] text-emerald-400 font-semibold">+2.3% â²</span>
+                      <div className="text-[11px] text-gray-400">Wheat (गेहूं)</div>
+                      <div className="text-sm font-bold text-white" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹2,275<span className="text-[9px] text-gray-400">/q</span></div>
+                      <span className="text-[10px] text-emerald-400 font-semibold">+2.3% ▲</span>
                     </div>
                     <div className="bg-white/5 border border-white/5 rounded-xl p-2">
-                      <div className="text-[11px] text-gray-400">Paddy (à¤§à¤¾à¤¨)</div>
-                      <div className="text-sm font-bold text-white" style={{ fontFamily: "Rajdhani, sans-serif" }}>â¹1,860<span className="text-[9px] text-gray-400">/q</span></div>
-                      <span className="text-[10px] text-emerald-400 font-semibold">+1.8% â²</span>
+                      <div className="text-[11px] text-gray-400">Paddy (धान)</div>
+                      <div className="text-sm font-bold text-white" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹1,860<span className="text-[9px] text-gray-400">/q</span></div>
+                      <span className="text-[10px] text-emerald-400 font-semibold">+1.8% ▲</span>
                     </div>
                     <div className="bg-white/5 border border-white/5 rounded-xl p-2">
-                      <div className="text-[11px] text-gray-400">Mustard (à¤¸à¤°à¤¸à¥à¤)</div>
-                      <div className="text-sm font-bold text-white" style={{ fontFamily: "Rajdhani, sans-serif" }}>â¹5,250<span className="text-[9px] text-gray-400">/q</span></div>
-                      <span className="text-[10px] text-emerald-400 font-semibold">+1.1% â²</span>
+                      <div className="text-[11px] text-gray-400">Mustard (सरसों)</div>
+                      <div className="text-sm font-bold text-white" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹5,250<span className="text-[9px] text-gray-400">/q</span></div>
+                      <span className="text-[10px] text-emerald-400 font-semibold">+1.1% ▲</span>
                     </div>
                   </div>
                 </div>
@@ -771,7 +771,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Our Services â 8 Card Grid Matching Image 4 & 5 */}
+      {/* Our Services — 8 Card Grid Matching Image 4 & 5 */}
       <section className="py-16 bg-[#0d0d0d]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
@@ -802,7 +802,7 @@ export default function Index() {
                 onClick={() => setIsKccAppModalOpen(true)}
                 className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs px-5 py-2.5 rounded-xl shrink-0 cursor-pointer shadow-md border border-amber-300"
               >
-                Apply for KCC to Unlock â
+                Apply for KCC to Unlock →
               </Button>
             </div>
           )}
@@ -883,7 +883,7 @@ export default function Index() {
                     Unlock Everything with Kisan Credit Card
                   </h3>
                   <p className="text-xs md:text-sm text-gray-300 max-w-2xl mt-1 leading-relaxed">
-                    Apply for your free KCC to access all platform features â buying, selling, labour booking and expert advice.
+                    Apply for your free KCC to access all platform features — buying, selling, labour booking and expert advice.
                   </p>
                 </div>
               </div>
@@ -898,7 +898,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Everything a Farmer Needs â Simple, Mobile-Optimized Grid */}
+      {/* Everything a Farmer Needs — Simple, Mobile-Optimized Grid */}
       <section className="py-14 sm:py-20 bg-[#0a0a0a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8 sm:mb-14">
@@ -1017,7 +1017,7 @@ export default function Index() {
                   </p>
                   <Link to={card.href}>
                     <Button size="sm" className="bg-primary text-black font-bold text-xs py-1.5 px-4 hover:bg-primary/90 rounded-xl cursor-pointer">
-                      {card.btn} â
+                      {card.btn} →
                     </Button>
                   </Link>
                 </div>
@@ -1266,7 +1266,7 @@ export default function Index() {
                         </div>
                         <p className="text-xs text-gray-300">Name: <strong className="text-white">{checkResult.fullName || checkResult.applicantName || "Ramesh Kumar"}</strong></p>
                         <p className="text-xs text-gray-300">Card Number: <strong className="text-primary font-mono">{checkResult.cardNumber || "KCC-BH-2026-9041"}</strong></p>
-                        <p className="text-xs text-gray-300">Phone: <strong className="text-white">{checkResult.phone}</strong> Â· Aadhaar: <strong className="text-white font-mono">{checkResult.aadhaar}</strong></p>
+                        <p className="text-xs text-gray-300">Phone: <strong className="text-white">{checkResult.phone}</strong> · Aadhaar: <strong className="text-white font-mono">{checkResult.aadhaar}</strong></p>
                         <p className="text-xs text-gray-300">Status: <span className="uppercase text-primary font-bold">{checkResult.status || "APPROVED"}</span></p>
                       </div>
                     ) : (
@@ -1311,7 +1311,7 @@ export default function Index() {
 
                 {applyPdfInfo && (
                   <div className="p-3 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-between">
-                    <span className="text-xs text-primary font-semibold">â Application Slip Ready!</span>
+                    <span className="text-xs text-primary font-semibold">✓ Application Slip Ready!</span>
                     <Button size="sm" onClick={() => downloadPdf(applyPdfInfo.dataUrl, applyPdfInfo.fileName)} className="bg-primary text-black font-bold text-xs">
                       <Download className="h-3.5 w-3.5 mr-1" /> Download PDF Slip
                     </Button>
@@ -1359,7 +1359,7 @@ export default function Index() {
 
                 {regPdfInfo && (
                   <div className="p-3 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-between">
-                    <span className="text-xs text-primary font-semibold">â Farmer Digital Certificate Generated!</span>
+                    <span className="text-xs text-primary font-semibold">✓ Farmer Digital Certificate Generated!</span>
                     <Button size="sm" onClick={() => downloadPdf(regPdfInfo.dataUrl, regPdfInfo.fileName)} className="bg-primary text-black font-bold text-xs">
                       <Download className="h-3.5 w-3.5 mr-1" /> Download Certificate
                     </Button>
@@ -1397,10 +1397,10 @@ export default function Index() {
                     <div className="flex items-center justify-between border-b border-primary/20 pb-2">
                       <div>
                         <h4 className="font-bold text-white text-sm">{posFarmerProfile.name}</h4>
-                        <p className="text-xs text-gray-400">Card: {posFarmerProfile.cardNumber} Â· Phone: {posFarmerProfile.phone}</p>
+                        <p className="text-xs text-gray-400">Card: {posFarmerProfile.cardNumber} · Phone: {posFarmerProfile.phone}</p>
                       </div>
                       <Badge className="bg-primary text-black font-bold text-xs">
-                        Limit: â¹{posFarmerProfile.kccBalance.toLocaleString()}
+                        Limit: ₹{posFarmerProfile.kccBalance.toLocaleString()}
                       </Badge>
                     </div>
 
@@ -1411,7 +1411,7 @@ export default function Index() {
                         <Input value={posItemDesc} onChange={e => setPosItemDesc(e.target.value)} placeholder="e.g. Urea Fertilizers (5 bags)" className="bg-black/50 border-white/10 text-white" />
                       </div>
                       <div>
-                        <Label className="text-xs text-gray-300">Billing Amount (â¹) *</Label>
+                        <Label className="text-xs text-gray-300">Billing Amount (₹) *</Label>
                         <Input type="number" value={posAmount} onChange={e => setPosAmount(e.target.value)} placeholder="e.g. 1500" className="bg-black/50 border-white/10 text-white" required />
                       </div>
                     </div>
@@ -1424,7 +1424,7 @@ export default function Index() {
 
                 {posReceiptPdf && (
                   <div className="p-3 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-between">
-                    <span className="text-xs text-primary font-semibold">â POS Invoice Bill Ready!</span>
+                    <span className="text-xs text-primary font-semibold">✓ POS Invoice Bill Ready!</span>
                     <Button size="sm" onClick={() => downloadPdf(posReceiptPdf.dataUrl, posReceiptPdf.fileName)} className="bg-primary text-black font-bold text-xs">
                       <Download className="h-3.5 w-3.5 mr-1" /> Download Invoice PDF
                     </Button>
@@ -1445,7 +1445,7 @@ export default function Index() {
             </div>
             <h3 className="font-bold text-lg text-white">Farmer OTP Verification</h3>
             <p className="text-xs text-gray-400">
-              SMS OTP sent to <strong className="text-white">{posFarmerProfile?.phone}</strong> for transaction amount <strong className="text-primary">â¹{posAmount}</strong>
+              SMS OTP sent to <strong className="text-white">{posFarmerProfile?.phone}</strong> for transaction amount <strong className="text-primary">₹{posAmount}</strong>
             </p>
             <div className="p-2 bg-white/5 rounded-lg border border-white/10 text-xs font-mono text-primary">
               Demo OTP: <strong>{posGeneratedOtp}</strong>
@@ -1557,7 +1557,7 @@ export default function Index() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-gray-300">
-                    {listingType === "labour" ? "Daily Wage Rate (â¹ / Day) *" : "Price (â¹) *"}
+                    {listingType === "labour" ? "Daily Wage Rate (₹ / Day) *" : "Price (₹) *"}
                   </Label>
                   <Input
                     type="number"
@@ -1599,7 +1599,7 @@ export default function Index() {
                   <div className="relative border border-primary/40 rounded-xl p-2 bg-white/5 flex items-center gap-3">
                     <img src={listImg} alt="Preview" className="w-16 h-16 object-cover rounded-lg border border-white/10" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-primary truncate">â Photo Attached</p>
+                      <p className="text-xs font-semibold text-primary truncate">✓ Photo Attached</p>
                       <p className="text-[10px] text-gray-400">Ready to submit with listing</p>
                     </div>
                     <Button
@@ -1666,7 +1666,7 @@ export default function Index() {
               onClick={() => setSelectedFeature(null)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full p-2 transition-colors cursor-pointer"
             >
-              â
+              ✕
             </button>
 
             {/* Header */}
@@ -1701,7 +1701,7 @@ export default function Index() {
                 <ul className="space-y-2 text-xs text-gray-300">
                   {selectedFeature.explanation.keyBenefits.map((b, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-primary font-bold">â¢</span>
+                      <span className="text-primary font-bold">•</span>
                       <span>{b}</span>
                     </li>
                   ))}
@@ -1736,7 +1736,7 @@ export default function Index() {
               </Button>
               <Link to={selectedFeature.href} className="w-full sm:w-auto">
                 <Button className="w-full sm:w-auto bg-primary text-black font-bold hover:bg-primary/90 rounded-xl">
-                  Go to {selectedFeature.title} Section â
+                  Go to {selectedFeature.title} Section →
                 </Button>
               </Link>
             </div>

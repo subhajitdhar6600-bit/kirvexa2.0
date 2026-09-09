@@ -23,17 +23,17 @@ interface LocationWeather {
 }
 
 const POPULAR_LOCATIONS: Record<string, LocationWeather> = {
-  "Kanpur": { city: "Kanpur", state: "Uttar Pradesh", temp: 28, feelsLike: 30, desc: "Partly Cloudy", emoji: "â", humidity: 62, windSpeed: 12, visibility: 8, rainChance: 20, uvIndex: "High", aqi: 110 },
-  "Patna": { city: "Patna", state: "Bihar", temp: 30, feelsLike: 34, desc: "Scattered Clouds", emoji: "â", humidity: 68, windSpeed: 14, visibility: 8, rainChance: 35, uvIndex: "Moderate", aqi: 95 },
-  "Samastipur": { city: "Samastipur", state: "Bihar", temp: 27, feelsLike: 29, desc: "Light Rain Showers", emoji: "ð§ï¸", humidity: 76, windSpeed: 16, visibility: 6, rainChance: 65, uvIndex: "Moderate", aqi: 65 },
-  "Lucknow": { city: "Lucknow", state: "Uttar Pradesh", temp: 29, feelsLike: 32, desc: "Mostly Sunny", emoji: "ð¤ï¸", humidity: 58, windSpeed: 10, visibility: 9, rainChance: 15, uvIndex: "High", aqi: 125 },
-  "Varanasi": { city: "Varanasi", state: "Uttar Pradesh", temp: 31, feelsLike: 35, desc: "Hot & Clear", emoji: "âï¸", humidity: 64, windSpeed: 9, visibility: 7, rainChance: 10, uvIndex: "Very High", aqi: 140 },
-  "Muzaffarpur": { city: "Muzaffarpur", state: "Bihar", temp: 28, feelsLike: 31, desc: "Overcast", emoji: "âï¸", humidity: 72, windSpeed: 11, visibility: 7, rainChance: 45, uvIndex: "Moderate", aqi: 80 },
-  "Gaya": { city: "Gaya", state: "Bihar", temp: 32, feelsLike: 36, desc: "Sunny & Warm", emoji: "âï¸", humidity: 50, windSpeed: 8, visibility: 10, rainChance: 5, uvIndex: "Very High", aqi: 105 },
-  "Bhopal": { city: "Bhopal", state: "Madhya Pradesh", temp: 26, feelsLike: 27, desc: "Breezy & Cool", emoji: "ð¤ï¸", humidity: 55, windSpeed: 18, visibility: 9, rainChance: 10, uvIndex: "Moderate", aqi: 70 },
-  "Jaipur": { city: "Jaipur", state: "Rajasthan", temp: 34, feelsLike: 37, desc: "Hot & Sunny", emoji: "âï¸", humidity: 38, windSpeed: 13, visibility: 10, rainChance: 0, uvIndex: "Very High", aqi: 135 },
-  "Ludhiana": { city: "Ludhiana", state: "Punjab", temp: 29, feelsLike: 31, desc: "Hazy Sun", emoji: "ð«ï¸", humidity: 60, windSpeed: 7, visibility: 5, rainChance: 10, uvIndex: "High", aqi: 160 },
-  "Delhi": { city: "Delhi", state: "Delhi NCR", temp: 33, feelsLike: 36, desc: "Hot & Hazy", emoji: "ð«ï¸", humidity: 48, windSpeed: 9, visibility: 4, rainChance: 5, uvIndex: "Very High", aqi: 210 },
+  "Kanpur": { city: "Kanpur", state: "Uttar Pradesh", temp: 28, feelsLike: 30, desc: "Partly Cloudy", emoji: "⛅", humidity: 62, windSpeed: 12, visibility: 8, rainChance: 20, uvIndex: "High", aqi: 110 },
+  "Patna": { city: "Patna", state: "Bihar", temp: 30, feelsLike: 34, desc: "Scattered Clouds", emoji: "⛅", humidity: 68, windSpeed: 14, visibility: 8, rainChance: 35, uvIndex: "Moderate", aqi: 95 },
+  "Samastipur": { city: "Samastipur", state: "Bihar", temp: 27, feelsLike: 29, desc: "Light Rain Showers", emoji: "🌧️", humidity: 76, windSpeed: 16, visibility: 6, rainChance: 65, uvIndex: "Moderate", aqi: 65 },
+  "Lucknow": { city: "Lucknow", state: "Uttar Pradesh", temp: 29, feelsLike: 32, desc: "Mostly Sunny", emoji: "🌤️", humidity: 58, windSpeed: 10, visibility: 9, rainChance: 15, uvIndex: "High", aqi: 125 },
+  "Varanasi": { city: "Varanasi", state: "Uttar Pradesh", temp: 31, feelsLike: 35, desc: "Hot & Clear", emoji: "☀️", humidity: 64, windSpeed: 9, visibility: 7, rainChance: 10, uvIndex: "Very High", aqi: 140 },
+  "Muzaffarpur": { city: "Muzaffarpur", state: "Bihar", temp: 28, feelsLike: 31, desc: "Overcast", emoji: "☁️", humidity: 72, windSpeed: 11, visibility: 7, rainChance: 45, uvIndex: "Moderate", aqi: 80 },
+  "Gaya": { city: "Gaya", state: "Bihar", temp: 32, feelsLike: 36, desc: "Sunny & Warm", emoji: "☀️", humidity: 50, windSpeed: 8, visibility: 10, rainChance: 5, uvIndex: "Very High", aqi: 105 },
+  "Bhopal": { city: "Bhopal", state: "Madhya Pradesh", temp: 26, feelsLike: 27, desc: "Breezy & Cool", emoji: "🌤️", humidity: 55, windSpeed: 18, visibility: 9, rainChance: 10, uvIndex: "Moderate", aqi: 70 },
+  "Jaipur": { city: "Jaipur", state: "Rajasthan", temp: 34, feelsLike: 37, desc: "Hot & Sunny", emoji: "☀️", humidity: 38, windSpeed: 13, visibility: 10, rainChance: 0, uvIndex: "Very High", aqi: 135 },
+  "Ludhiana": { city: "Ludhiana", state: "Punjab", temp: 29, feelsLike: 31, desc: "Hazy Sun", emoji: "🌫️", humidity: 60, windSpeed: 7, visibility: 5, rainChance: 10, uvIndex: "High", aqi: 160 },
+  "Delhi": { city: "Delhi", state: "Delhi NCR", temp: 33, feelsLike: 36, desc: "Hot & Hazy", emoji: "🌫️", humidity: 48, windSpeed: 9, visibility: 4, rainChance: 5, uvIndex: "Very High", aqi: 210 },
 };
 
 const STATE_DISTRICTS: Record<string, string[]> = {
@@ -68,10 +68,10 @@ export default function WeatherPage() {
     const rainChance = (hash % 8) * 10;
 
     let desc = "Partly Cloudy";
-    let emoji = "â";
-    if (rainChance > 50) { desc = "Light Rain Showers"; emoji = "ð§ï¸"; }
-    else if (temp > 31) { desc = "Hot & Sunny"; emoji = "âï¸"; }
-    else if (humidity > 70) { desc = "Overcast & Humid"; emoji = "âï¸"; }
+    let emoji = "⛅";
+    if (rainChance > 50) { desc = "Light Rain Showers"; emoji = "🌧️"; }
+    else if (temp > 31) { desc = "Hot & Sunny"; emoji = "☀️"; }
+    else if (humidity > 70) { desc = "Overcast & Humid"; emoji = "☁️"; }
 
     return {
       city: cityName,
@@ -134,7 +134,7 @@ export default function WeatherPage() {
           const defaultState = user?.state || "Bihar";
           setSelectedDistrict(defaultCity);
           setSelectedState(defaultState);
-          toast.success(`ð GPS Location detected: ${defaultCity}, ${defaultState}`);
+          toast.success(`📍 GPS Location detected: ${defaultCity}, ${defaultState}`);
         },
         () => {
           setLocLoading(false);
@@ -142,7 +142,7 @@ export default function WeatherPage() {
           const defaultState = user?.state || "Bihar";
           setSelectedDistrict(defaultCity);
           setSelectedState(defaultState);
-          toast.success(`ð Location set from your profile: ${defaultCity}, ${defaultState}`);
+          toast.success(`📍 Location set from your profile: ${defaultCity}, ${defaultState}`);
         },
         { timeout: 3000 }
       );
@@ -150,7 +150,7 @@ export default function WeatherPage() {
       setLocLoading(false);
       setSelectedDistrict("Samastipur");
       setSelectedState("Bihar");
-      toast.success("ð Location set to Samastipur, Bihar");
+      toast.success("📍 Location set to Samastipur, Bihar");
     }
   };
 
@@ -216,21 +216,21 @@ export default function WeatherPage() {
 
     return [
       {
-        title: isRainy ? "ð§ï¸ High Rain Alert & Crop Protection" : "âï¸ Clear Weather Sowing Window",
+        title: isRainy ? "🌧️ High Rain Alert & Crop Protection" : "☀️ Clear Weather Sowing Window",
         desc: isRainy
           ? `High rain chance (${currentWeather.rainChance}%) in ${currentWeather.city}. Avoid spraying pesticides or chemical fertilizers today. Ensure proper drainage in fields.`
           : `Favorable clear weather in ${currentWeather.city}. Ideal period for pesticide spray, weeding, and crop harvesting.`,
         type: isRainy ? "warning" : "success",
       },
       {
-        title: isHot ? "ð¡ï¸ Heat Stress & Irrigation Advice" : "ð§ Soil Moisture Advisory",
+        title: isHot ? "🌡️ Heat Stress & Irrigation Advice" : "💧 Soil Moisture Advisory",
         desc: isHot
-          ? `High temperature (${currentWeather.temp}Â°C). Provide light evening irrigation to standing crops to prevent thermal stress.`
+          ? `High temperature (${currentWeather.temp}°C). Provide light evening irrigation to standing crops to prevent thermal stress.`
           : `Current humidity at ${currentWeather.humidity}%. Soil moisture retention is optimal for cereal and vegetable crops.`,
         type: isHot ? "warning" : "info",
       },
       {
-        title: "ð¨ Wind & Air Quality Notice",
+        title: "💨 Wind & Air Quality Notice",
         desc: `Wind speed is ${currentWeather.windSpeed} km/h with Air Quality Index (AQI) at ${currentWeather.aqi} (${currentWeather.aqi > 100 ? "Moderate" : "Good"}). Safe for field machinery operation.`,
         type: "info",
       },
@@ -344,7 +344,7 @@ export default function WeatherPage() {
               <div className="flex items-center gap-6">
                 <div>
                   <div className="text-6xl sm:text-7xl font-black text-primary tracking-tight" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                    {currentWeather.temp}Â°C
+                    {currentWeather.temp}°C
                   </div>
                   <div className="text-gray-200 font-semibold text-lg mt-1 flex items-center gap-2">
                     {currentWeather.desc}
@@ -360,7 +360,7 @@ export default function WeatherPage() {
                 { icon: Droplets, label: "Humidity", value: `${currentWeather.humidity}%` },
                 { icon: Wind, label: "Wind Speed", value: `${currentWeather.windSpeed} km/h` },
                 { icon: Eye, label: "Visibility", value: `${currentWeather.visibility} km` },
-                { icon: Thermometer, label: "Feels Like", value: `${currentWeather.feelsLike}Â°C` },
+                { icon: Thermometer, label: "Feels Like", value: `${currentWeather.feelsLike}°C` },
                 { icon: CloudRain, label: "Rain Chance", value: `${currentWeather.rainChance}%` },
                 { icon: Sun, label: "UV Index", value: currentWeather.uvIndex },
               ].map((w) => (
@@ -385,8 +385,8 @@ export default function WeatherPage() {
               <div key={h.time} className="bg-white/5 border border-white/5 rounded-xl p-3.5 text-center hover:border-primary/30 transition-colors">
                 <div className="text-xs text-gray-400 mb-2 font-medium">{h.time}</div>
                 <h.icon className="h-6 w-6 text-primary mx-auto mb-2" />
-                <div className="text-base font-bold text-white">{h.temp}Â°C</div>
-                <div className="text-[10px] text-blue-400 font-semibold mt-1">â {h.rain}</div>
+                <div className="text-base font-bold text-white">{h.temp}°C</div>
+                <div className="text-[10px] text-blue-400 font-semibold mt-1">☔ {h.rain}</div>
               </div>
             ))}
           </div>
@@ -404,10 +404,10 @@ export default function WeatherPage() {
                 <div className="w-28 text-sm font-semibold text-gray-200 shrink-0">{d.day}</div>
                 <d.icon className="h-5 w-5 text-primary shrink-0" />
                 <div className="flex-1 text-xs text-gray-300 font-medium truncate">{d.desc}</div>
-                <div className="text-xs text-blue-400 font-semibold shrink-0">â {d.rain}</div>
+                <div className="text-xs text-blue-400 font-semibold shrink-0">☔ {d.rain}</div>
                 <div className="text-sm shrink-0 font-mono">
-                  <span className="font-bold text-white">{d.high}Â°</span>
-                  <span className="text-gray-500"> / {d.low}Â°</span>
+                  <span className="font-bold text-white">{d.high}°</span>
+                  <span className="text-gray-500"> / {d.low}°</span>
                 </div>
               </div>
             ))}

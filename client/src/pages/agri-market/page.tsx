@@ -50,7 +50,7 @@ function CropDetailModal({ crop, onClose }: CropDetailModalProps) {
           </button>
           {allImages.length > 1 && (
             <span className="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-mono px-2 py-1 rounded-full border border-white/20">
-              ð· {activeImgIdx + 1} / {allImages.length}
+              📷 {activeImgIdx + 1} / {allImages.length}
             </span>
           )}
           <div className="absolute bottom-0 left-0 p-4">
@@ -84,7 +84,7 @@ function CropDetailModal({ crop, onClose }: CropDetailModalProps) {
             </div>
             <div className="bg-white/5 rounded-xl p-3">
               <p className="text-xs text-gray-500">{t.buyInputs.askingPrice}</p>
-              <p className="text-sm font-black text-primary">â¹{crop.price}/Qtl</p>
+              <p className="text-sm font-black text-primary">₹{crop.price}/Qtl</p>
             </div>
           </div>
           <div className="bg-white/5 rounded-xl p-4">
@@ -92,7 +92,7 @@ function CropDetailModal({ crop, onClose }: CropDetailModalProps) {
             <p className="text-sm font-bold text-white">{crop.sellerName}</p>
             <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-1">
               <MapPin className="h-3 w-3 text-primary" />
-              {crop.address}, {crop.city}, {crop.district} â {crop.pincode}
+              {crop.address}, {crop.city}, {crop.district} — {crop.pincode}
             </div>
           </div>
           <div className="flex gap-3">
@@ -249,7 +249,7 @@ export default function AgriMarketPage() {
             <div className="p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-gray-400">Category: {selectedDealerProduct.category}</span>
-                <span className="text-xl font-black text-emerald-400">â¹{selectedDealerProduct.price} <span className="text-xs font-normal text-gray-400">/{selectedDealerProduct.unit}</span></span>
+                <span className="text-xl font-black text-emerald-400">₹{selectedDealerProduct.price} <span className="text-xs font-normal text-gray-400">/{selectedDealerProduct.unit}</span></span>
               </div>
               <p className="text-xs text-gray-300 leading-relaxed">{selectedDealerProduct.description || "High quality agricultural input supplied directly by verified dealer."}</p>
               <div className="bg-white/5 rounded-xl p-3 text-xs text-gray-400">
@@ -312,8 +312,8 @@ export default function AgriMarketPage() {
             { key: "Pesticides", label: t.buyInputs.pesticides },
             { key: "Farm Tools", label: t.buyInputs.farmTools },
             { key: "Organic", label: t.buyInputs.organic },
-            { key: "Farmer Crops", label: `ð¾ ${t.buyInputs.userCrops}` },
-            { key: "Dealer Products", label: `ðª Dealer Products` },
+            { key: "Farmer Crops", label: `🌾 ${t.buyInputs.userCrops}` },
+            { key: "Dealer Products", label: `🏪 Dealer Products` },
           ].map((c) => (
             <button key={c.key} onClick={() => setCategory(c.key)}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all cursor-pointer ${category === c.key ? "bg-primary text-black shadow-lg shadow-primary/20 scale-105" : "bg-white/5 border border-white/10 text-gray-300 hover:border-primary/40 hover:bg-primary/5"}`}>
@@ -348,9 +348,9 @@ export default function AgriMarketPage() {
                   </div>
                   <div className="p-4">
                     <h3 className="text-sm font-bold mb-1 text-white">{crop.cropName}</h3>
-                    <p className="text-xs text-gray-400 mb-2">{t.buyInputs.by} {crop.sellerName} Â· {crop.weight}</p>
+                    <p className="text-xs text-gray-400 mb-2">{t.buyInputs.by} {crop.sellerName} · {crop.weight}</p>
                     <div className="flex items-end justify-between">
-                      <div className="text-xl font-black text-amber-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>â¹{crop.price}<span className="text-xs text-gray-500 font-normal">/Qtl</span></div>
+                      <div className="text-xl font-black text-amber-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹{crop.price}<span className="text-xs text-gray-500 font-normal">/Qtl</span></div>
                       <div className="flex gap-1.5">
                         <Button size="sm" onClick={() => {
                           handleAddToCart({
@@ -378,7 +378,7 @@ export default function AgriMarketPage() {
           </div>
         )}
 
-        {/* 2. Verified Dealers Products Section â Directly below Farmer-Listed Crops */}
+        {/* 2. Verified Dealers Products Section — Directly below Farmer-Listed Crops */}
         {showDealerProducts && filteredDealerProducts.length > 0 && (
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-5">
@@ -413,10 +413,10 @@ export default function AgriMarketPage() {
                     </div>
                     <div className="p-4">
                       <h3 className="text-sm font-bold mb-1 text-white">{dealerProd.title}</h3>
-                      <p className="text-xs text-gray-400 mb-2">By {dealerProd.dealerName} Â· {dealerProd.unit}</p>
+                      <p className="text-xs text-gray-400 mb-2">By {dealerProd.dealerName} · {dealerProd.unit}</p>
                       <div className="flex items-end justify-between">
                         <div className="text-xl font-black text-emerald-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                          â¹{dealerProd.price}
+                          ₹{dealerProd.price}
                           <span className="text-xs text-gray-500 font-normal">/{dealerProd.unit}</span>
                         </div>
                         <div className="flex gap-1.5">
@@ -546,7 +546,7 @@ export default function AgriMarketPage() {
                     <div className="flex items-end justify-between gap-2 border-t border-white/5 pt-3">
                       <div className="min-w-0">
                         <div className="text-base sm:text-lg font-black text-primary truncate" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                          â¹{p.price.toLocaleString("en-IN")}
+                          ₹{p.price.toLocaleString("en-IN")}
                         </div>
                         <div className="text-[10px] text-gray-500 truncate">{p.unit}</div>
                       </div>

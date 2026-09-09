@@ -3,7 +3,7 @@ import { type Language, TRANSLATIONS, type Translations } from "@/lib/translatio
 import { toast } from "sonner";
 import { api } from "@/services/api";
 
-// ── One-time migration: rename krivexa_* localStorage keys to krivexo_* ──────
+// ?? One-time migration: rename krivexa_* localStorage keys to krivexo_* ??????
 (function migrateLocalStorageKeys() {
   const keyMap: Record<string, string> = {
     "krivexa_user_profile": "krivexo_user_profile",
@@ -32,7 +32,7 @@ import { api } from "@/services/api";
   });
   localStorage.setItem("krivexo_migrated_v1", "1");
 })();
-// ─────────────────────────────────────────────────────────────────────────────
+// ?????????????????????????????????????????????????????????????????????????????
 
 
 export interface CropListing {
@@ -484,7 +484,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem("krivexo_admin_name");
   };
 
-  // KCC State â hydrate from localStorage / DB
+  // KCC State — hydrate from localStorage / DB
   const [isKccIssuedState, setIsKccIssuedState] = useState<boolean>(false);
   const [kccApplications, setKccApplications] = useState<KccApplication[]>(() => {
     return safeJsonParse("krivexo_kcc_apps", []);
@@ -612,7 +612,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setKccApplications((prev) => [newApp, ...prev.filter((a) => a.phone !== newApp.phone)]);
     api.submitKccApplication(newApp);
     addNotification(
-      "KCC Application Submitted ð³",
+      "KCC Application Submitted 💳",
       `Your Kisan Credit Card application has been submitted. We will review it shortly.`,
       "info",
       "/dashboard",
@@ -698,8 +698,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     addNotification(
-      "Kisan Credit Card (KCC) Approved & Allotted ð³",
-      `Congratulations ${targetApp?.fullName || "User"}! Your KCC card application has been approved by the Admin. Allotted Card Number: ${cardNumber} with Credit Limit of â¹${limit.toLocaleString("en-IN")}. All platform features (buying, selling, bookings & trading) are now 100% unlocked!`,
+      "Kisan Credit Card (KCC) Approved & Allotted 💳",
+      `Congratulations ${targetApp?.fullName || "User"}! Your KCC card application has been approved by the Admin. Allotted Card Number: ${cardNumber} with Credit Limit of ₹${limit.toLocaleString("en-IN")}. All platform features (buying, selling, bookings & trading) are now 100% unlocked!`,
       "success",
       "/wallet",
       "kcc"
@@ -802,8 +802,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 6. Dispatch notification
     addNotification(
-      "KCC Credit Limit Updated ð³",
-      `KCC Card limit for #${cleanCard} has been updated to â¹${newLimit.toLocaleString("en-IN")}.`,
+      "KCC Credit Limit Updated 💳",
+      `KCC Card limit for #${cleanCard} has been updated to ₹${newLimit.toLocaleString("en-IN")}.`,
       "info",
       "/wallet",
       "kcc"
@@ -878,7 +878,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCropListings((prev) => [newListing, ...prev]);
     api.addCrop(newListing);
     addNotification(
-      "Crop Listing Submitted ð¾",
+      "Crop Listing Submitted 🌾",
       `Your listing for "${listing.cropName}" (${listing.weight}) has been submitted and is pending review.`,
       "info",
       "/sell-crops",
@@ -894,7 +894,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.approveCrop(id);
     if (listing) {
       addNotification(
-        "Crop Listing Approved â",
+        "Crop Listing Approved ✅",
         `Your crop listing "${listing.cropName}" has been approved and is now live on the marketplace.`,
         "success",
         "/agri-market",
@@ -929,7 +929,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMachineryBookings((prev) => [newBooking, ...prev]);
     api.addMachineryBooking(newBooking);
     addNotification(
-      "Machinery Booking Request Sent ð",
+      "Machinery Booking Request Sent 🚜",
       `Your booking request for ${booking.machineryType} on ${booking.bookingDate} has been sent to admin for allotment.`,
       "info",
       "/machinery-booking",
@@ -948,7 +948,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     api.allotMachinery(id, machineDetails, notes);
     addNotification(
-      "Machinery Allotted! ð",
+      "Machinery Allotted! 🚜",
       `Your requested machine (${target?.machineryType || "Machinery"}) has been allotted by Admin: ${machineDetails}.`,
       "success",
       "/machinery-booking",
@@ -963,7 +963,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     api.rejectMachinery(id);
     addNotification(
-      "Machinery Request Declined â",
+      "Machinery Request Declined ❌",
       `Your booking request for ${target?.machineryType || "Machinery"} could not be fulfilled at this time.`,
       "warning",
       "/machinery-booking",
@@ -1009,7 +1009,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLabourBookings((prev) => [newBooking, ...prev]);
     api.addLabourBooking(newBooking);
     addNotification(
-      "Labour Booking Request Sent ð·",
+      "Labour Booking Request Sent 👷",
       `Your request for ${booking.count} ${booking.labourType}(s) starting ${booking.startDate} has been submitted.`,
       "info",
       "/labour-booking",
@@ -1031,7 +1031,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     api.assignLabours(id, assigned, notes);
     addNotification(
-      "Labour Assigned to You! â",
+      "Labour Assigned to You! ✅",
       `${assigned.length} labourer(s) have been assigned to your booking. Check your booking page for details.`,
       "success",
       "/labour-booking",
@@ -1058,7 +1058,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setExpertAdviceQueries((prev) => [newQuery, ...prev]);
     api.addExpertQuery(newQuery);
     addNotification(
-      "Expert Advice Query Submitted ð¿",
+      "Expert Advice Query Submitted 🌿",
       `Your query about "${query.cropName}" has been received. An expert will contact you soon.`,
       "info",
       "/expert-advice",
@@ -1077,7 +1077,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.updateExpertQuery(id, status, reply);
     if (status === "resolved" && reply) {
       addNotification(
-        "Expert Advice Received! ð",
+        "Expert Advice Received! 🎓",
         `Your crop query has been resolved by our expert. Tap to view the reply.`,
         "success",
         "/expert-advice",
@@ -1085,7 +1085,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
     } else if (status === "contacted") {
       addNotification(
-        "Expert Will Contact You ð",
+        "Expert Will Contact You 📞",
         `An agricultural expert will call you shortly regarding your crop query.`,
         "info",
         "/expert-advice",
@@ -1259,7 +1259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }).catch(() => {});
 
     addNotification(
-      "Login Successful ð",
+      "Login Successful 👋",
       `Welcome back, ${newUser.name}! You are logged in as ${newUser.role === "farmer" ? "Farmer" : "Dealer"}.`,
       "success",
       "/",
@@ -1484,7 +1484,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    // 4. KCC must be approved with an assigned card number â unlocks 100% of website features!
+    // 4. KCC must be approved with an assigned card number — unlocks 100% of website features!
     if (isKccIssued) {
       return true;
     }
@@ -1545,7 +1545,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const holderName = info.cardHolder ?? "Farmer";
 
     if (currentBalance < amount) {
-      return { success: false, message: `Insufficient balance on KCC. Current available limit: â¹${currentBalance}` };
+      return { success: false, message: `Insufficient balance on KCC. Current available limit: ₹${currentBalance}` };
     }
 
     const newBalance = currentBalance - amount;
@@ -1561,7 +1561,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     addNotification(
       "KCC Payment Debited",
-      `â¹${amount} debited for "${itemDesc}" from Card ${cleaned} (${holderName}).`,
+      `₹${amount} debited for "${itemDesc}" from Card ${cleaned} (${holderName}).`,
       "success",
       "/wallet",
       "wallet"
@@ -1569,7 +1569,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return {
       success: true,
-      message: `Payment of â¹${amount} debited successfully!`,
+      message: `Payment of ₹${amount} debited successfully!`,
       remainingBalance: newBalance
     };
   };
@@ -1608,7 +1608,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDealerListings((prev) => [newListing, ...prev]);
     api.addDealerListing(newListing);
     addNotification(
-      "New Listing Request Sent ð¦",
+      "New Listing Request Sent 📦",
       `Your request to list "${item.title}" (${item.type}) has been sent to Admin for approval.`,
       "info",
       "/dashboard",
@@ -1624,7 +1624,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.approveDealerListing(id);
     if (target) {
       addNotification(
-        "Listing Approved by Admin â",
+        "Listing Approved by Admin ✅",
         `Your ${target.type} listing "${target.title}" is now active and live across all panels!`,
         "success",
         "/agri-market",
@@ -1661,26 +1661,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return safeJsonParse<PathshalaVideo[]>("krivexo_pathshala_videos", [
       {
         id: "vid-1",
-        title: "à¤µà¥à¤à¥à¤à¤¾à¤¨à¤¿à¤ à¤µà¤¿à¤§à¤¿ à¤¸à¥ à¤à¥à¤¹à¥à¤ à¤à¥ à¤à¥à¤¤à¥ | Scientific Wheat Farming Techniques",
+        title: "वैज्ञानिक विधि से गेहूं की खेती | Scientific Wheat Farming Techniques",
         youtubeUrl: "https://www.youtube.com/watch?v=co3_pS74L-Q",
         category: "soil",
-        description: "à¤à¤¸ à¤µà¥à¤¡à¤¿à¤¯à¥ à¤®à¥à¤ à¤¦à¥à¤à¥à¤ à¤à¥à¤¹à¥à¤ à¤à¥ à¤¬à¥à¤µà¤¾à¤ à¤¸à¥ à¤²à¥à¤à¤° à¤à¤à¤¾à¤ à¤¤à¤ à¤à¥ à¤ªà¥à¤°à¥ à¤à¤¾à¤¨à¤à¤¾à¤°à¥ à¤à¤° à¤µà¥à¤à¥à¤à¤¾à¤¨à¤¿à¤ à¤¤à¤°à¥à¤à¥à¥¤",
+        description: "इस वीडियो में देखें गेहूं की बुवाई से लेकर कटाई तक की पूरी जानकारी और वैज्ञानिक तरीके।",
         createdAt: new Date().toISOString()
       },
       {
         id: "vid-2",
-        title: "à¤¡à¥à¤°à¤¿à¤ª à¤¸à¤¿à¤à¤à¤¾à¤ à¤ªà¥à¤°à¤£à¤¾à¤²à¥ à¤à¥à¤¸à¥ à¤à¤¾à¤® à¤à¤°à¤¤à¥ à¤¹à¥? | Working of Drip Irrigation System",
+        title: "ड्रिप सिंचाई प्रणाली कैसे काम करती है? | Working of Drip Irrigation System",
         youtubeUrl: "https://www.youtube.com/watch?v=FmYj08m52_I",
         category: "water",
-        description: "à¤à¥à¤¤à¥à¤ à¤®à¥à¤ à¤¡à¥à¤°à¤¿à¤ª à¤¸à¤¿à¤à¤à¤¾à¤ (à¤à¤ªà¤ à¤¸à¤¿à¤à¤à¤¾à¤) à¤²à¤à¤¾à¤¨à¥ à¤à¥ à¤«à¤¾à¤¯à¤¦à¥ à¤à¤° à¤à¤¸à¤à¥ à¤ªà¥à¤°à¥ à¤à¤¾à¤°à¥à¤¯à¤ªà¥à¤°à¤£à¤¾à¤²à¥à¥¤",
+        description: "खेतों में ड्रिप सिंचाई (टपक सिंचाई) लगाने के फायदे और उसकी पूरी कार्यप्रणाली।",
         createdAt: new Date().toISOString()
       },
       {
         id: "vid-3",
-        title: "à¤à¥à¤µà¤¿à¤ à¤à¤¾à¤¦ à¤¬à¤¨à¤¾à¤¨à¥ à¤à¥ à¤¸à¤¬à¤¸à¥ à¤à¤¸à¤¾à¤¨ à¤µà¤¿à¤§à¤¿ | How to make Organic Compost at home",
+        title: "जैविक खाद बनाने की सबसे आसान विधि | How to make Organic Compost at home",
         youtubeUrl: "https://www.youtube.com/watch?v=P84nI0TpxmU",
         category: "soil",
-        description: "à¤à¥à¤à¤à¥à¤ à¤à¤¾à¤¦ (Vermicompost) à¤à¤° à¤à¤¨à¥à¤¯ à¤à¥à¤µà¤¿à¤ à¤à¤¾à¤¦ à¤¬à¤¨à¤¾à¤¨à¥ à¤à¥ à¤µà¤¿à¤§à¤¿ à¤¤à¤¥à¤¾ à¤à¥à¤¤à¥à¤ à¤®à¥à¤ à¤à¤¸à¤à¥ à¤à¤ªà¤¯à¥à¤à¥¤",
+        description: "केंचुआ खाद (Vermicompost) और अन्य जैविक खाद बनाने की विधि तथा खेतों में इसके उपयोग।",
         createdAt: new Date().toISOString()
       }
     ]);
@@ -1725,7 +1725,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRegisteredFarmers((prev) => [newFarmer, ...prev]);
     api.registerFarmer(newFarmer);
     addNotification(
-      "New Farmer Registered ð¤",
+      "New Farmer Registered 👤",
       `Farmer ${farmerData.name} (+91 ${farmerData.phone}) registered successfully by ${farmerData.registeredByDealer}.`,
       "success",
       "/dashboard",
@@ -1870,17 +1870,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const itemNames = cart.map(i => i.name).join(", ");
 
-    // ââ Wallet payment: check balance first ââ
+    // ── Wallet payment: check balance first ──
     if (paymentMethod === "wallet") {
       if (walletBalance < totalAmount) {
         return {
           success: false,
-          message: `Insufficient wallet balance! Available: â¹${walletBalance.toLocaleString("en-IN")}, Required: â¹${totalAmount.toLocaleString("en-IN")}. Please add money to your wallet.`,
+          message: `Insufficient wallet balance! Available: ₹${walletBalance.toLocaleString("en-IN")}, Required: ₹${totalAmount.toLocaleString("en-IN")}. Please add money to your wallet.`,
         };
       }
     }
 
-    // ââ KCC payment: check credit limit ââ
+    // ── KCC payment: check credit limit ──
     if (paymentMethod === "kcc") {
       const kccCard = kccDetails?.cardNumber || user?.kccCardNumber || "";
       if (!kccCard) {
@@ -1892,17 +1892,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       // Record KCC debit as wallet transaction so it appears in user, admin, dealer panels
       addWalletTransaction({
-        title: `KCC Payment â ${cart.length} item(s)`,
+        title: `KCC Payment – ${cart.length} item(s)`,
         type: "debit",
         amount: totalAmount,
         category: "KCC Order Payment",
       });
     }
 
-    // ââ Wallet: record the debit transaction ââ
+    // ── Wallet: record the debit transaction ──
     if (paymentMethod === "wallet") {
       addWalletTransaction({
-        title: `Wallet Payment â ${cart.length} item(s)`,
+        title: `Wallet Payment – ${cart.length} item(s)`,
         type: "debit",
         amount: totalAmount,
         category: "Wallet Order Payment",
@@ -1927,8 +1927,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     clearCart();
 
     addNotification(
-      "Order Placed Successfully! ð",
-      `Order ${orderId} for â¹${totalAmount.toLocaleString("en-IN")} has been placed via ${paymentMethod.toUpperCase()}. Items: ${itemNames}.`,
+      "Order Placed Successfully! 🛒",
+      `Order ${orderId} for ₹${totalAmount.toLocaleString("en-IN")} has been placed via ${paymentMethod.toUpperCase()}. Items: ${itemNames}.`,
       "success",
       "/cart",
       "orders"
@@ -1938,8 +1938,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     cart.forEach((item) => {
       if (item.sellerName) {
         addNotification(
-          "Your Listed Item Was Purchased! ð¾",
-          `Customer ${user?.name || "Verified Farmer"} placed an order for "${item.name}" (${item.quantity} ${item.unit || "unit"}). Total: â¹${(item.price * item.quantity).toLocaleString("en-IN")}. Payment via: ${paymentMethod.toUpperCase()}.`,
+          "Your Listed Item Was Purchased! 🌾",
+          `Customer ${user?.name || "Verified Farmer"} placed an order for "${item.name}" (${item.quantity} ${item.unit || "unit"}). Total: ₹${(item.price * item.quantity).toLocaleString("en-IN")}. Payment via: ${paymentMethod.toUpperCase()}.`,
           "success",
           "/sell-crops",
           "crops"
@@ -1960,7 +1960,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     api.updateOrderStatus(orderId, newStatus);
     addNotification(
-      `Order #${orderId} Updated ð¦`,
+      `Order #${orderId} Updated 📦`,
       `Your product order status has been updated to "${newStatus}" by the dealer.`,
       "info",
       "/profile",

@@ -31,7 +31,7 @@ export default function ReportsView() {
         <div className="flex items-center gap-2.5">
           <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-400 mr-2">
             <span>Dashboard</span>
-            <span>âº</span>
+            <span>›</span>
             <span className="text-emerald-600 font-semibold">Reports &amp; Analytics</span>
           </div>
           <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-xl px-3 py-1.5 text-xs text-gray-600 shadow-sm">
@@ -65,7 +65,7 @@ export default function ReportsView() {
           <div>
             <p className="text-[11px] font-medium text-gray-500">Total Revenue</p>
             <p className="text-xl font-black text-gray-900 mt-0.5">
-              â¹ {totalRevenue.toLocaleString("en-IN")}
+              ₹ {totalRevenue.toLocaleString("en-IN")}
             </p>
             <p className="text-[10px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-0.5">
               <ArrowUpRight className="h-3 w-3" /> 21.4% from last month
@@ -303,14 +303,14 @@ export default function ReportsView() {
           </div>
 
           <div className="p-3 bg-emerald-50/60 border border-emerald-100 rounded-xl text-[10.5px] text-emerald-900 leading-tight">
-            ð¡ All reports are generated in real-time with verified platform transactional records.
+            💡 All reports are generated in real-time with verified platform transactional records.
           </div>
         </div>
       </div>
 
       {/* Footer */}
       <div className="text-center text-[11px] text-gray-400 pb-2">
-        Â© 2025 Krivexo. All rights reserved. &nbsp; Made with care for Farmers ð¿
+        © 2025 Krivexo. All rights reserved. &nbsp; Made with care for Farmers 🌿
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ const PAYMENT_METHODS = [
     id: "upi",
     title: "UPI",
     desc: "Pay using any UPI App",
-    icon: "â¡",
+    icon: "⚡",
     instant: true,
     tag: "Instant",
   },
@@ -24,7 +24,7 @@ const PAYMENT_METHODS = [
     id: "card",
     title: "Debit / Credit Card",
     desc: "Visa, Mastercard, Rupay",
-    icon: "ð³",
+    icon: "💳",
     instant: true,
     tag: "Instant",
   },
@@ -32,7 +32,7 @@ const PAYMENT_METHODS = [
     id: "netbanking",
     title: "Net Banking",
     desc: "All major banks supported",
-    icon: "ð¦",
+    icon: "🏦",
     instant: true,
     tag: "Instant",
   },
@@ -40,7 +40,7 @@ const PAYMENT_METHODS = [
     id: "wallet",
     title: "Wallet",
     desc: "Pay using Paytm, PhonePe, Amazon Pay etc.",
-    icon: "ð",
+    icon: "👛",
     instant: true,
     tag: "Instant",
   },
@@ -48,7 +48,7 @@ const PAYMENT_METHODS = [
     id: "neft",
     title: "NEFT / RTGS / IMPS",
     desc: "Direct bank transfer",
-    icon: "ð",
+    icon: "🔄",
     instant: false,
     tag: "1-2 Hours",
   },
@@ -65,13 +65,13 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
 
   const handleProceed = () => {
     if (!amount || amount < 100) {
-      toast.error("Minimum amount to add is â¹100");
+      toast.error("Minimum amount to add is ₹100");
       return;
     }
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
-      toast.success(`Payment initiated for â¹${amount.toLocaleString("en-IN")} via ${selectedMethod.toUpperCase()}!`);
+      toast.success(`Payment initiated for ₹${amount.toLocaleString("en-IN")} via ${selectedMethod.toUpperCase()}!`);
     }, 1200);
   };
 
@@ -85,9 +85,9 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>âº</span>
+          <span>›</span>
           <span>Finance &amp; Wallet</span>
-          <span>âº</span>
+          <span>›</span>
           <span className="text-emerald-600 font-semibold">Add Money</span>
         </div>
       </div>
@@ -138,8 +138,8 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
 
         {/* 3D Wallet visual */}
         <div className="hidden md:flex items-center gap-2 shrink-0 pr-4">
-          <div className="text-4xl animate-bounce">ð</div>
-          <div className="text-2xl">ðª</div>
+          <div className="text-4xl animate-bounce">👛</div>
+          <div className="text-2xl">🪙</div>
         </div>
       </div>
 
@@ -152,13 +152,13 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
             <div>
               <h3 className="text-xs font-bold text-gray-800 mb-2.5">1. Enter Amount</h3>
               <label className="text-[11px] font-semibold text-gray-600 block mb-1.5">
-                Enter Amount (â¹)
+                Enter Amount (₹)
               </label>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                 <div className="relative flex-1">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base font-bold text-gray-800">
-                    â¹
+                    ₹
                   </span>
                   <input
                     type="number"
@@ -177,7 +177,7 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
                       onClick={() => handleAddPreset(addVal)}
                       className="px-2.5 py-2 rounded-xl border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50 hover:border-emerald-300 transition-colors whitespace-nowrap"
                     >
-                      + â¹{addVal.toLocaleString("en-IN")}
+                      + ₹{addVal.toLocaleString("en-IN")}
                     </button>
                   ))}
                 </div>
@@ -196,7 +196,7 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
                         : "border-gray-200 text-gray-600 hover:bg-gray-50"
                     }`}
                   >
-                    â¹{val.toLocaleString("en-IN")}
+                    ₹{val.toLocaleString("en-IN")}
                   </button>
                 ))}
                 <button
@@ -253,7 +253,7 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
                             : "bg-amber-100/70 text-amber-700"
                         }`}
                       >
-                        {method.instant ? "â¡ Instant" : "â± 1-2 Hours"}
+                        {method.instant ? "⚡ Instant" : "⏱ 1-2 Hours"}
                       </span>
                     </div>
                   );
@@ -265,7 +265,7 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
             <div className="pt-2 border-t border-gray-100">
               <h3 className="text-xs font-bold text-gray-800 mb-2.5">3. Payment Details</h3>
               <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-3.5 flex items-center gap-3">
-                <div className="text-2xl shrink-0">ð±</div>
+                <div className="text-2xl shrink-0">📱</div>
                 <div className="text-[11px] text-emerald-900 leading-relaxed">
                   <p className="font-semibold text-emerald-800">
                     You will be redirected to your UPI app to complete the payment.
@@ -285,7 +285,7 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm py-3 px-4 rounded-xl shadow-md shadow-emerald-700/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Lock className="h-4 w-4" />
-                  {isProcessing ? "Processing..." : `Proceed to Pay â¹ ${amount.toLocaleString("en-IN")}`}
+                  {isProcessing ? "Processing..." : `Proceed to Pay ₹ ${amount.toLocaleString("en-IN")}`}
                 </button>
                 <p className="text-[10.5px] text-gray-400 flex items-center justify-center gap-1">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
@@ -299,7 +299,7 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
           <div className="flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-500 px-2 gap-2">
             <div className="flex items-center gap-1.5">
               <HelpCircle className="h-3.5 w-3.5 text-gray-400" />
-              <span>Note: Minimum amount to add is â¹100. Maximum wallet limit is â¹1,00,000.</span>
+              <span>Note: Minimum amount to add is ₹100. Maximum wallet limit is ₹1,00,000.</span>
             </div>
             <button
               onClick={() => onNavigateTab?.("wallet_overview")}
@@ -327,28 +327,28 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
             <div className="flex items-center justify-between bg-gray-50/70 p-3 rounded-xl border border-gray-100">
               <div>
                 <p className="text-[10px] text-gray-500 font-medium">Total Wallet Balance</p>
-                <p className="text-xl font-black text-emerald-600 mt-0.5">â¹ 28,45,670.50</p>
+                <p className="text-xl font-black text-emerald-600 mt-0.5">₹ 28,45,670.50</p>
               </div>
-              <div className="text-3xl">ð</div>
+              <div className="text-3xl">👛</div>
             </div>
 
             <div className="space-y-2 text-xs divide-y divide-gray-50">
               <div className="flex items-center justify-between pt-1">
                 <span className="text-gray-500 text-[11px]">Available Balance</span>
-                <span className="font-bold text-gray-800 text-[11px]">â¹ 24,10,670.50</span>
+                <span className="font-bold text-gray-800 text-[11px]">₹ 24,10,670.50</span>
               </div>
               <div className="flex items-center justify-between pt-2">
                 <span className="text-gray-500 text-[11px]">On Hold Balance</span>
-                <span className="font-bold text-amber-600 text-[11px]">â¹ 4,35,000.00</span>
+                <span className="font-bold text-amber-600 text-[11px]">₹ 4,35,000.00</span>
               </div>
               <div className="flex items-center justify-between pt-2">
                 <span className="text-gray-500 text-[11px]">Pending Payouts</span>
-                <span className="font-bold text-gray-700 text-[11px]">â¹ 3,26,540.00</span>
+                <span className="font-bold text-gray-700 text-[11px]">₹ 3,26,540.00</span>
               </div>
             </div>
 
             <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-100 text-[10.5px] text-emerald-800 flex items-center gap-2">
-              <span className="text-base">ð±</span>
+              <span className="text-base">🌱</span>
               <span>Add money to your wallet and enjoy seamless transactions across Krivexo.</span>
             </div>
           </div>
@@ -377,7 +377,7 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
               </div>
 
               <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-3xl shrink-0">
-                ð¡ï¸
+                🛡️
               </div>
             </div>
           </div>
@@ -385,7 +385,7 @@ export default function AddMoneyView({ onNavigateTab }: AddMoneyViewProps) {
           {/* Need Help? */}
           <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col items-center text-center">
             <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center text-3xl mb-2">
-              ð¨âð¼
+              👨‍💼
             </div>
             <h4 className="text-xs font-bold text-gray-800">Need Help?</h4>
             <p className="text-[11px] text-gray-500 mt-1 max-w-[200px]">

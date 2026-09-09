@@ -235,7 +235,7 @@ export default function RegisterPage() {
     }).catch((err) => console.warn("EmailJS warning:", err));
 
     // Display Email simulation toast
-    toast.success(`ð§ Email Sent to ${email}: Your Krivexo verification code is ${randomCode}`, {
+    toast.success(`📧 Email Sent to ${email}: Your Krivexo verification code is ${randomCode}`, {
       duration: 8000,
     });
 
@@ -497,7 +497,7 @@ export default function RegisterPage() {
                             <span className="text-[11px] text-gray-400 animate-pulse">Checking...</span>
                           )}
                           {userIdStatus === "available" && (
-                            <span className="text-[11px] text-emerald-400 font-medium">â Available</span>
+                            <span className="text-[11px] text-emerald-400 font-medium">✓ Available</span>
                           )}
                           {userIdStatus === "taken" && (
                             <span className="text-[11px] text-red-400 font-medium">Already taken</span>
@@ -527,16 +527,16 @@ export default function RegisterPage() {
                         {/* Complexity requirement checklist */}
                         <div className="grid grid-cols-2 gap-1.5 mt-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-[11px]">
                           <span className={`flex items-center gap-1.5 ${hasUppercase ? "text-emerald-400 font-medium" : "text-gray-500"}`}>
-                            <span>{hasUppercase ? "â" : "â"}</span> Uppercase (A-Z)
+                            <span>{hasUppercase ? "✓" : "○"}</span> Uppercase (A-Z)
                           </span>
                           <span className={`flex items-center gap-1.5 ${hasLowercase ? "text-emerald-400 font-medium" : "text-gray-500"}`}>
-                            <span>{hasLowercase ? "â" : "â"}</span> Lowercase (a-z)
+                            <span>{hasLowercase ? "✓" : "○"}</span> Lowercase (a-z)
                           </span>
                           <span className={`flex items-center gap-1.5 ${hasNumber ? "text-emerald-400 font-medium" : "text-gray-500"}`}>
-                            <span>{hasNumber ? "â" : "â"}</span> Number (0-9)
+                            <span>{hasNumber ? "✓" : "○"}</span> Number (0-9)
                           </span>
                           <span className={`flex items-center gap-1.5 ${hasSpecial ? "text-emerald-400 font-medium" : "text-gray-500"}`}>
-                            <span>{hasSpecial ? "â" : "â"}</span> Special char (@, #, $, etc.)
+                            <span>{hasSpecial ? "✓" : "○"}</span> Special char (@, #, $, etc.)
                           </span>
                         </div>
                       </div>
@@ -699,7 +699,7 @@ export default function RegisterPage() {
                     </div>
 
                     <Button type="submit" className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer">
-                      Next Step (Send Email Verification) â
+                      Next Step (Send Email Verification) →
                     </Button>
 
                     <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-xl">
@@ -741,11 +741,11 @@ export default function RegisterPage() {
                       </div>
                     </div>
                     <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl max-w-md mx-auto text-xs text-gray-300">
-                      ð Once approved by Admin, your <strong>Dealer Login ID & Password</strong> will be dispatched to your registered email address. You will then be able to log in and change your password from your profile.
+                      🔒 Once approved by Admin, your <strong>Dealer Login ID & Password</strong> will be dispatched to your registered email address. You will then be able to log in and change your password from your profile.
                     </div>
                     <div className="pt-4">
                       <Button onClick={() => navigate("/login")} className="bg-primary text-black font-bold px-8 py-3 rounded-xl cursor-pointer">
-                        Go to Dealer Login â
+                        Go to Dealer Login →
                       </Button>
                     </div>
                   </div>
@@ -935,7 +935,7 @@ export default function RegisterPage() {
                     </div>
 
                     <Button type="submit" className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer">
-                      Submit Dealer Registration Request â
+                      Submit Dealer Registration Request →
                     </Button>
 
                     <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-xl">
@@ -973,7 +973,7 @@ export default function RegisterPage() {
                   <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <div className="text-xs font-bold text-white flex items-center justify-between">
-                      <span>ð§ Live Email Gateway</span>
+                      <span>📧 Live Email Gateway</span>
                       <span className="text-[10px] text-primary font-mono bg-primary/20 px-2 py-0.5 rounded">Active</span>
                     </div>
                     <div className="text-xs text-gray-300 mt-1">
@@ -984,7 +984,7 @@ export default function RegisterPage() {
                       onClick={handleAutoFillEmailCode}
                       className="mt-2 text-xs bg-primary text-black font-bold px-3 py-1 rounded-lg hover:bg-primary/90 cursor-pointer shadow-md"
                     >
-                      â¡ Auto-Fill Email Code ({generatedEmailCode || "4829"})
+                      ⚡ Auto-Fill Email Code ({generatedEmailCode || "4829"})
                     </button>
                   </div>
                 </div>
@@ -1012,7 +1012,7 @@ export default function RegisterPage() {
                     disabled={isVerifying}
                     className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer"
                   >
-                    {isVerifying ? "Verifying Email Code..." : "Verify & Complete Registration â"}
+                    {isVerifying ? "Verifying Email Code..." : "Verify & Complete Registration →"}
                   </Button>
 
                   <div className="text-center text-xs text-gray-400">
@@ -1023,7 +1023,7 @@ export default function RegisterPage() {
                         const newCode = Math.floor(1000 + Math.random() * 9000).toString();
                         setGeneratedEmailCode(newCode);
                         api.sendEmailCode(email).catch(() => {});
-                        toast.success(`ð§ Resent Email: Your new verification code is ${newCode}`);
+                        toast.success(`📧 Resent Email: Your new verification code is ${newCode}`);
                       }}
                       className="text-primary font-semibold hover:underline cursor-pointer ml-1"
                     >

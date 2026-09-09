@@ -46,7 +46,7 @@ export default function ShipmentDetailsView({ shipmentAwb, orders: propOrders, o
           <p className="text-xs text-gray-500 mt-0.5">Track and manage shipment information in real time</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span>âº</span><span>Orders & Sales</span><span>âº</span><span>Shipping</span><span>âº</span>
+          <span>Dashboard</span><span>›</span><span>Orders & Sales</span><span>›</span><span>Shipping</span><span>›</span>
           <span className="text-emerald-600 font-medium">{awb}</span>
         </div>
       </div>
@@ -160,7 +160,7 @@ export default function ShipmentDetailsView({ shipmentAwb, orders: propOrders, o
         </div>
       </div>
 
-      <div className="text-center text-[11px] text-gray-400">Â© {new Date().getFullYear()} Krivexo. All rights reserved.</div>
+      <div className="text-center text-[11px] text-gray-400">© {new Date().getFullYear()} Krivexo. All rights reserved.</div>
     </div>
   );
 }

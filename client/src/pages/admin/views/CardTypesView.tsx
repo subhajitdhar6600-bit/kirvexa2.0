@@ -31,7 +31,7 @@ const DEFAULT_CARD_TYPES: CardType[] = [
     name: "Kisan Card Basic",
     tag: "Most Popular",
     tagColor: "bg-emerald-100 text-emerald-800",
-    desc: "à¤¬à¥à¤¨à¤¿à¤¯à¤¾à¤¦à¥ à¤¸à¥à¤µà¤¿à¤§à¤¾à¤à¤ à¤à¥ à¤¸à¤¾à¤¥ à¤à¤ªà¤à¥ à¤à¥à¤·à¤¿ à¤à¤¾à¤°à¥à¤¯à¥à¤ à¤à¥ à¤²à¤¿à¤ à¤¸à¤¬à¤¸à¥ à¤à¤ªà¤¯à¥à¤à¥à¤¤ à¤à¤¾à¤°à¥à¤¡à¥¤",
+    desc: "बुनियादी सुविधाओं के साथ आपके कृषि कार्यों के लिए सबसे उपयुक्त कार्ड।",
     price: 299,
     creditLimit: 10000,
     validity: "1 Year",
@@ -50,7 +50,7 @@ const DEFAULT_CARD_TYPES: CardType[] = [
     name: "Kisan Card Premium",
     tag: "Best Value",
     tagColor: "bg-blue-100 text-blue-800",
-    desc: "à¤à¤¨à¥à¤¨à¤¤ à¤¸à¥à¤µà¤¿à¤§à¤¾à¤à¤ à¤à¥ à¤¸à¤¾à¤¥ à¤à¥à¤·à¤¿ à¤¯à¤à¤¤à¥à¤° à¤¬à¥à¤à¤¿à¤à¤ à¤à¤° à¤µà¤¿à¤¶à¥à¤· à¤à¥à¤à¥¤",
+    desc: "उन्नत सुविधाओं के साथ कृषि यंत्र बुकिंग और विशेष छूट।",
     price: 799,
     creditLimit: 25000,
     validity: "2 Years",
@@ -69,7 +69,7 @@ const DEFAULT_CARD_TYPES: CardType[] = [
     name: "Kisan Card Gold",
     tag: "Exclusive",
     tagColor: "bg-amber-100 text-amber-800",
-    desc: "à¤à¤§à¤¿à¤à¤¤à¤® à¤à¥à¤°à¥à¤¡à¤¿à¤ à¤¸à¥à¤®à¤¾ à¤à¤° à¤¸à¤à¤ªà¥à¤°à¥à¤£ à¤à¥à¤·à¤¿ à¤¸à¤¹à¤¾à¤¯à¤¤à¤¾ à¤ªà¥à¤à¥à¤à¥¤",
+    desc: "अधिकतम क्रेडिट सीमा और संपूर्ण कृषि सहायता पैकेज।",
     price: 1499,
     creditLimit: 50000,
     validity: "3 Years",
@@ -262,9 +262,9 @@ export default function CardTypesView() {
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>âº</span>
+          <span>›</span>
           <span>Krivexo Card</span>
-          <span>âº</span>
+          <span>›</span>
           <span className="text-emerald-600 font-medium">Card Types</span>
         </div>
       </div>
@@ -275,7 +275,7 @@ export default function CardTypesView() {
           { label: "Total Card Types", value: cardTypes.length.toString(), sub: "Available tiers", Icon: CreditCard, bg: "bg-emerald-50", tc: "text-emerald-600" },
           { label: "Active Card Types", value: cardTypes.filter(c => c.status === "Active").length.toString(), sub: "Active tiers", Icon: ShieldCheck, bg: "bg-blue-50", tc: "text-blue-600" },
           { label: "Total Cards Issued", value: totalCardsIssued.toString(), sub: "Database accounts", Icon: Users, bg: "bg-purple-50", tc: "text-purple-600" },
-          { label: "Total Revenue", value: `â¹ ${totalRevenue.toLocaleString("en-IN")}`, sub: "Delivered volume", Icon: ShoppingBag, bg: "bg-amber-50", tc: "text-amber-600" },
+          { label: "Total Revenue", value: `₹ ${totalRevenue.toLocaleString("en-IN")}`, sub: "Delivered volume", Icon: ShoppingBag, bg: "bg-amber-50", tc: "text-amber-600" },
         ].map((s, i) => {
           const CardIcon = s.Icon;
           return (
@@ -323,9 +323,9 @@ export default function CardTypesView() {
               className="h-8 px-3 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-600 font-medium cursor-pointer"
             >
               <option value="all">All Price Range</option>
-              <option value="low">Under â¹500</option>
-              <option value="mid">â¹500 - â¹1500</option>
-              <option value="high">Above â¹1500</option>
+              <option value="low">Under ₹500</option>
+              <option value="mid">₹500 - ₹1500</option>
+              <option value="high">Above ₹1500</option>
             </select>
             <button
               onClick={handleExport}
@@ -381,8 +381,8 @@ export default function CardTypesView() {
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-4 font-black text-gray-900">â¹ {c.price}</td>
-                    <td className="py-4 px-4 font-bold text-emerald-700">Up to â¹ {c.creditLimit.toLocaleString("en-IN")}</td>
+                    <td className="py-4 px-4 font-black text-gray-900">₹ {c.price}</td>
+                    <td className="py-4 px-4 font-bold text-emerald-700">Up to ₹ {c.creditLimit.toLocaleString("en-IN")}</td>
                     <td className="py-4 px-4 text-gray-600 font-medium">{c.validity}</td>
                     <td className="py-4 px-4">
                       <div className="space-y-0.5 max-w-[140px]">
@@ -490,16 +490,16 @@ export default function CardTypesView() {
 
               {/* Price & Credit */}
               <div className="flex items-center justify-between text-[10px] text-white/80">
-                <span>Fee: â¹{selectedType.price}</span>
-                <span className="font-bold text-white">Limit: â¹{selectedType.creditLimit.toLocaleString("en-IN")}</span>
+                <span>Fee: ₹{selectedType.price}</span>
+                <span className="font-bold text-white">Limit: ₹{selectedType.creditLimit.toLocaleString("en-IN")}</span>
               </div>
             </div>
 
             {/* Details */}
             <div className="space-y-2 mt-3 text-xs">
               <div className="flex justify-between"><span className="text-gray-400">Tier Name</span><span className="font-bold text-gray-800">{selectedType.name}</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">Card Fee</span><span className="font-bold text-emerald-700">â¹ {selectedType.price}</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">Credit Limit</span><span className="font-bold text-gray-900">â¹ {selectedType.creditLimit.toLocaleString("en-IN")}</span></div>
+              <div className="flex justify-between"><span className="text-gray-400">Card Fee</span><span className="font-bold text-emerald-700">₹ {selectedType.price}</span></div>
+              <div className="flex justify-between"><span className="text-gray-400">Credit Limit</span><span className="font-bold text-gray-900">₹ {selectedType.creditLimit.toLocaleString("en-IN")}</span></div>
               <div className="flex justify-between"><span className="text-gray-400">Validity</span><span className="font-semibold text-gray-700">{selectedType.validity}</span></div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Status</span>
@@ -532,7 +532,7 @@ export default function CardTypesView() {
         </div>
       </div>
 
-      {/* âââ Edit Card Type Modal âââ */}
+      {/* ─── Edit Card Type Modal ─── */}
       {editingType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -602,12 +602,12 @@ export default function CardTypesView() {
                     }}
                     className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-xs font-medium cursor-pointer"
                   >
-                    <option value="from-emerald-700 to-teal-900">ð¢ Emerald (Green)</option>
-                    <option value="from-blue-700 to-indigo-900">ðµ Blue Indigo</option>
-                    <option value="from-amber-600 to-orange-900">ð  Amber Gold</option>
-                    <option value="from-purple-700 to-indigo-900">ð£ Purple Indigo</option>
-                    <option value="from-rose-700 to-pink-900">ð´ Rose Pink</option>
-                    <option value="from-slate-700 to-gray-900">â« Slate Gray</option>
+                    <option value="from-emerald-700 to-teal-900">🟢 Emerald (Green)</option>
+                    <option value="from-blue-700 to-indigo-900">🔵 Blue Indigo</option>
+                    <option value="from-amber-600 to-orange-900">🟠 Amber Gold</option>
+                    <option value="from-purple-700 to-indigo-900">🟣 Purple Indigo</option>
+                    <option value="from-rose-700 to-pink-900">🔴 Rose Pink</option>
+                    <option value="from-slate-700 to-gray-900">⚫ Slate Gray</option>
                   </select>
                 </div>
               </div>
@@ -627,7 +627,7 @@ export default function CardTypesView() {
               {/* Row 4: Annual Fee + Credit Limit */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Annual Fee (â¹)</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Annual Fee (₹)</label>
                   <Input
                     type="number"
                     value={editingType.price}
@@ -637,7 +637,7 @@ export default function CardTypesView() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Credit Limit (â¹)</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Credit Limit (₹)</label>
                   <Input
                     type="number"
                     value={editingType.creditLimit}
@@ -709,7 +709,7 @@ export default function CardTypesView() {
         </div>
       )}
 
-      {/* âââ Add New Card Type Modal âââ */}
+      {/* ─── Add New Card Type Modal ─── */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -760,12 +760,12 @@ export default function CardTypesView() {
                     onChange={(e) => setNewTypeColor(e.target.value)}
                     className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-xs font-medium cursor-pointer"
                   >
-                    <option value="from-emerald-700 to-teal-900">ð¢ Emerald (Green)</option>
-                    <option value="from-blue-700 to-indigo-900">ðµ Blue Indigo</option>
-                    <option value="from-amber-600 to-orange-900">ð  Amber Gold</option>
-                    <option value="from-purple-700 to-indigo-900">ð£ Purple Indigo</option>
-                    <option value="from-rose-700 to-pink-900">ð´ Rose Pink</option>
-                    <option value="from-slate-700 to-gray-900">â« Slate Gray</option>
+                    <option value="from-emerald-700 to-teal-900">🟢 Emerald (Green)</option>
+                    <option value="from-blue-700 to-indigo-900">🔵 Blue Indigo</option>
+                    <option value="from-amber-600 to-orange-900">🟠 Amber Gold</option>
+                    <option value="from-purple-700 to-indigo-900">🟣 Purple Indigo</option>
+                    <option value="from-rose-700 to-pink-900">🔴 Rose Pink</option>
+                    <option value="from-slate-700 to-gray-900">⚫ Slate Gray</option>
                   </select>
                 </div>
               </div>
@@ -785,7 +785,7 @@ export default function CardTypesView() {
               {/* Annual Fee + Credit Limit */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Annual Fee (â¹) *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Annual Fee (₹) *</label>
                   <Input
                     type="number"
                     min="0"
@@ -796,7 +796,7 @@ export default function CardTypesView() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Credit Limit (â¹) *</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Credit Limit (₹) *</label>
                   <Input
                     type="number"
                     min="0"
@@ -811,7 +811,7 @@ export default function CardTypesView() {
               {/* Processing Fee + Interest Rate */}
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Processing Fee (â¹)</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Processing Fee (₹)</label>
                   <Input
                     type="number"
                     min="0"
@@ -897,7 +897,7 @@ export default function CardTypesView() {
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Kisan Card Tiers
+        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Kisan Card Tiers
       </div>
     </div>
   );

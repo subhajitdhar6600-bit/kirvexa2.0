@@ -14,10 +14,10 @@ const FAQS = [
   { topic: "Mandi Bhav", q: "Which mandis are covered on Krivexo?", a: "We currently cover 500+ mandis across 20 states including UP, MP, Maharashtra, Punjab, Haryana, Bihar, Rajasthan, Gujarat and more." },
   { topic: "Machinery Booking", q: "How do I book a tractor on Krivexo?", a: "Go to Machinery Booking, select the equipment you need, choose your preferred date and duration, enter your location and submit the form. Our team will confirm within 2 hours." },
   { topic: "Machinery Booking", q: "Can I cancel a machinery booking?", a: "Yes, you can cancel a booking up to 24 hours before the scheduled date without any cancellation fee. Contact support if you need to cancel on short notice." },
-  { topic: "Soil Testing", q: "How long does soil testing take?", a: "After sample collection, results are available within 5â7 working days. You will receive the report via SMS and on your Krivexo dashboard." },
-  { topic: "Soil Testing", q: "What does a standard soil test include?", a: "Our standard test covers pH, N-P-K (Nitrogen, Phosphorus, Potassium), Organic Carbon, Sulphur, Zinc and Iron â all the key nutrients needed for crop planning." },
+  { topic: "Soil Testing", q: "How long does soil testing take?", a: "After sample collection, results are available within 5–7 working days. You will receive the report via SMS and on your Krivexo dashboard." },
+  { topic: "Soil Testing", q: "What does a standard soil test include?", a: "Our standard test covers pH, N-P-K (Nitrogen, Phosphorus, Potassium), Organic Carbon, Sulphur, Zinc and Iron — all the key nutrients needed for crop planning." },
   { topic: "Wallet", q: "How do I add money to my Krivexo Wallet?", a: "Go to Wallet page and click 'Add Money'. You can choose a preset amount or enter a custom amount. We accept UPI, net banking and debit/credit cards." },
-  { topic: "Wallet", q: "Is my money safe in the Krivexo Wallet?", a: "Yes. Krivexo Wallet is fully secured with bank-grade encryption. All transactions are monitored 24/7. Your money is insured up to â¹1 Lakh." },
+  { topic: "Wallet", q: "Is my money safe in the Krivexo Wallet?", a: "Yes. Krivexo Wallet is fully secured with bank-grade encryption. All transactions are monitored 24/7. Your money is insured up to ₹1 Lakh." },
   { topic: "Orders", q: "How do I track my order?", a: "Go to Dashboard > Recent Orders to see the status of all your orders. You will also receive SMS updates at every stage of your order." },
   { topic: "Technical", q: "The app is not loading. What should I do?", a: "Try refreshing the page or clearing your browser cache. If the issue persists, try a different browser or contact our support team at support@krivexo.com." },
 ];

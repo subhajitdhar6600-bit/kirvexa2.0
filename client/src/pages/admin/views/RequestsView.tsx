@@ -147,7 +147,7 @@ export default function RequestsView({ requests, setRequests }: RequestsViewProp
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>âº</span>
+          <span>›</span>
           <span className="text-emerald-600 font-semibold">Advisory &amp; Services</span>
         </div>
       </div>
@@ -377,7 +377,7 @@ export default function RequestsView({ requests, setRequests }: RequestsViewProp
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div>
                 <h3 className="text-base font-bold text-gray-900">Edit Request #{editingRequest.id}</h3>
-                <p className="text-xs text-gray-500">{editingRequest.type} â¢ Submitted by {editingRequest.user}</p>
+                <p className="text-xs text-gray-500">{editingRequest.type} • Submitted by {editingRequest.user}</p>
               </div>
               <button
                 onClick={() => setEditingRequest(null)}

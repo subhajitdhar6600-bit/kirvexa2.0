@@ -81,17 +81,17 @@ export default function AllUsersView({
     const rawId = u._id || u.id || `usr-${idx}`;
     const name = u.fullName || u.name || "User";
     const customUserId = u.userId || u.id || `USR${1000 + idx}`;
-    const emailVal = (u.email && u.email !== "â" && !u.email.endsWith("@farma.local")) ? u.email : (u.email || "â");
+    const emailVal = (u.email && u.email !== "—" && !u.email.endsWith("@farma.local")) ? u.email : (u.email || "—");
     return {
       id: customUserId,
       userId: customUserId,
       rawId: rawId,
       name: name,
       role: (u.role || "Farmer").charAt(0).toUpperCase() + (u.role || "farmer").slice(1),
-      phone: u.phone || "â",
+      phone: u.phone || "—",
       email: emailVal,
-      gender: (u.gender && u.gender !== "â") ? u.gender : "â",
-      dob: (u.dob && u.dob !== "â") ? u.dob : "â",
+      gender: (u.gender && u.gender !== "—") ? u.gender : "—",
+      dob: (u.dob && u.dob !== "—") ? u.dob : "—",
       address: u.address || "",
       location: [u.village, u.district, u.state].filter(Boolean).join(", ") || u.location || "Bihar, India",
       joinedOn: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
@@ -159,9 +159,9 @@ export default function AllUsersView({
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>âº</span>
+          <span>›</span>
           <span>Users Management</span>
-          <span>âº</span>
+          <span>›</span>
           <span className="text-emerald-600 font-medium">All Users</span>
         </div>
       </div>
@@ -438,7 +438,7 @@ export default function AllUsersView({
         </div>
       </div>
 
-      {/* âââ 1. View User Details Modal âââ */}
+      {/* ─── 1. View User Details Modal ─── */}
       {viewingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative animate-in fade-in zoom-in-95">
@@ -471,11 +471,11 @@ export default function AllUsersView({
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500">Gender</span>
-                <span className="font-semibold text-gray-900 capitalize">{viewingUser.gender || "â"}</span>
+                <span className="font-semibold text-gray-900 capitalize">{viewingUser.gender || "—"}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500">Date of Birth</span>
-                <span className="font-semibold text-gray-900">{viewingUser.dob || "â"}</span>
+                <span className="font-semibold text-gray-900">{viewingUser.dob || "—"}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500 flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-gray-400" /> Phone</span>
@@ -526,7 +526,7 @@ export default function AllUsersView({
 
 
 
-      {/* âââ 3. Delete Confirmation Modal âââ */}
+      {/* ─── 3. Delete Confirmation Modal ─── */}
       {deletingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 relative animate-in fade-in zoom-in-95 text-center">

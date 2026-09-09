@@ -41,9 +41,9 @@ export default function Navbar() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const LANG_OPTIONS: { code: Language; label: string; flag: string }[] = [
-    { code: "en", label: "English", flag: "ð¬ð§" },
-    { code: "hi", label: "à¤¹à¤¿à¤à¤¦à¥", flag: "ð®ð³" },
-    { code: "bn", label: "à¦¬à¦¾à¦à¦²à¦¾", flag: "ð§ð©" },
+    { code: "en", label: "English", flag: "🇬🇧" },
+    { code: "hi", label: "हिंदी", flag: "🇮🇳" },
+    { code: "bn", label: "বাংলা", flag: "🇧🇩" },
   ];
 
   const SERVICES_LINKS = [
@@ -297,7 +297,7 @@ export default function Navbar() {
                             onClick={() => setShowNotifMenu(false)}
                             className="text-xs text-primary hover:underline font-semibold flex items-center justify-center gap-1"
                           >
-                            View All Notifications â
+                            View All Notifications →
                           </Link>
                         </div>
                       )}
@@ -371,7 +371,7 @@ export default function Navbar() {
                             }}
                             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-black text-black bg-amber-400 hover:bg-amber-300 transition-colors shadow-md cursor-pointer border border-amber-300"
                           >
-                            <CreditCard className="h-4 w-4 text-black" /> Apply for KCC Now â
+                            <CreditCard className="h-4 w-4 text-black" /> Apply for KCC Now →
                           </button>
                         )}
                         <Link
@@ -547,7 +547,7 @@ export default function Navbar() {
                         onClick={() => setShowNotifMenu(false)}
                         className="text-xs text-primary hover:underline font-semibold flex items-center justify-center gap-1"
                       >
-                        View All Notifications â
+                        View All Notifications →
                       </Link>
                     </div>
                   </div>

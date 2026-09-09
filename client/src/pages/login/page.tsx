@@ -77,7 +77,7 @@ export default function LoginPage() {
       verification_code: randomCode,
       subject: "Krivexo Password Reset Code",
     }).catch(() => {});
-    toast.success(`ð§ Email Verification Code sent to ${forgotIdentifier}: Code is ${randomCode}`, { duration: 8000 });
+    toast.success(`📧 Email Verification Code sent to ${forgotIdentifier}: Code is ${randomCode}`, { duration: 8000 });
   };
 
   // Forgot Password Step 2: Verify Email Code
@@ -628,7 +628,7 @@ export default function LoginPage() {
               </div>
 
               <Button type="submit" disabled={isLoading} className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer">
-                {isLoading ? "Logging in..." : "Login â"}
+                {isLoading ? "Logging in..." : "Login →"}
               </Button>
 
               {loginType === "dealer" ? (
@@ -636,7 +636,7 @@ export default function LoginPage() {
                   <p className="text-xs text-gray-400">
                     {"Don't have a Dealer ID yet? "}
                     <Link to="/register" className="text-amber-400 font-semibold hover:underline">
-                      Register Dealership for Approval â
+                      Register Dealership for Approval →
                     </Link>
                   </p>
                 </div>
@@ -668,7 +668,7 @@ export default function LoginPage() {
                   onClick={() => setIsForgotOpen(false)}
                   className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-white/10 cursor-pointer"
                 >
-                  â
+                  ✕
                 </button>
               </div>
 
@@ -688,7 +688,7 @@ export default function LoginPage() {
                     />
                   </div>
                   <Button type="submit" className="w-full bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer">
-                    Send Email Verification Code â
+                    Send Email Verification Code →
                   </Button>
                 </form>
               )}
@@ -696,7 +696,7 @@ export default function LoginPage() {
               {forgotStep === 2 && (
                 <form onSubmit={handleVerifyForgotOtp} className="space-y-4">
                   <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs space-y-1">
-                    <div className="font-bold text-primary">ð§ Live Email Verification Code</div>
+                    <div className="font-bold text-primary">📧 Live Email Verification Code</div>
                     <div className="text-gray-300">
                       Your reset email code is: <strong className="text-primary font-mono text-sm">{forgotGeneratedCode}</strong>
                     </div>
@@ -709,7 +709,7 @@ export default function LoginPage() {
                       }}
                       className="mt-1 bg-primary text-black text-[11px] font-bold px-2.5 py-1 rounded cursor-pointer"
                     >
-                      â¡ Auto-Fill Email Code ({forgotGeneratedCode})
+                      ⚡ Auto-Fill Email Code ({forgotGeneratedCode})
                     </button>
                   </div>
 
@@ -744,7 +744,7 @@ export default function LoginPage() {
                       Back
                     </Button>
                     <Button type="submit" className="w-2/3 bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer">
-                      Verify Email Code â
+                      Verify Email Code →
                     </Button>
                   </div>
                 </form>
@@ -780,7 +780,7 @@ export default function LoginPage() {
                     disabled={isSubmittingForgot}
                     className="w-full bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer"
                   >
-                    {isSubmittingForgot ? "Saving Password..." : "Save Password & Login â"}
+                    {isSubmittingForgot ? "Saving Password..." : "Save Password & Login →"}
                   </Button>
                 </form>
               )}

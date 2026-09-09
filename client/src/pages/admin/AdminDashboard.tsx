@@ -240,9 +240,9 @@ export default function AdminDashboard() {
     setAdminTheme(nextTheme);
     localStorage.setItem("admin_theme", nextTheme);
     if (nextTheme === "dark") {
-      toast.success("Dark Mode activated for Admin Panel ð");
+      toast.success("Dark Mode activated for Admin Panel 🌙");
     } else {
-      toast.success("Light Mode activated for Admin Panel âï¸");
+      toast.success("Light Mode activated for Admin Panel ☀️");
     }
   };
 
@@ -261,7 +261,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // âââ Data Stores (all empty by default â populated from DB) âââ
+  // ─── Data Stores (all empty by default — populated from DB) ───
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [dealers, setDealers] = useState<Dealer[]>([]);
   const [rawUsers, setRawUsers] = useState<any[]>([]);
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
   const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
   const [settings, setSettings] = useState<AdminSettings>(EMPTY_SETTINGS);
 
-  // âââ Load data from MongoDB on mount concurrently âââ
+  // ─── Load data from MongoDB on mount concurrently ───
   const loadAdminData = useCallback(async () => {
     setLoading(true);
 
@@ -361,9 +361,9 @@ export default function AdminDashboard() {
         return {
           ...u,
           userId: u.userId || local.userId,
-          gender: (u.gender && u.gender !== "â") ? u.gender : (local.gender || "Male"),
-          dob: (u.dob && u.dob !== "â") ? u.dob : (local.dob || ""),
-          email: (u.email && u.email !== "â" && !u.email.endsWith("@farma.local")) ? u.email : (local.email || u.email || ""),
+          gender: (u.gender && u.gender !== "—") ? u.gender : (local.gender || "Male"),
+          dob: (u.dob && u.dob !== "—") ? u.dob : (local.dob || ""),
+          email: (u.email && u.email !== "—" && !u.email.endsWith("@farma.local")) ? u.email : (local.email || u.email || ""),
           address: u.address || local.address || "",
           village: u.village || local.village || "",
           district: u.district || local.district || "",
@@ -390,7 +390,7 @@ export default function AdminDashboard() {
             role: acc.role || "farmer",
             state: acc.state || "Bihar",
             district: acc.district || "Patna",
-            village: acc.village || "â",
+            village: acc.village || "—",
             businessName: acc.businessName,
             dealerType: acc.dealerType,
             occupation: acc.occupation,
@@ -405,23 +405,23 @@ export default function AdminDashboard() {
 
       const farmerUsers = combinedUsers.filter((u: any) => (u.role || "").toLowerCase() === "farmer").map((u: any, idx: number) => {
         const farmerUserId = u.userId || u.id || `FRM${1000 + idx}`;
-        const farmerEmail = (u.email && u.email !== "â" && !u.email.endsWith("@farma.local")) ? u.email : (u.email || "â");
-        const farmerGender = (u.gender && u.gender !== "â") ? u.gender : "Male";
-        const farmerDob = (u.dob && u.dob !== "â") ? u.dob : "â";
-        const farmerAddress = u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "â";
+        const farmerEmail = (u.email && u.email !== "—" && !u.email.endsWith("@farma.local")) ? u.email : (u.email || "—");
+        const farmerGender = (u.gender && u.gender !== "—") ? u.gender : "Male";
+        const farmerDob = (u.dob && u.dob !== "—") ? u.dob : "—";
+        const farmerAddress = u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "—";
 
         return {
           id: farmerUserId,
           userId: farmerUserId,
-          name: u.fullName || u.name || "â",
+          name: u.fullName || u.name || "—",
           fatherName: farmerUserId,
-          phone: u.phone || "â",
+          phone: u.phone || "—",
           email: farmerEmail,
           gender: farmerGender,
           dob: farmerDob,
           state: u.state || "Bihar",
           district: u.district || "Patna",
-          village: u.village || "â",
+          village: u.village || "—",
           address: farmerAddress,
           location: [u.village, u.district || u.state].filter(Boolean).join(", ") || u.district || u.state || "Bihar",
           occupation: u.occupation || "Farmer",
@@ -433,8 +433,8 @@ export default function AdminDashboard() {
           totalSales: 0,
           totalEarnings: 0,
           farmName: u.businessName || `${u.fullName || u.name || "Farmer"} Farm`,
-          totalLand: u.landSize || "â",
-          landType: "â",
+          totalLand: u.landSize || "—",
+          landType: "—",
           mainCrops: u.occupation || "Grain, Vegetables",
           organicCertified: "No" as const,
           createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
@@ -446,9 +446,9 @@ export default function AdminDashboard() {
       const dealerUsers = combinedUsers.filter((u: any) => (u.role || "").toLowerCase() === "dealer").map((u: any, idx: number) => ({
         id: u.id || u._id || `DLR${2000 + idx}`,
         businessName: u.businessName || u.fullName || u.name || "Agri Dealer",
-        owner: u.fullName || u.owner || u.name || "â",
-        phone: u.phone || "â",
-        email: u.email && u.email !== "â" && !u.email.endsWith("@farma.local") ? u.email : "â",
+        owner: u.fullName || u.owner || u.name || "—",
+        phone: u.phone || "—",
+        email: u.email && u.email !== "—" && !u.email.endsWith("@farma.local") ? u.email : "—",
         dealerType: u.dealerType || "Seeds & Fertilizer Dealer",
         businessType: u.dealerType || "Seeds & Fertilizer Dealer",
         gstin: u.gstin || u.gstNumber || "Not provided",
@@ -456,8 +456,8 @@ export default function AdminDashboard() {
         licenseNumber: u.licenseNumber || "Not provided",
         state: u.state || "Bihar",
         district: u.district || "Patna",
-        village: u.village || "â",
-        address: u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "â",
+        village: u.village || "—",
+        address: u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "—",
         location: [u.village, u.district || u.state].filter(Boolean).join(", ") || u.district || u.state || "Bihar",
         status: (u.status?.toLowerCase() === "pending" ? "pending" : u.status?.toLowerCase() === "suspended" ? "suspended" : "active") as any,
         verified: (u.verificationStatus === "Verified" ? "verified" : u.verificationStatus === "Rejected" ? "unverified" : "pending") as any,
@@ -534,16 +534,16 @@ export default function AdminDashboard() {
           const orderItem: OrderItem = {
             id: o.id || `ORD${8000 + idx}`,
             buyer: o.buyer || o.userName || (o.userId && !o.userId.startsWith("usr_") ? o.userId : "Registered Farmer"),
-            buyerId: o.userId || "â",
+            buyerId: o.userId || "—",
             dealer: o.assignedDealerName || "Kisan Agro Kendra",
-            dealerId: "â",
+            dealerId: "—",
             product: o.items?.[0]?.name || "Agricultural Supplies",
             qty: String(o.items?.length || 1),
             amount: o.totalAmount || o.amount || 0,
             status: (o.status?.toLowerCase() || "placed") as OrderItem["status"],
             paymentStatus: "paid",
             paymentMethod: o.paymentMethod || "UPI",
-            date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "â",
+            date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "—",
             tracking: [],
           };
 
@@ -581,14 +581,14 @@ export default function AdminDashboard() {
       }
       if (txList.length > 0) setTransactions(txList);
 
-      // Process products from /products API â real catalog products only
+      // Process products from /products API — real catalog products only
       const newProducts: ProductItem[] = [];
       if (productsRes.status === "fulfilled" && productsRes.value) {
         const pList = productsRes.value.data?.products || (Array.isArray(productsRes.value) ? productsRes.value : []);
         pList.forEach((p: any) => {
           newProducts.push({
             id: p.id || p._id || `PROD${Math.random()}`,
-            name: p.name || "â",
+            name: p.name || "—",
             seller: p.brand || p.vendor || "Verified Vendor",
             sellerType: "Dealer",
             category: p.category || (typeof p.categoryId === 'string' ? p.categoryId.replace("cat_", "") : "") || "Agricultural Supplies",
@@ -615,11 +615,11 @@ export default function AdminDashboard() {
         cropsRes.value.forEach((c: any) => {
           newProducts.push({
             id: c.id || c._id || `CRP${Math.random()}`,
-            name: c.cropName || "â",
+            name: c.cropName || "—",
             seller: c.sellerName || "Farmer",
             sellerType: "Farmer",
             category: "Farmer Crops",
-            quantity: c.weight || "â",
+            quantity: c.weight || "—",
             price: Number(c.price || 0),
             status: (c.status === "approved" ? "active" : c.status || "pending") as ProductItem["status"],
             image: c.image,
@@ -633,11 +633,11 @@ export default function AdminDashboard() {
         dealerListingsRes.value.forEach((d: any) => {
           newProducts.push({
             id: d.id || d._id || `DLR${Math.random()}`,
-            name: d.title || d.name || "â",
+            name: d.title || d.name || "—",
             seller: d.dealerName || "Dealer",
             sellerType: "Dealer",
             category: d.category || d.type || "Agricultural Supplies",
-            quantity: d.unit || d.quantity || "â",
+            quantity: d.unit || d.quantity || "—",
             price: typeof d.price === "number" ? d.price : Number(d.price || 0),
             status: (d.status === "approved" ? "active" : d.status || "pending") as ProductItem["status"],
             image: d.image,
@@ -653,15 +653,15 @@ export default function AdminDashboard() {
         labourRes.value.forEach((l: any, idx: number) => {
           reqItems.push({
             id: l.id || `RQ${3000 + idx}`,
-            user: l.userName || "â",
+            user: l.userName || "—",
             userType: "Farmer",
             type: "Labour Booking",
             subject: `${l.labourType} Request`,
-            date: l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "â",
+            date: l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "—",
             status: l.status === "assigned" ? "resolved" : l.status === "pending" ? "new" : "in_review",
             priority: "Medium",
             description: `Need ${l.count} ${l.labourType}(s) for ${l.days} days from ${l.startDate}`,
-            assignedTo: "â",
+            assignedTo: "—",
             conversation: [],
           });
         });
@@ -671,15 +671,15 @@ export default function AdminDashboard() {
         machineryRes.value.forEach((m: any, idx: number) => {
           reqItems.push({
             id: m.id || `RQ${4000 + idx}`,
-            user: m.userName || "â",
+            user: m.userName || "—",
             userType: "Farmer",
             type: "Machinery Booking",
             subject: `${m.machineryType} Booking`,
-            date: m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "â",
+            date: m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "—",
             status: m.status === "allotted" ? "resolved" : m.status === "pending" ? "new" : "closed",
             priority: "Medium",
             description: `Machinery: ${m.machineryType}, Date: ${m.bookingDate}, Duration: ${m.durationHours}h`,
-            assignedTo: "â",
+            assignedTo: "—",
             conversation: [],
           });
         });
@@ -689,15 +689,15 @@ export default function AdminDashboard() {
         expertRes.value.forEach((e: any, idx: number) => {
           reqItems.push({
             id: e.id || `RQ${5000 + idx}`,
-            user: e.farmerName || "â",
+            user: e.farmerName || "—",
             userType: "Farmer",
             type: "Expert Advice",
             subject: `${e.cropName} Problem`,
-            date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-IN") : "â",
+            date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-IN") : "—",
             status: e.status === "resolved" ? "resolved" : "new",
             priority: "High",
-            description: e.problemDetails || "â",
-            assignedTo: "â",
+            description: e.problemDetails || "—",
+            assignedTo: "—",
             conversation: [],
           });
         });
@@ -711,9 +711,9 @@ export default function AdminDashboard() {
           adminName: "System",
           action: n.title || "Notification",
           module: n.category || "General",
-          details: n.message || "â",
+          details: n.message || "—",
           dateTime: n.time || new Date().toISOString(),
-          ipAddress: "â",
+          ipAddress: "—",
         })));
       }
 
@@ -739,7 +739,7 @@ export default function AdminDashboard() {
           date: "Yesterday",
           status: "resolved",
           priority: "Low",
-          details: "Farmer enquired about credit limit enhancement from â¹25,000 to â¹50,000.",
+          details: "Farmer enquired about credit limit enhancement from ₹25,000 to ₹50,000.",
         },
       ]);
 

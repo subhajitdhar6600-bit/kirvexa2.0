@@ -22,7 +22,7 @@ export const seedMongoDatabase = async () => {
   }
 };
 
-// âââ In-memory request cache (30 second TTL for GET requests) âââââââââââââââââ
+// ─── In-memory request cache (30 second TTL for GET requests) ─────────────────
 const CACHE_TTL_MS = 30_000; // 30 seconds
 interface CacheEntry { data: any; expiresAt: number; }
 const requestCache = new Map<string, CacheEntry>();
@@ -47,7 +47,7 @@ function invalidateCache(prefix: string): void {
 
 // Expose manual cache clear (useful after mutations from outside api.ts)
 export const clearApiCache = () => requestCache.clear();
-// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Generic API caller with in-memory GET cache + timeout controller
 async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T | null> {
@@ -62,7 +62,7 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T |
 
   // On write operations, bust the cache for this resource type
   if (!isGet) {
-    // Extract resource prefix e.g. "/users/123/approve" â "/users"
+    // Extract resource prefix e.g. "/users/123/approve" → "/users"
     const parts = endpoint.split('/');
     if (parts.length >= 2) invalidateCache(`/${parts[1]}`);
   }

@@ -68,7 +68,7 @@ export default function ExpertAdvicePage() {
 
       // Send notification with PDF receipt
       addNotification(
-        "Expert Query Received ð©º",
+        "Expert Query Received 🩺",
         `Your expert query regarding ${form.cropName} is logged (Ref: ${refId}). Download official PDF report.`,
         "success",
         "/expert-advice",
@@ -159,9 +159,9 @@ export default function ExpertAdvicePage() {
               <h3 className="text-xl font-bold mb-2">{t.expertAdvice.submittedTitle}</h3>
               <p className="text-gray-400 text-sm mb-4">{t.expertAdvice.submittedMsg}</p>
               <div className="bg-white/5 rounded-xl p-4 text-left text-sm text-gray-300 mb-5 space-y-1">
-                <p>ð¤ <strong>Farmer:</strong> {form.farmerName}</p>
-                <p>ð¾ <strong>Crop:</strong> {form.cropName}</p>
-                <p>ð <strong>Problem:</strong> {form.problemDetails.substring(0, 80)}{form.problemDetails.length > 80 ? "..." : ""}</p>
+                <p>👤 <strong>Farmer:</strong> {form.farmerName}</p>
+                <p>🌾 <strong>Crop:</strong> {form.cropName}</p>
+                <p>📋 <strong>Problem:</strong> {form.problemDetails.substring(0, 80)}{form.problemDetails.length > 80 ? "..." : ""}</p>
               </div>
               <Button onClick={() => { setSubmitted(false); setForm({ farmerName: "", phone: "", address: "", cropName: "", problemDetails: "" }); }}
                 className="bg-primary text-black font-bold">{t.expertAdvice.submitAnother}</Button>

@@ -70,14 +70,14 @@ export default function DealerProfileView({ dealer, onBack }: DealerProfileViewP
             <span>Total Purchases</span>
             <CreditCard className="h-4 w-4 text-emerald-400" />
           </div>
-          <p className="text-2xl font-black text-emerald-400">â¹{dealer.totalPurchases.toLocaleString("en-IN")}</p>
+          <p className="text-2xl font-black text-emerald-400">₹{dealer.totalPurchases.toLocaleString("en-IN")}</p>
         </div>
         <div className="bg-[#111] border border-white/10 rounded-2xl p-4">
           <div className="flex items-center justify-between text-gray-400 text-xs mb-2">
             <span>Outstanding Balance</span>
             <AlertCircle className="h-4 w-4 text-amber-400" />
           </div>
-          <p className="text-2xl font-black text-amber-400">â¹{(dealer.outstanding || 0).toLocaleString("en-IN")}</p>
+          <p className="text-2xl font-black text-amber-400">₹{(dealer.outstanding || 0).toLocaleString("en-IN")}</p>
         </div>
       </div>
 
@@ -122,7 +122,7 @@ export default function DealerProfileView({ dealer, onBack }: DealerProfileViewP
               <span className="text-gray-300 ml-3">Wheat - 30 Quintal</span>
             </div>
             <div className="text-right">
-              <span className="font-bold text-white">â¹70,500</span>
+              <span className="font-bold text-white">₹70,500</span>
               <Badge className="ml-3 bg-emerald-500/10 text-emerald-400">Confirmed</Badge>
             </div>
           </div>

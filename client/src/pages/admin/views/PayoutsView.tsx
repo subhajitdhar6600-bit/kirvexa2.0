@@ -51,9 +51,9 @@ export default function PayoutsView({ payouts, setPayouts }: PayoutsViewProps) {
                   <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{p.id}</td>
                   <td className="py-3.5 px-4 font-bold text-white">{p.recipient}</td>
                   <td className="py-3.5 px-4 text-gray-300">{p.recipientType}</td>
-                  <td className="py-3.5 px-4 text-gray-300 font-mono">â¹{p.grossAmount.toLocaleString("en-IN")}</td>
+                  <td className="py-3.5 px-4 text-gray-300 font-mono">₹{p.grossAmount.toLocaleString("en-IN")}</td>
                   <td className="py-3.5 px-4 font-bold text-amber-400">{p.commissionPct}%</td>
-                  <td className="py-3.5 px-4 font-black text-emerald-400">â¹{p.netPayout.toLocaleString("en-IN")}</td>
+                  <td className="py-3.5 px-4 font-black text-emerald-400">₹{p.netPayout.toLocaleString("en-IN")}</td>
                   <td className="py-3.5 px-4">
                     <Badge
                       className={

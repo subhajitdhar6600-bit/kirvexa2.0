@@ -47,12 +47,12 @@ export function KccAlertModal() {
               onClick={() => { setIsKccAlertOpen(false); setIsKccAppModalOpen(true); }}
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              Apply for KCC to Unlock â
+              Apply for KCC to Unlock →
             </Button>
           ) : (
             <Link to="/wallet" className="flex-1" onClick={() => setIsKccAlertOpen(false)}>
               <Button className="w-full bg-amber-500 hover:bg-amber-400 text-black font-extrabold shadow-lg cursor-pointer">
-                View Status in Wallet â
+                View Status in Wallet →
               </Button>
             </Link>
           )}
@@ -75,10 +75,10 @@ const KCC_TIERS = [
     badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
     icon: Star,
     iconColor: "text-emerald-400",
-    limit: "â¹1,60,000",
+    limit: "₹1,60,000",
     features: [
       "Zero application & processing fee",
-      "Credit limit up to â¹1,60,000 collateral-free",
+      "Credit limit up to ₹1,60,000 collateral-free",
       "4% Subsidised interest rate under Govt. scheme",
       "Unlocks 100% platform services upon approval",
     ],
@@ -92,10 +92,10 @@ const KCC_TIERS = [
     badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
     icon: Star,
     iconColor: "text-blue-400",
-    limit: "â¹1,00,000",
+    limit: "₹1,00,000",
     features: [
-      "Annual membership at â¹299 only",
-      "Credit limit up to â¹1,00,000",
+      "Annual membership at ₹299 only",
+      "Credit limit up to ₹1,00,000",
       "Valid at all Krivexo partner stores",
       "Digital e-Card instantly issued upon review",
     ],
@@ -109,10 +109,10 @@ const KCC_TIERS = [
     badge: "bg-amber-500/20 text-amber-300 border-amber-500/30",
     icon: Crown,
     iconColor: "text-amber-400",
-    limit: "â¹3,00,000",
+    limit: "₹3,00,000",
     features: [
-      "Premium membership at â¹999/year",
-      "Credit limit up to â¹3,00,000",
+      "Premium membership at ₹999/year",
+      "Credit limit up to ₹3,00,000",
       "Priority processing & approvals",
       "Physical gold-plated card issued",
     ],
@@ -185,13 +185,13 @@ export function KccApplicationModal() {
               {user?.kccCardNumber || kccDetails?.cardNumber || "KCC-APPROVED"}
             </div>
             <div className="text-[11px] text-emerald-400 font-semibold mt-1">
-              â Status: Verified &amp; Active
+              ✓ Status: Verified &amp; Active
             </div>
           </div>
           <div className="flex gap-3">
             <Link to="/wallet" onClick={() => setIsKccAppModalOpen(false)} className="flex-1">
               <Button className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold">
-                View in Wallet â
+                View in Wallet →
               </Button>
             </Link>
             <Button variant="ghost" onClick={() => setIsKccAppModalOpen(false)} className="border border-white/10 text-gray-300">
@@ -231,7 +231,7 @@ export function KccApplicationModal() {
           <div className="flex gap-3">
             <Link to="/wallet" onClick={() => setIsKccAppModalOpen(false)} className="flex-1">
               <Button className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold">
-                Check Status in Wallet â
+                Check Status in Wallet →
               </Button>
             </Link>
             <Button variant="ghost" onClick={() => setIsKccAppModalOpen(false)} className="border border-white/10 text-gray-300">
@@ -264,7 +264,7 @@ export function KccApplicationModal() {
           "District Zone": form.district,
           "Permanent Address": form.address || "Not Specified",
           "Card Type Selected": tier.name,
-          "Subscription Amount Paid": `â¹${tier.price} (${payMethodName})`,
+          "Subscription Amount Paid": `₹${tier.price} (${payMethodName})`,
           "Credit Limit": tier.limit,
         },
       });
@@ -272,8 +272,8 @@ export function KccApplicationModal() {
       submitKccApplication({ ...form, cardTier: selectedTier, paymentStatus: "paid", paymentAmount: tier.price });
 
       addNotification(
-        "KCC Application Logged ð³",
-        `Your ${tier.name} application for ${form.fullName} is received (Ref: ${refId}). Subscription of â¹${tier.price} paid via ${payMethodName}. Download PDF receipt.`,
+        "KCC Application Logged 💳",
+        `Your ${tier.name} application for ${form.fullName} is received (Ref: ${refId}). Subscription of ₹${tier.price} paid via ${payMethodName}. Download PDF receipt.`,
         "success",
         "/dashboard",
         "kcc",
@@ -290,7 +290,7 @@ export function KccApplicationModal() {
   // Payment via Kishan Wallet
   const handleWalletPayment = () => {
     if (walletBalance < tier.price) {
-      toast.error(`Insufficient Kishan Wallet balance (â¹${walletBalance}). Please use UPI or recharge your wallet.`);
+      toast.error(`Insufficient Kishan Wallet balance (₹${walletBalance}). Please use UPI or recharge your wallet.`);
       return;
     }
     setPayLoading(true);
@@ -300,14 +300,14 @@ export function KccApplicationModal() {
       amount: tier.price,
       category: "KCC Fee",
     });
-    toast.success(`â¹${tier.price} paid successfully from Kishan Wallet!`);
+    toast.success(`₹${tier.price} paid successfully from Kishan Wallet!`);
     setTimeout(() => {
       setPayLoading(false);
       completeKccSubmission("Kishan Wallet");
     }, 600);
   };
 
-  // Payment via UPI â Email Code verification
+  // Payment via UPI — Email Code verification
   const handleSendPayCode = () => {
     if (!upiId.trim()) { toast.error("Please enter your UPI ID."); return; }
     const email = upiEmail.trim() || user?.email || form.phone;
@@ -320,7 +320,7 @@ export function KccApplicationModal() {
       verification_code: code,
       subject: "Krivexo UPI Payment Verification Code",
     }).catch(() => {});
-    toast.success(`ð§ Email Verification Code sent to ${email}: ${code}`, { duration: 8000 });
+    toast.success(`📧 Email Verification Code sent to ${email}: ${code}`, { duration: 8000 });
   };
 
   const handleVerifyPayCode = () => {
@@ -330,7 +330,7 @@ export function KccApplicationModal() {
       return;
     }
     setPayLoading(true);
-    toast.success(`â¹${tier.price} paid successfully via UPI!`);
+    toast.success(`₹${tier.price} paid successfully via UPI!`);
     setTimeout(() => {
       setPayLoading(false);
       completeKccSubmission("UPI");
@@ -460,7 +460,7 @@ export function KccApplicationModal() {
                           {isSelected && <Check className="h-3.5 w-3.5 text-primary ml-auto" />}
                         </div>
                         <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black border mb-2 ${t.badge}`}>
-                          {t.price === 0 ? "FREE / â¹0" : `â¹${t.price}/year`}
+                          {t.price === 0 ? "FREE / ₹0" : `₹${t.price}/year`}
                         </div>
                         <div className="text-[11px] text-gray-300 font-semibold mb-2">Limit: <span className="text-white font-black">{t.limit}</span></div>
                         <ul className="space-y-1">
@@ -479,7 +479,7 @@ export function KccApplicationModal() {
                 onClick={() => setStep("form")}
                 className="w-full bg-primary text-black font-extrabold py-5 text-base hover:bg-primary/90 cursor-pointer shadow-lg"
               >
-                Continue with {tier.name} â {tier.price === 0 ? "Free Application" : `â¹${tier.price}`} <ArrowRight className="h-5 w-5 ml-2" />
+                Continue with {tier.name} – {tier.price === 0 ? "Free Application" : `₹${tier.price}`} <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </div>
           )}
@@ -490,7 +490,7 @@ export function KccApplicationModal() {
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center gap-2 mb-1">
                 <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
                 <div className="text-xs text-gray-300">
-                  Selected Card: <span className="text-primary font-bold">{tier.name}</span> (Fee: <span className="font-bold text-white">â¹{tier.price}</span>). Fill out details to preview your form.
+                  Selected Card: <span className="text-primary font-bold">{tier.name}</span> (Fee: <span className="font-bold text-white">₹{tier.price}</span>). Fill out details to preview your form.
                 </div>
               </div>
 
@@ -544,7 +544,7 @@ export function KccApplicationModal() {
                     <div className="text-xs text-gray-400 mt-0.5">Applicant: {form.fullName}</div>
                   </div>
                   <div className={`text-2xl font-black ${tier.iconColor}`} style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                    â¹{tier.price}
+                    ₹{tier.price}
                   </div>
                 </div>
               </div>
@@ -586,33 +586,33 @@ export function KccApplicationModal() {
                         <Wallet className="h-4 w-4 text-primary" /> Available Wallet Balance
                       </div>
                       <div className="text-lg font-bold text-white">
-                        â¹{walletBalance.toLocaleString("en-IN")}
+                        ₹{walletBalance.toLocaleString("en-IN")}
                       </div>
                     </div>
 
                     {walletBalance >= tier.price ? (
                       <div className="space-y-3">
                         <p className="text-xs text-gray-400">
-                          Click below to pay <span className="text-white font-bold">â¹{tier.price}</span> directly from your Krivexo Kishan Wallet.
+                          Click below to pay <span className="text-white font-bold">₹{tier.price}</span> directly from your Krivexo Kishan Wallet.
                         </p>
                         <Button
                           onClick={handleWalletPayment}
                           disabled={payLoading}
                           className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 cursor-pointer"
                         >
-                          {payLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : `Pay â¹${tier.price} via Kishan Wallet`}
+                          {payLoading ? <RefreshCw className="h-5 w-5 animate-spin" /> : `Pay ₹${tier.price} via Kishan Wallet`}
                         </Button>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-xs text-amber-300">
-                          â ï¸ Insufficient balance in Kishan Wallet (Available: â¹{walletBalance}). Please use UPI or top up your wallet.
+                          ⚠️ Insufficient balance in Kishan Wallet (Available: ₹{walletBalance}). Please use UPI or top up your wallet.
                         </div>
                         <Button
                           disabled
                           className="w-full bg-gray-700 text-gray-400 font-bold py-5 text-base cursor-not-allowed opacity-60"
                         >
-                          Pay â¹{tier.price} via Kishan Wallet
+                          Pay ₹{tier.price} via Kishan Wallet
                         </Button>
                       </div>
                     )}
@@ -657,7 +657,7 @@ export function KccApplicationModal() {
                       {payCodeSent && (
                         <div className="space-y-3 pt-2 animate-in fade-in">
                           <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs space-y-1">
-                            <div className="font-bold text-primary">ð§ Email Verification Code Sent</div>
+                            <div className="font-bold text-primary">📧 Email Verification Code Sent</div>
                             <div className="text-gray-300">Check your email for the 6-digit code: <strong className="text-primary font-mono">{generatedPayCode}</strong></div>
                           </div>
                           <Label className="text-gray-300 text-xs block">Enter 6-digit Email Verification Code</Label>
@@ -704,7 +704,7 @@ export function KccApplicationModal() {
               <h3 className="text-lg font-bold text-white mb-2">{t.kccModal.submittedTitle}</h3>
               <p className="text-gray-400 text-sm mb-4">{t.kccModal.success}</p>
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 mb-6 text-xs text-gray-300">
-                <span className="text-primary font-bold">{tier.name}</span> subscription of <span className="font-bold text-white">â¹{tier.price}</span> paid. Your application has been logged and sent for review.
+                <span className="text-primary font-bold">{tier.name}</span> subscription of <span className="font-bold text-white">₹{tier.price}</span> paid. Your application has been logged and sent for review.
               </div>
               <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 text-amber-400 text-sm">
                 <Clock className="h-4 w-4" />{t.kccModal.statusPending}
@@ -721,9 +721,9 @@ export function KccApplicationModal() {
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
           onConfirm={handleConfirmPreview}
-          title={`KCC Application Preview â ${tier.name}`}
+          title={`KCC Application Preview — ${tier.name}`}
           data={{
-            "Card Plan Selected": `${tier.name} (â¹${tier.price}/year)`,
+            "Card Plan Selected": `${tier.name} (₹${tier.price}/year)`,
             "Credit Limit": tier.limit,
             "Applicant Full Name": form.fullName,
             "Contact Phone": form.phone,

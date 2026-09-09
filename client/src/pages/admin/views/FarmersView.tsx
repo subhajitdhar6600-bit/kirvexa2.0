@@ -63,8 +63,8 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
           <p className="text-xs text-gray-500 mt-0.5">Manage all registered farmers and inspect complete profile details</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span className="text-gray-300">âº</span>
-          <span>Farmers Management</span><span className="text-gray-300">âº</span>
+          <span>Dashboard</span><span className="text-gray-300">›</span>
+          <span>Farmers Management</span><span className="text-gray-300">›</span>
           <span className="text-emerald-600 font-medium">All Farmers</span>
         </div>
       </div>
@@ -169,16 +169,16 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                       </td>
                       <td className="py-3.5 px-4">
                         <span className="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-mono font-bold">
-                          {f.userId || f.id || "â"}
+                          {f.userId || f.id || "—"}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
-                        <p className="text-gray-800 font-semibold">{f.gender || "â"}</p>
-                        <p className="text-[10px] text-gray-400">{f.dob || "â"}</p>
+                        <p className="text-gray-800 font-semibold">{f.gender || "—"}</p>
+                        <p className="text-[10px] text-gray-400">{f.dob || "—"}</p>
                       </td>
                       <td className="py-3.5 px-4">
                         <p className="text-gray-800 font-medium">{f.phone}</p>
-                        <p className="text-[10px] text-emerald-700 font-medium truncate max-w-[140px]">{f.email || "â"}</p>
+                        <p className="text-[10px] text-emerald-700 font-medium truncate max-w-[140px]">{f.email || "—"}</p>
                       </td>
                       <td className="py-3.5 px-4">
                         <p className="text-gray-800 font-medium">{f.district || "Patna"}</p>
@@ -271,9 +271,9 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                   <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Personal Information</p>
                   {[
                     { label: "Full Name", value: selectedFarmer.name },
-                    { label: "User ID", value: selectedFarmer.userId || selectedFarmer.id || "â" },
-                    { label: "Gender", value: selectedFarmer.gender || "â" },
-                    { label: "Date of Birth", value: selectedFarmer.dob || "â" },
+                    { label: "User ID", value: selectedFarmer.userId || selectedFarmer.id || "—" },
+                    { label: "Gender", value: selectedFarmer.gender || "—" },
+                    { label: "Date of Birth", value: selectedFarmer.dob || "—" },
                     { label: "Occupation", value: selectedFarmer.occupation || "Farmer" },
                   ].map((row, i) => (
                     <div key={i} className="flex items-start justify-between gap-2">
@@ -287,11 +287,11 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                   <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Contact & Address</p>
                   {[
                     { label: "Mobile No.", value: selectedFarmer.phone },
-                    { label: "Email Address", value: selectedFarmer.email || "â" },
+                    { label: "Email Address", value: selectedFarmer.email || "—" },
                     { label: "State", value: selectedFarmer.state || "Bihar" },
                     { label: "District", value: selectedFarmer.district || "Patna" },
-                    { label: "Village", value: selectedFarmer.village || "â" },
-                    { label: "Full Address", value: selectedFarmer.address || "â" },
+                    { label: "Village", value: selectedFarmer.village || "—" },
+                    { label: "Full Address", value: selectedFarmer.address || "—" },
                   ].map((row, i) => (
                     <div key={i} className="flex items-start justify-between gap-2">
                       <span className="text-gray-400 shrink-0">{row.label}</span>
@@ -340,7 +340,7 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                 )}
                 <div>
                   <h2 className="text-lg font-bold leading-tight">{viewingModalFarmer.name}</h2>
-                  <p className="text-xs text-emerald-200">Registered Farmer Account Profile â¢ User ID: {viewingModalFarmer.userId || viewingModalFarmer.id}</p>
+                  <p className="text-xs text-emerald-200">Registered Farmer Account Profile • User ID: {viewingModalFarmer.userId || viewingModalFarmer.id}</p>
                 </div>
               </div>
               <button
@@ -365,19 +365,19 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">User ID (Login ID)</span>
-                    <span className="font-bold text-emerald-700 font-mono text-xs">{viewingModalFarmer.userId || viewingModalFarmer.id || "â"}</span>
+                    <span className="font-bold text-emerald-700 font-mono text-xs">{viewingModalFarmer.userId || viewingModalFarmer.id || "—"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Gender</span>
-                    <span className="font-bold text-gray-800 text-xs capitalize">{viewingModalFarmer.gender || "â"}</span>
+                    <span className="font-bold text-gray-800 text-xs capitalize">{viewingModalFarmer.gender || "—"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Date of Birth</span>
-                    <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.dob || "â"}</span>
+                    <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.dob || "—"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Email Address</span>
-                    <span className="font-bold text-emerald-700 text-xs">{viewingModalFarmer.email || "â"}</span>
+                    <span className="font-bold text-emerald-700 text-xs">{viewingModalFarmer.email || "—"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Account Status</span>
@@ -410,7 +410,7 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Village / Panchayat</span>
-                    <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.village || "â"}</span>
+                    <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.village || "—"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Registration Date</span>
@@ -418,7 +418,7 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                   </div>
                   <div className="col-span-2 sm:col-span-3">
                     <span className="text-gray-400 block text-[10.5px]">Full Residence Address</span>
-                    <span className="font-medium text-gray-800 text-xs">{viewingModalFarmer.address || "â"}</span>
+                    <span className="font-medium text-gray-800 text-xs">{viewingModalFarmer.address || "—"}</span>
                   </div>
                 </div>
               </div>
@@ -439,7 +439,7 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Farmers Database
+        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Farmers Database
       </div>
     </div>
   );

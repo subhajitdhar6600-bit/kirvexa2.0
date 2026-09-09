@@ -175,33 +175,33 @@ export default function DashboardPage() {
 
   const DEALER_ANALYTICS: Record<string, { income: string; orders: number; sales: string; growth: string }> = {
     "1day": {
-      income: totalOrdersCount > 0 ? `â¹${Math.round(totalIncomeAmount * 0.25).toLocaleString("en-IN")}` : "â¹0.00",
+      income: totalOrdersCount > 0 ? `₹${Math.round(totalIncomeAmount * 0.25).toLocaleString("en-IN")}` : "₹0.00",
       orders: Math.ceil(totalOrdersCount * 0.25),
-      sales: totalOrdersCount > 0 ? `â¹${Math.round(totalSalesAmount * 0.25).toLocaleString("en-IN")}` : "â¹0.00",
+      sales: totalOrdersCount > 0 ? `₹${Math.round(totalSalesAmount * 0.25).toLocaleString("en-IN")}` : "₹0.00",
       growth: totalOrdersCount > 0 ? "+4.2% vs yesterday" : "No orders today",
     },
     "weekly": {
-      income: totalOrdersCount > 0 ? `â¹${Math.round(totalIncomeAmount * 0.6).toLocaleString("en-IN")}` : "â¹0.00",
+      income: totalOrdersCount > 0 ? `₹${Math.round(totalIncomeAmount * 0.6).toLocaleString("en-IN")}` : "₹0.00",
       orders: Math.ceil(totalOrdersCount * 0.6),
-      sales: totalOrdersCount > 0 ? `â¹${Math.round(totalSalesAmount * 0.6).toLocaleString("en-IN")}` : "â¹0.00",
+      sales: totalOrdersCount > 0 ? `₹${Math.round(totalSalesAmount * 0.6).toLocaleString("en-IN")}` : "₹0.00",
       growth: totalOrdersCount > 0 ? "+8.5% vs last week" : "No orders this week",
     },
     "monthly": {
-      income: totalOrdersCount > 0 ? `â¹${totalIncomeAmount.toLocaleString("en-IN")}` : "â¹0.00",
+      income: totalOrdersCount > 0 ? `₹${totalIncomeAmount.toLocaleString("en-IN")}` : "₹0.00",
       orders: totalOrdersCount,
-      sales: totalOrdersCount > 0 ? `â¹${totalSalesAmount.toLocaleString("en-IN")}` : "â¹0.00",
+      sales: totalOrdersCount > 0 ? `₹${totalSalesAmount.toLocaleString("en-IN")}` : "₹0.00",
       growth: totalOrdersCount > 0 ? "+14.2% vs last month" : "No orders this month",
     },
     "quarterly": {
-      income: totalOrdersCount > 0 ? `â¹${Math.round(totalIncomeAmount * 2.5).toLocaleString("en-IN")}` : "â¹0.00",
+      income: totalOrdersCount > 0 ? `₹${Math.round(totalIncomeAmount * 2.5).toLocaleString("en-IN")}` : "₹0.00",
       orders: Math.ceil(totalOrdersCount * 2.5),
-      sales: totalOrdersCount > 0 ? `â¹${Math.round(totalSalesAmount * 2.5).toLocaleString("en-IN")}` : "â¹0.00",
+      sales: totalOrdersCount > 0 ? `₹${Math.round(totalSalesAmount * 2.5).toLocaleString("en-IN")}` : "₹0.00",
       growth: totalOrdersCount > 0 ? "+18.1% vs Q1" : "No quarterly orders",
     },
     "yearly": {
-      income: totalOrdersCount > 0 ? `â¹${Math.round(totalIncomeAmount * 6).toLocaleString("en-IN")}` : "â¹0.00",
+      income: totalOrdersCount > 0 ? `₹${Math.round(totalIncomeAmount * 6).toLocaleString("en-IN")}` : "₹0.00",
       orders: Math.ceil(totalOrdersCount * 6),
-      sales: totalOrdersCount > 0 ? `â¹${Math.round(totalSalesAmount * 6).toLocaleString("en-IN")}` : "â¹0.00",
+      sales: totalOrdersCount > 0 ? `₹${Math.round(totalSalesAmount * 6).toLocaleString("en-IN")}` : "₹0.00",
       growth: totalOrdersCount > 0 ? "+22.4% YoY" : "No yearly orders",
     },
   };
@@ -209,16 +209,16 @@ export default function DashboardPage() {
   const mandiHighlights = mandiRates && mandiRates.length > 0
     ? mandiRates.slice(0, 4).map(m => ({
         crop: m.name,
-        price: `â¹${(m.modal || m.max || 2000).toLocaleString("en-IN")}`,
+        price: `₹${(m.modal || m.max || 2000).toLocaleString("en-IN")}`,
         unit: m.unit ? `/${m.unit}` : "/Quintal",
         change: `${(m.change || 1.5) > 0 ? "+" : ""}${m.change || 1.5}%`,
         up: (m.change || 1.5) >= 0,
       }))
     : [
-        { crop: "Wheat", price: "â¹2,275", unit: "/Quintal", change: "+2.35%", up: true },
-        { crop: "Paddy", price: "â¹1,860", unit: "/Quintal", change: "+1.78%", up: true },
-        { crop: "Mustard", price: "â¹5,450", unit: "/Quintal", change: "+1.20%", up: true },
-        { crop: "Maize", price: "â¹1,920", unit: "/Quintal", change: "+0.91%", up: true },
+        { crop: "Wheat", price: "₹2,275", unit: "/Quintal", change: "+2.35%", up: true },
+        { crop: "Paddy", price: "₹1,860", unit: "/Quintal", change: "+1.78%", up: true },
+        { crop: "Mustard", price: "₹5,450", unit: "/Quintal", change: "+1.20%", up: true },
+        { crop: "Maize", price: "₹1,920", unit: "/Quintal", change: "+0.91%", up: true },
       ];
 
   // Listed Crops Data
@@ -230,7 +230,7 @@ export default function DashboardPage() {
     method: o.paymentMethod.toLowerCase(),
     title: `Order #${o.id}`,
     customer: o.userName,
-    amount: `â¹${o.totalAmount}`,
+    amount: `₹${o.totalAmount}`,
     date: new Date(o.createdAt).toLocaleDateString("en-IN"),
     status: o.status,
   }));
@@ -247,7 +247,7 @@ export default function DashboardPage() {
     title: o.items.map(i => `${i.name} (x${i.quantity})`).join(", "),
     vendor: o.assignedDealerName || user?.name || "Agri Dealer",
     date: new Date(o.createdAt).toLocaleDateString("en-IN"),
-    amount: `â¹${o.totalAmount}`,
+    amount: `₹${o.totalAmount}`,
     status: o.status,
     statusBadge: o.status === "Delivered" ? "bg-primary/20 text-primary border-primary/30" : o.status === "Dispatched" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-blue-500/20 text-blue-400 border-blue-500/30",
     icon: ShoppingCart,
@@ -398,10 +398,10 @@ export default function DashboardPage() {
       to_name: posFarmerProfile.profile?.name || "Farmer",
       verification_code: code,
       subject: `Krivexo POS Debit Authorization Code: ${code}`,
-      message: `Your verification code to authorize KCC POS billing of â¹${posAmount} is: ${code}`,
+      message: `Your verification code to authorize KCC POS billing of ₹${posAmount} is: ${code}`,
     }).catch(() => {});
 
-    toast.success(`ð§ Verification code dispatched to ${farmerEmail}: Code is ${code}`);
+    toast.success(`📧 Verification code dispatched to ${farmerEmail}: Code is ${code}`);
   };
 
   const handleVerifyOtpAndChargePos = () => {
@@ -428,9 +428,9 @@ export default function DashboardPage() {
       details: {
         "Kishan Credit Card No": cardNum,
         "Transaction ID": txId,
-        "Amount Charged": `â¹${posAmount}`,
+        "Amount Charged": `₹${posAmount}`,
         "Items / Description": posItemDesc || "Agricultural Purchase",
-        "Remaining Card Limit": `â¹${chargeRes.remainingBalance}`,
+        "Remaining Card Limit": `₹${chargeRes.remainingBalance}`,
         "Dealer Name": user?.name || "Verified Dealer",
         "Verification Method": "Verified via Registered Email Code",
       },
@@ -438,7 +438,7 @@ export default function DashboardPage() {
 
     setPosReceiptPdf(pdf);
     setPosOtpModal(false);
-    toast.success(`â¹${posAmount} charged successfully via KCC POS! Receipt generated.`);
+    toast.success(`₹${posAmount} charged successfully via KCC POS! Receipt generated.`);
   };
 
   const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -514,7 +514,7 @@ export default function DashboardPage() {
     }).catch(() => {});
 
     setIsAddListingModalOpen(false);
-    toast.success(`ð "${payload.name}" successfully listed with ${payload.variants.length} variants!`);
+    toast.success(`🎉 "${payload.name}" successfully listed with ${payload.variants.length} variants!`);
   };
 
   const handleLogout = () => {
@@ -619,7 +619,7 @@ export default function DashboardPage() {
               onClick={() => { setSidebarOpen(false); setIsKccAppModalOpen(true); }}
               className="w-full flex items-center justify-center gap-2 py-2.5 bg-linear-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-black rounded-xl text-xs font-extrabold shadow-md shadow-amber-500/20 transition-all cursor-pointer animate-pulse border border-amber-300"
             >
-              <CreditCard className="h-4 w-4 text-black" /> Apply for KCC Now â
+              <CreditCard className="h-4 w-4 text-black" /> Apply for KCC Now →
             </button>
           </div>
         )}
@@ -714,7 +714,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="p-3 border-t border-white/10 text-center">
                     <Link to="/notifications" onClick={() => setShowNotifMenu(false)} className="text-xs text-primary hover:underline font-bold">
-                      View All Notifications â
+                      View All Notifications →
                     </Link>
                   </div>
                 </div>
@@ -802,7 +802,7 @@ export default function DashboardPage() {
                       ? "Your KCC application has been submitted and is currently being processed by the Admin. Your card number and credit limit will be allotted shortly."
                       : user?.role === "dealer"
                       ? "Platform buying, crop selling & bookings are currently locked. Apply for KCC to unlock all dealer transactional features. (Customer Service & Product Listings remain accessible)."
-                      : "Buying inputs, selling harvest, labour & machinery bookings are locked. Apply for KCC to unlock 100% platform access and get up to â¹3,00,000 credit limit."}
+                      : "Buying inputs, selling harvest, labour & machinery bookings are locked. Apply for KCC to unlock 100% platform access and get up to ₹3,00,000 credit limit."}
                   </p>
                 </div>
               </div>
@@ -811,7 +811,7 @@ export default function DashboardPage() {
                   onClick={() => setIsKccAppModalOpen(true)}
                   className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs py-3 px-6 rounded-xl shrink-0 cursor-pointer shadow-lg animate-pulse border border-amber-300"
                 >
-                  <CreditCard className="h-4 w-4 mr-1.5 text-black" /> Apply for KCC Now â
+                  <CreditCard className="h-4 w-4 mr-1.5 text-black" /> Apply for KCC Now →
                 </Button>
               ) : (
                 <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold shrink-0">
@@ -827,16 +827,16 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 mb-1">
-                    â KCC Card Active Â· All Platform Features Unlocked
+                    ✓ KCC Card Active · All Platform Features Unlocked
                   </div>
                   <div className="text-xs text-gray-300">
-                    Allotted Card Number: <span className="text-emerald-400 font-mono font-bold">{user?.kccCardNumber || kccDetails?.cardNumber || "KCC-APPROVED"}</span> | Limit: <span className="text-white font-bold">â¹{(kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000).toLocaleString("en-IN")}</span>
+                    Allotted Card Number: <span className="text-emerald-400 font-mono font-bold">{user?.kccCardNumber || kccDetails?.cardNumber || "KCC-APPROVED"}</span> | Limit: <span className="text-white font-bold">₹{(kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000).toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               </div>
               <Link to="/wallet" className="shrink-0">
                 <Button size="sm" className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-xl shadow-md">
-                  View Card in Wallet â
+                  View Card in Wallet →
                 </Button>
               </Link>
             </div>
@@ -890,7 +890,7 @@ export default function DashboardPage() {
                 >
                   <div>
                     <div className="text-xs text-gray-400 font-semibold mb-1 flex items-center gap-1">
-                      Total Income <Badge className="bg-primary/20 text-primary border-primary/30 text-[9px] px-1 py-0">Click for Breakdown ð</Badge>
+                      Total Income <Badge className="bg-primary/20 text-primary border-primary/30 text-[9px] px-1 py-0">Click for Breakdown 🔍</Badge>
                     </div>
                     <div className="text-2xl font-black text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>
                       {DEALER_ANALYTICS[dealerTimeframe].income}
@@ -1062,7 +1062,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <div className="text-3xl font-black text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                      â¹{walletBalance.toLocaleString()}.00
+                      ₹{walletBalance.toLocaleString()}.00
                     </div>
                     <div className="text-[11px] text-gray-400">Krivexo Kisan Wallet</div>
                   </div>
@@ -1082,7 +1082,7 @@ export default function DashboardPage() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="text-sm font-bold text-white">Today's Mandi Highlights</div>
-                  <Link to="/mandi-bhav" className="text-xs text-primary hover:underline font-bold">View All â</Link>
+                  <Link to="/mandi-bhav" className="text-xs text-primary hover:underline font-bold">View All →</Link>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {mandiHighlights.map((p) => (
@@ -1104,13 +1104,13 @@ export default function DashboardPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div className="text-sm font-bold text-white">Weather Forecast</div>
-                  <Link to="/weather" className="text-xs text-primary hover:underline font-bold">View Full Forecast â</Link>
+                  <Link to="/weather" className="text-xs text-primary hover:underline font-bold">View Full Forecast →</Link>
                 </div>
-                <div className="text-xs text-gray-400 mb-3">Patna, Bihar â¢ Live Update</div>
+                <div className="text-xs text-gray-400 mb-3">Patna, Bihar • Live Update</div>
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="text-4xl font-black text-white" style={{ fontFamily: "Rajdhani, sans-serif" }}>28Â°C</div>
+                  <div className="text-4xl font-black text-white" style={{ fontFamily: "Rajdhani, sans-serif" }}>28°C</div>
                   <div>
-                    <div className="text-2xl">â</div>
+                    <div className="text-2xl">⛅</div>
                     <div className="text-xs text-gray-300 font-semibold">Partly Cloudy</div>
                   </div>
                 </div>
@@ -1141,7 +1141,7 @@ export default function DashboardPage() {
                   onClick={() => setIsCropsModalOpen(true)}
                   className="text-xs text-primary hover:underline font-bold cursor-pointer"
                 >
-                  Manage Crops â
+                  Manage Crops →
                 </button>
               </div>
               <div className="space-y-3">
@@ -1154,7 +1154,7 @@ export default function DashboardPage() {
                     <img src={c.image} alt={c.cropName} className="w-10 h-10 rounded-lg object-cover border border-white/10 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-bold text-white truncate">{c.cropName}</div>
-                      <div className="text-[10px] text-gray-400">{c.weight} â¢ â¹{c.price}/Qtl</div>
+                      <div className="text-[10px] text-gray-400">{c.weight} • ₹{c.price}/Qtl</div>
                     </div>
                     <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] px-2 py-0.5 capitalize">
                       {c.status || "Growing"}
@@ -1173,7 +1173,7 @@ export default function DashboardPage() {
                   onClick={() => setIsOrdersModalOpen(true)}
                   className="text-xs text-primary hover:underline font-bold cursor-pointer"
                 >
-                  View All â
+                  View All →
                 </button>
               </div>
               <div className="space-y-3">
@@ -1205,7 +1205,7 @@ export default function DashboardPage() {
                 <div className="text-sm font-bold text-white flex items-center gap-2">
                   System Alerts & Activity
                 </div>
-                <Link to="/notifications" className="text-xs text-primary hover:underline font-bold">View All â</Link>
+                <Link to="/notifications" className="text-xs text-primary hover:underline font-bold">View All →</Link>
               </div>
               <div className="space-y-3">
                 {notifications.slice(0, 3).map((n) => (
@@ -1252,22 +1252,22 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="bg-white/5 border border-white/10 rounded-xl p-3">
                   <div className="text-[10px] text-gray-400 font-semibold">KCC (Kishan Credit)</div>
-                  <div className="text-lg font-black text-amber-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>â¹2,43,900</div>
+                  <div className="text-lg font-black text-amber-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹2,43,900</div>
                   <div className="text-[10px] text-gray-500">45% of total</div>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-3">
                   <div className="text-[10px] text-gray-400 font-semibold">KKW (Krivexo Wallet)</div>
-                  <div className="text-lg font-black text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>â¹1,24,660</div>
+                  <div className="text-lg font-black text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹1,24,660</div>
                   <div className="text-[10px] text-gray-500">23% of total</div>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-3">
                   <div className="text-[10px] text-gray-400 font-semibold">UPI Direct</div>
-                  <div className="text-lg font-black text-blue-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>â¹1,03,000</div>
+                  <div className="text-lg font-black text-blue-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹1,03,000</div>
                   <div className="text-[10px] text-gray-500">19% of total</div>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-xl p-3">
                   <div className="text-[10px] text-gray-400 font-semibold">COD (Cash on Delivery)</div>
-                  <div className="text-lg font-black text-emerald-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>â¹70,440</div>
+                  <div className="text-lg font-black text-emerald-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹70,440</div>
                   <div className="text-[10px] text-gray-500">13% of total</div>
                 </div>
               </div>
@@ -1303,7 +1303,7 @@ export default function DashboardPage() {
                         <span className="text-xs font-bold text-white">{tx.title}</span>
                         <Badge className="bg-white/10 text-gray-300 text-[9px] uppercase font-mono">{tx.method}</Badge>
                       </div>
-                      <div className="text-[11px] text-gray-400 mt-0.5">Customer: {tx.customer} Â· {tx.date}</div>
+                      <div className="text-[11px] text-gray-400 mt-0.5">Customer: {tx.customer} · {tx.date}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-black text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>{tx.amount}</div>
@@ -1399,7 +1399,7 @@ export default function DashboardPage() {
                     <div className="bg-black/40 border border-white/10 rounded-xl p-4 space-y-2 animate-in fade-in">
                       {checkResult.notFound ? (
                         <div className="text-center py-4 text-amber-400 text-xs font-semibold">
-                          â ï¸ No KCC Application record found for the provided phone or Aadhaar.
+                          ⚠️ No KCC Application record found for the provided phone or Aadhaar.
                         </div>
                       ) : (
                         <div>
@@ -1584,12 +1584,12 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between border-b border-white/10 pb-2">
                         <div>
                           <div className="text-sm font-bold text-white">{posFarmerProfile.profile?.name}</div>
-                          <div className="text-xs text-gray-400">+91 {posFarmerProfile.profile?.phone} Â· {posFarmerProfile.profile?.district}</div>
+                          <div className="text-xs text-gray-400">+91 {posFarmerProfile.profile?.phone} · {posFarmerProfile.profile?.district}</div>
                         </div>
                         <div className="text-right">
                           <div className="text-[10px] text-gray-400">Available KCC Balance</div>
                           <div className="text-xl font-black text-amber-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                            â¹{posFarmerProfile.cardInfo?.balance?.toLocaleString() || "25,000"}
+                            ₹{posFarmerProfile.cardInfo?.balance?.toLocaleString() || "25,000"}
                           </div>
                         </div>
                       </div>
@@ -1598,14 +1598,14 @@ export default function DashboardPage() {
                         <div><span className="text-gray-500">Aadhaar:</span> {posFarmerProfile.profile?.aadhaar}</div>
                         <div><span className="text-gray-500">Card No:</span> <span className="font-mono text-amber-400 font-bold">{posFarmerProfile.profile?.cardNumber}</span></div>
                         <div><span className="text-gray-500">Land Size:</span> {posFarmerProfile.profile?.landSize}</div>
-                        <div><span className="text-gray-500">KCC Status:</span> <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[9px]">ACTIVE â</Badge></div>
+                        <div><span className="text-gray-500">KCC Status:</span> <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[9px]">ACTIVE ✅</Badge></div>
                       </div>
 
                       {/* Billing Action Box */}
                       <div className="pt-3 border-t border-white/10 space-y-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <Label className="text-xs text-gray-300">Bill Amount (â¹) *</Label>
+                            <Label className="text-xs text-gray-300">Bill Amount (₹) *</Label>
                             <Input type="number" value={posAmount} onChange={e => setPosAmount(e.target.value)} placeholder="Amount to charge" className="bg-white/5 border-white/10 text-white mt-1" />
                           </div>
                           <div>
@@ -1659,7 +1659,7 @@ export default function DashboardPage() {
             </div>
             <h3 className="text-base font-bold text-white mb-1">Farmer Email Authorization</h3>
             <p className="text-xs text-gray-400 mb-4">
-              Enter the 4-digit security code sent to farmer's email to authorize debit of <strong className="text-amber-400">â¹{posAmount}</strong>
+              Enter the 4-digit security code sent to farmer's email to authorize debit of <strong className="text-amber-400">₹{posAmount}</strong>
             </p>
 
             <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-4">
@@ -1793,7 +1793,7 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs text-gray-300 font-medium">
-                      {listingType === "labour" ? "Daily Wage Rate (â¹ / Day) *" : "Rental Rate (â¹) *"}
+                      {listingType === "labour" ? "Daily Wage Rate (₹ / Day) *" : "Rental Rate (₹) *"}
                     </Label>
                     <Input type="number" value={listPrice} onChange={e => setListPrice(e.target.value)} placeholder={listingType === "labour" ? "e.g. 500" : "Rental Rate"} className="bg-white/5 border-white/10 text-white mt-1" required />
                   </div>
@@ -1818,7 +1818,7 @@ export default function DashboardPage() {
                     <div className="relative border border-primary/40 rounded-xl p-2 bg-white/5 flex items-center gap-3">
                       <img src={listImg} alt="Preview" className="w-14 h-14 object-cover rounded-lg border border-white/10" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-primary truncate">â Photo Attached</p>
+                        <p className="text-xs font-semibold text-primary truncate">✓ Photo Attached</p>
                         <p className="text-[10px] text-gray-400">Ready to submit with listing</p>
                       </div>
                       <Button
@@ -1980,7 +1980,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-300">
                       <div><span className="text-gray-500">Weight:</span> <span className="font-semibold text-white">{crop.weight}</span></div>
-                      <div><span className="text-gray-500">Price:</span> <span className="font-semibold text-primary">â¹{crop.price}/Quintal</span></div>
+                      <div><span className="text-gray-500">Price:</span> <span className="font-semibold text-primary">₹{crop.price}/Quintal</span></div>
                       <div><span className="text-gray-400">{crop.district}, {crop.city || "Bihar"}</span></div>
                     </div>
                   </div>
@@ -2120,13 +2120,13 @@ export default function DashboardPage() {
                           />
                         </div>
                         <div>
-                          <Label className="text-xs text-gray-300 mb-1 block">Price / Rate (â¹)</Label>
+                          <Label className="text-xs text-gray-300 mb-1 block">Price / Rate (₹)</Label>
                           <input
                             type="number"
                             value={editListPrice}
                             onChange={e => setEditListPrice(e.target.value)}
                             className="w-full bg-white/5 border border-white/10 text-white text-xs rounded-xl px-3 py-2 outline-none focus:border-amber-500/40"
-                            placeholder="Amount in â¹"
+                            placeholder="Amount in ₹"
                           />
                         </div>
                         <div>
@@ -2200,7 +2200,7 @@ export default function DashboardPage() {
                             "bg-amber-500/10 text-amber-400 border-amber-500/20"
                           }`}>{d.status}</span>
                         </div>
-                        <p className="text-xs text-gray-400">â¹{d.price} / {d.unit || "unit"} Â· {d.location || "Bihar"}</p>
+                        <p className="text-xs text-gray-400">₹{d.price} / {d.unit || "unit"} · {d.location || "Bihar"}</p>
                         {d.description && <p className="text-xs text-gray-500 mt-0.5 truncate">{d.description}</p>}
                       </div>
                       <Button

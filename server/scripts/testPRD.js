@@ -11,7 +11,7 @@ const BASE_URL = 'http://localhost:5000/api';
 
 async function runTests() {
   console.log('=======================================================');
-  console.log('ð§ª Running Comprehensive PRD Backend Test Suite...');
+  console.log('🧪 Running Comprehensive PRD Backend Test Suite...');
   console.log('=======================================================');
 
   let passed = 0;
@@ -19,10 +19,10 @@ async function runTests() {
 
   function assert(condition, message) {
     if (condition) {
-      console.log(`  â PASS: ${message}`);
+      console.log(`  ✅ PASS: ${message}`);
       passed++;
     } else {
-      console.error(`  â FAIL: ${message}`);
+      console.error(`  ❌ FAIL: ${message}`);
       failed++;
     }
   }
@@ -225,7 +225,7 @@ async function runTests() {
     assert(hasKccApprovalLog, 'Rule 7 & Section 26 Enforced: Admin actions are recorded in AuditLog');
 
     console.log('=======================================================');
-    console.log(`ð PRD TEST RUN COMPLETE: ${passed} passed, ${failed} failed`);
+    console.log(`🎉 PRD TEST RUN COMPLETE: ${passed} passed, ${failed} failed`);
     console.log('=======================================================');
 
     if (failed > 0) {

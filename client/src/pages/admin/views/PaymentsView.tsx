@@ -85,7 +85,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
             date: `${dateStr}\n${timeStr}`,
             user: `${uName}\n(${uRole})`,
             userNameOnly: uName,
-            amount: `â¹ ${amt.toLocaleString("en-IN")}`,
+            amount: `₹ ${amt.toLocaleString("en-IN")}`,
             method: (p.paymentMethod || p.gateway || "UPI").toUpperCase(),
             status: isFailed ? "Failed" : isPending ? "Pending" : "Success",
           });
@@ -114,7 +114,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
             date: `${dateStr}\n${timeStr}`,
             user: `${uName}\n(${uRole})`,
             userNameOnly: uName,
-            amount: `â¹ ${orderAmt.toLocaleString("en-IN")}`,
+            amount: `₹ ${orderAmt.toLocaleString("en-IN")}`,
             method: (o.paymentMethod || "COD").toUpperCase(),
             status: isFailed ? "Failed" : isPending ? "Pending" : "Success",
           });
@@ -178,7 +178,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
               user: `${editForm.user}\n(User)`,
               userNameOnly: editForm.user,
               rawAmount: newAmt,
-              amount: `â¹ ${newAmt.toLocaleString("en-IN")}`,
+              amount: `₹ ${newAmt.toLocaleString("en-IN")}`,
               method: editForm.method,
               status: editForm.status,
             };
@@ -336,7 +336,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Total Payments</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ {totalPaymentsAmt.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">₹ {totalPaymentsAmt.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
             <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">From {payments.length} transactions</p>
           </div>
         </div>
@@ -348,7 +348,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Total Withdrawals</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ {totalWithdrawalsAmt.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">₹ {totalWithdrawalsAmt.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
             <p className="text-[10px] text-purple-600 font-semibold mt-0.5">Wallet payouts</p>
           </div>
         </div>
@@ -360,7 +360,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Successful</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ {successfulAmt.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">₹ {successfulAmt.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
             <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">Processed successfully</p>
           </div>
         </div>
@@ -372,7 +372,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Failed / Cancelled</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ {failedAmt.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">₹ {failedAmt.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
             <p className="text-[10px] text-red-500 font-semibold mt-0.5">{payments.filter((p) => p.status === "Failed").length} failed</p>
           </div>
         </div>
@@ -531,7 +531,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                   <span className="text-[9px] text-gray-400 font-medium">Total</span>
-                  <span className="text-[11px] font-black text-gray-900 leading-tight">â¹ {grandTotal.toLocaleString("en-IN")}</span>
+                  <span className="text-[11px] font-black text-gray-900 leading-tight">₹ {grandTotal.toLocaleString("en-IN")}</span>
                 </div>
               </div>
 
@@ -542,21 +542,21 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span>Payments</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 pl-3.5">â¹ {totalPaymentsAmt.toLocaleString("en-IN")} ({pctPayments}%)</p>
+                  <p className="text-[10px] text-gray-400 pl-3.5">₹ {totalPaymentsAmt.toLocaleString("en-IN")} ({pctPayments}%)</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5 text-gray-700 font-medium">
                     <span className="w-2 h-2 rounded-full bg-purple-500"></span>
                     <span>Withdrawals</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 pl-3.5">â¹ 0.00 (0%)</p>
+                  <p className="text-[10px] text-gray-400 pl-3.5">₹ 0.00 (0%)</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5 text-gray-700 font-medium">
                     <span className="w-2 h-2 rounded-full bg-red-500"></span>
                     <span>Failed / Cancelled</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 pl-3.5">â¹ {failedAmt.toLocaleString("en-IN")} ({pctFailed}%)</p>
+                  <p className="text-[10px] text-gray-400 pl-3.5">₹ {failedAmt.toLocaleString("en-IN")} ({pctFailed}%)</p>
                 </div>
               </div>
             </div>
@@ -610,7 +610,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
                   <span className="font-medium">UPI</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-gray-800">â¹ {upiTotal.toLocaleString("en-IN")}</span>
+                  <span className="font-bold text-gray-800">₹ {upiTotal.toLocaleString("en-IN")}</span>
                   <span className="text-gray-400 ml-1.5 text-[10px] font-semibold">{upiPct}%</span>
                 </div>
               </div>
@@ -621,7 +621,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
                   <span className="font-medium">KCC / Card</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-gray-800">â¹ {kccTotal.toLocaleString("en-IN")}</span>
+                  <span className="font-bold text-gray-800">₹ {kccTotal.toLocaleString("en-IN")}</span>
                   <span className="text-gray-400 ml-1.5 text-[10px] font-semibold">{kccPct}%</span>
                 </div>
               </div>
@@ -632,7 +632,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
                   <span className="font-medium">COD</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-gray-800">â¹ {codTotal.toLocaleString("en-IN")}</span>
+                  <span className="font-bold text-gray-800">₹ {codTotal.toLocaleString("en-IN")}</span>
                   <span className="text-gray-400 ml-1.5 text-[10px] font-semibold">{codPct}%</span>
                 </div>
               </div>
@@ -644,7 +644,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
                     <span className="font-medium">Other</span>
                   </div>
                   <div className="text-right">
-                    <span className="font-bold text-gray-800">â¹ {otherTotal.toLocaleString("en-IN")}</span>
+                    <span className="font-bold text-gray-800">₹ {otherTotal.toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               )}
@@ -683,7 +683,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
               </div>
 
               <div>
-                <label className="block text-gray-700 font-bold mb-1">Amount (â¹)</label>
+                <label className="block text-gray-700 font-bold mb-1">Amount (₹)</label>
                 <Input
                   type="number"
                   value={editForm.rawAmount}
@@ -765,7 +765,7 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
         </div>
       )}
 
-      <div className="text-center text-[11px] text-gray-400">Â© {new Date().getFullYear()} Farma. All rights reserved.</div>
+      <div className="text-center text-[11px] text-gray-400">© {new Date().getFullYear()} Farma. All rights reserved.</div>
     </div>
   );
 }

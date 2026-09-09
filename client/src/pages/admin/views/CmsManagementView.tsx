@@ -86,9 +86,9 @@ export default function CmsManagementView() {
         <div className="flex items-center gap-3">
           <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-400 mr-2">
             <span>Dashboard</span>
-            <span>âº</span>
+            <span>›</span>
             <span>CMS</span>
-            <span>âº</span>
+            <span>›</span>
             <span className="text-emerald-600 font-semibold">Pages Management</span>
           </div>
           <button
@@ -286,7 +286,7 @@ export default function CmsManagementView() {
               <span>Showing 1 to 15 of 58 pages</span>
               <div className="flex items-center gap-1">
                 <button className="px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 text-[11px]">
-                  â¹
+                  ‹
                 </button>
                 <button className="px-2.5 py-1 rounded-lg bg-emerald-700 text-white font-bold text-[11px]">
                   1
@@ -305,7 +305,7 @@ export default function CmsManagementView() {
                   6
                 </button>
                 <button className="px-2.5 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 text-[11px]">
-                  âº
+                  ›
                 </button>
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function CmsManagementView() {
                 onClick={() => toast.info("Opening Help Center...")}
                 className="mt-3 w-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
               >
-                Go to Help Center â
+                Go to Help Center →
               </button>
             </div>
           </div>

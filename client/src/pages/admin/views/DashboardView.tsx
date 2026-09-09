@@ -136,7 +136,7 @@ export default function DashboardView({
   const displayRetailers = filteredDealers.length.toLocaleString("en-IN");
   const displayOrders = filteredOrders.length.toLocaleString("en-IN");
   const rawRevenue = filteredOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
-  const displayRevenue = `â¹ ${rawRevenue.toLocaleString("en-IN")}`;
+  const displayRevenue = `₹ ${rawRevenue.toLocaleString("en-IN")}`;
 
   // Dynamic duration buckets calculated strictly from live orders based on selected duration
   const now = new Date();
@@ -244,7 +244,7 @@ export default function DashboardView({
       day: b.day,
       total: b.total,
       fullDate: b.fullDate || b.day,
-      amount: `â¹ ${b.total.toLocaleString("en-IN")}`,
+      amount: `₹ ${b.total.toLocaleString("en-IN")}`,
     };
   });
 
@@ -264,11 +264,11 @@ export default function DashboardView({
   const RECENT_ORDERS = filteredOrders.slice(0, 5).map((o, idx) => ({
     id: o.id || `#ORD-${1000 + idx}`,
     buyer: o.buyer && !o.buyer.startsWith("usr_") ? o.buyer : "Registered Farmer",
-    amount: `â¹ ${(o.amount || 0).toLocaleString("en-IN")}`,
+    amount: `₹ ${(o.amount || 0).toLocaleString("en-IN")}`,
     status: (o.status?.toLowerCase() === "delivered" || o.status?.toLowerCase() === "completed" ? "Delivered" :
              o.status?.toLowerCase() === "shipped" ? "Shipped" :
              o.status?.toLowerCase() === "processing" ? "Processing" : "Pending") as "Delivered" | "Shipped" | "Processing" | "Pending",
-    avatar: "ð¾",
+    avatar: "🌾",
   }));
 
   // Top Selling Categories dynamically filtered by selected timeframe
@@ -370,7 +370,7 @@ export default function DashboardView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            Welcome back, Admin! <span className="inline-block animate-wave">ð</span>
+            Welcome back, Admin! <span className="inline-block animate-wave">👋</span>
           </h2>
           <div className="flex flex-wrap items-center gap-2 mt-0.5 text-xs sm:text-sm text-gray-500">
             <span>Here's what's happening on Krivexo today.</span>
@@ -532,7 +532,7 @@ export default function DashboardView({
             {displayFarmers}
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-            <span>â 12.5%</span>
+            <span>↗ 12.5%</span>
             <span className="text-gray-400 font-normal text-[11px]">vs last month</span>
           </div>
         </div>
@@ -552,7 +552,7 @@ export default function DashboardView({
             {displayRetailers}
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-            <span>â 8.3%</span>
+            <span>↗ 8.3%</span>
             <span className="text-gray-400 font-normal text-[11px]">vs last month</span>
           </div>
         </div>
@@ -572,7 +572,7 @@ export default function DashboardView({
             {displayOrders}
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-            <span>â 15.7%</span>
+            <span>↗ 15.7%</span>
             <span className="text-gray-400 font-normal text-[11px]">vs last month</span>
           </div>
         </div>
@@ -585,14 +585,14 @@ export default function DashboardView({
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold text-gray-500">Total Revenue</span>
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform font-bold text-lg">
-              â¹
+              ₹
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight mb-2 truncate">
             {displayRevenue}
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-            <span>â 18.2%</span>
+            <span>↗ 18.2%</span>
             <span className="text-gray-400 font-normal text-[11px]">vs last month</span>
           </div>
         </div>
@@ -795,7 +795,7 @@ export default function DashboardView({
           className="bg-white rounded-2xl border border-gray-100 p-4 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all text-center cursor-pointer relative group"
         >
           <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50/80 border border-emerald-100 flex items-center justify-center text-2xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
-            ð¨âð¾
+            👨‍🌾
           </div>
           <div className="absolute top-10 right-1/4 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow">
             <Plus className="h-3 w-3 stroke-[3]" />
@@ -809,7 +809,7 @@ export default function DashboardView({
           className="bg-white rounded-2xl border border-gray-100 p-4 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all text-center cursor-pointer relative group"
         >
           <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-50/80 border border-blue-100 flex items-center justify-center text-2xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
-            ðª
+            🏪
           </div>
           <div className="absolute top-10 right-1/4 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow">
             <Plus className="h-3 w-3 stroke-[3]" />
@@ -823,7 +823,7 @@ export default function DashboardView({
           className="bg-white rounded-2xl border border-gray-100 p-4 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all text-center cursor-pointer relative group"
         >
           <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-50/80 border border-amber-100 flex items-center justify-center text-2xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
-            ð¦
+            📦
           </div>
           <div className="absolute top-10 right-1/4 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow">
             <Plus className="h-3 w-3 stroke-[3]" />
@@ -837,7 +837,7 @@ export default function DashboardView({
           className="bg-white rounded-2xl border border-gray-100 p-4 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all text-center cursor-pointer relative group"
         >
           <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50/80 border border-emerald-100 flex items-center justify-center text-2xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
-            ð
+            🚜
           </div>
           <div className="absolute top-10 right-1/4 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow">
             <Plus className="h-3 w-3 stroke-[3]" />
@@ -851,7 +851,7 @@ export default function DashboardView({
           className="bg-white rounded-2xl border border-gray-100 p-4 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all text-center cursor-pointer relative group col-span-2 sm:col-span-1"
         >
           <div className="w-14 h-14 mx-auto rounded-2xl bg-orange-50/80 border border-orange-100 flex items-center justify-center text-2xl mb-3 shadow-2xs group-hover:scale-105 transition-transform">
-            ð
+            🔔
           </div>
           <div className="absolute top-10 right-1/4 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow">
             <Plus className="h-3 w-3 stroke-[3]" />
@@ -917,7 +917,7 @@ export default function DashboardView({
                   key={cat.name}
                   onClick={() => onNavigate("products")}
                   className="flex items-center justify-between hover:bg-emerald-50/60 p-1.5 rounded-lg cursor-pointer transition-colors group"
-                  title={`Click to view ${cat.name} (${cat.count} units sold - â¹${cat.revenue.toLocaleString("en-IN")})`}
+                  title={`Click to view ${cat.name} (${cat.count} units sold - ₹${cat.revenue.toLocaleString("en-IN")})`}
                 >
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
@@ -937,7 +937,7 @@ export default function DashboardView({
               onClick={() => onNavigate("products")}
               className="text-emerald-600 hover:text-emerald-700 font-semibold cursor-pointer"
             >
-              Explore Products â
+              Explore Products →
             </button>
           </div>
         </div>
@@ -989,12 +989,12 @@ export default function DashboardView({
           </div>
 
           <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-400 mt-2">
-            <span>{farmers.length} Farmers Â· {dealers.length} Dealers</span>
+            <span>{farmers.length} Farmers · {dealers.length} Dealers</span>
             <button
               onClick={() => onNavigate("farmers")}
               className="text-emerald-600 hover:text-emerald-700 font-semibold cursor-pointer"
             >
-              View Users â
+              View Users →
             </button>
           </div>
         </div>
@@ -1042,9 +1042,9 @@ export default function DashboardView({
 
       {/* Footer matching PDF Page 1 */}
       <div className="pt-6 border-t border-gray-200/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
-        <div>Â© 2025 Krivexo. All rights reserved.</div>
+        <div>© 2025 Krivexo. All rights reserved.</div>
         <div className="flex items-center gap-1 font-medium">
-          Made with <span className="text-red-500">â¤ï¸</span> for Farmers ð¿
+          Made with <span className="text-red-500">❤️</span> for Farmers 🌿
         </div>
       </div>
 
