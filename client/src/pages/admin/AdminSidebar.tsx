@@ -55,7 +55,7 @@ export type AdminTab =
   | "cms_management"
   | "kisan_card"
   | "kisan_card_overview"
-  | "krivexa_cards"
+  | "krivexo_cards"
   | "card_requests"
   | "card_types"
   | "card_benefits"
@@ -103,7 +103,7 @@ export default function AdminSidebar({
   // State for collapsible sub-menus
   const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({
     users: false,
-    krivexaCard: true,
+    krivexoCard: true,
     products: false,
     orders: true,
     bookings: false,
@@ -135,11 +135,11 @@ export default function AdminSidebar({
         <div className="p-4 border-b border-emerald-900/40 flex items-center justify-between bg-[#081814]">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shadow-md">
-              <span className="text-lg">🌿</span>
+              <span className="text-lg">ð¿</span>
             </div>
             <div>
               <h1 className="text-base font-black tracking-wide text-white leading-tight">
-                Krivexa
+                Krivexo
               </h1>
               <p className="text-[10px] text-emerald-400/80 font-medium">
                 Admin Panel
@@ -266,28 +266,28 @@ export default function AdminSidebar({
             <span>Retailers / Dealers</span>
           </button>
 
-          {/* 5. Krivexa Card (KCC) */}
+          {/* 5. Krivexo Card (KCC) */}
           <div>
             <button
-              onClick={() => toggleSubMenu("krivexaCard")}
+              onClick={() => toggleSubMenu("krivexoCard")}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium cursor-pointer transition-all ${
-                activeTab === "kisan_card" || activeTab === "kisan_card_overview" || activeTab === "krivexa_cards" || activeTab === "card_requests" || activeTab === "card_types" || activeTab === "card_benefits" || activeTab === "transactions"
+                activeTab === "kisan_card" || activeTab === "kisan_card_overview" || activeTab === "krivexo_cards" || activeTab === "card_requests" || activeTab === "card_types" || activeTab === "card_benefits" || activeTab === "transactions"
                   ? "text-emerald-300 bg-emerald-950/40 font-semibold"
                   : "text-gray-300 hover:text-white hover:bg-white/5"
               }`}
             >
               <div className="flex items-center gap-3">
                 <CreditCard className="h-4 w-4 shrink-0" />
-                <span>Krivexa Card</span>
+                <span>Krivexo Card</span>
               </div>
-              {openSubMenus.krivexaCard ? <ChevronDown className="h-3.5 w-3.5 opacity-60" /> : <ChevronRight className="h-3.5 w-3.5 opacity-60" />}
+              {openSubMenus.krivexoCard ? <ChevronDown className="h-3.5 w-3.5 opacity-60" /> : <ChevronRight className="h-3.5 w-3.5 opacity-60" />}
             </button>
-            {openSubMenus.krivexaCard && (
+            {openSubMenus.krivexoCard && (
               <div className="pl-9 pr-2 py-1 space-y-0.5">
                 {[
                   { label: "Overview", tab: "kisan_card_overview" },
                   { label: "All Cards", tab: "kisan_card" },
-                  { label: "Krivexa Cards", tab: "krivexa_cards" },
+                  { label: "Krivexo Cards", tab: "krivexo_cards" },
                   { label: "Card Requests", tab: "card_requests" },
                   { label: "Card Types", tab: "card_types" },
                   { label: "Benefits & Offers", tab: "card_benefits" },
@@ -579,13 +579,13 @@ export default function AdminSidebar({
         {/* Bottom KCC Card Widget matching PDF Page 1 */}
         <div className="p-3">
           <div className="rounded-2xl bg-gradient-to-br from-[#123830] to-[#0a211c] border border-emerald-500/30 p-3 shadow-lg text-center">
-            <h4 className="text-xs font-bold text-white mb-0.5">Krivexa Kisan Card</h4>
+            <h4 className="text-xs font-bold text-white mb-0.5">Krivexo Kisan Card</h4>
             <p className="text-[10px] text-emerald-300/80 mb-2 leading-tight">
               Empowering Farmers, Enriching Bharat
             </p>
             <div className="relative rounded-xl overflow-hidden border border-amber-400/40 bg-gradient-to-r from-[#201c10] to-[#121008] p-2 mb-2 text-left shadow-inner">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[9px] font-black text-amber-400 tracking-wider">Krivexa</span>
+                <span className="text-[9px] font-black text-amber-400 tracking-wider">Krivexo</span>
                 <div className="w-3.5 h-2.5 rounded-xs bg-amber-400/40 border border-amber-300/60" />
               </div>
               <div className="text-[9px] font-mono text-amber-200 tracking-wider">1234 5678 9012 3456</div>

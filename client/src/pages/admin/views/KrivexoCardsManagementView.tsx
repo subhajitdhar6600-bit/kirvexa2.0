@@ -27,7 +27,7 @@ interface CardItem {
   avatar: string;
 }
 
-export default function KrivexaCardsManagementView() {
+export default function KrivexoCardsManagementView() {
   const { kccApplications, updateKccLimit } = useApp();
   const [cards, setCards] = useState<CardItem[]>([]);
   const [selectedCard, setSelectedCard] = useState<CardItem | null>(null);
@@ -62,7 +62,7 @@ export default function KrivexaCardsManagementView() {
       setSelectedCard(prev => prev ? { ...prev, creditLimit: numLimit } : null);
     }
     await updateKccLimit(editingCard.cardNumber, numLimit, editingCard.phone);
-    toast.success(`Credit limit for ${editingCard.name} updated to ₹${numLimit.toLocaleString("en-IN")}!`);
+    toast.success(`Credit limit for ${editingCard.name} updated to â¹${numLimit.toLocaleString("en-IN")}!`);
     setEditingCard(null);
   };
 
@@ -76,7 +76,7 @@ export default function KrivexaCardsManagementView() {
       const allApps = (Array.isArray(dbApps) && dbApps.length > 0 ? dbApps : kccApplications) || [];
       const mapped: CardItem[] = users.map((u, idx) => {
         const name = u.fullName || u.name || "Farmer";
-        const phone = u.phone || "—";
+        const phone = u.phone || "â";
         const cleanPhone = phone.replace(/\D/g, "").slice(-10);
         const last4 = cleanPhone.slice(-4) || `${1000 + idx}`;
         const role = (u.role || "").toLowerCase();
@@ -142,7 +142,7 @@ export default function KrivexaCardsManagementView() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Krivexa_Cards_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `Krivexo_Cards_${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -164,12 +164,12 @@ export default function KrivexaCardsManagementView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Krivexa Kisan Card Management</h1>
+          <h1 className="text-xl font-bold text-gray-900">Krivexo Kisan Card Management</h1>
           <p className="text-xs text-gray-500 mt-0.5">Live database of issued cards, limits, and real account records</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span>›</span><span>Krivexa Card</span><span>›</span>
-          <span className="text-emerald-600 font-medium">Krivexa Cards</span>
+          <span>Dashboard</span><span>âº</span><span>Krivexo Card</span><span>âº</span>
+          <span className="text-emerald-600 font-medium">Krivexo Cards</span>
         </div>
       </div>
 
@@ -180,7 +180,7 @@ export default function KrivexaCardsManagementView() {
           { label: "Active Cards", value: activeCards.toString(), sub: `${totalCards > 0 ? Math.round((activeCards / totalCards) * 100) : 0}% active`, Icon: Users, bg: "bg-blue-50", tc: "text-blue-600" },
           { label: "Inactive Cards", value: inactiveCards.toString(), sub: `${inactiveCards} dormant`, Icon: Clock, bg: "bg-amber-50", tc: "text-amber-600" },
           { label: "Blocked Cards", value: blockedCards.toString(), sub: `${blockedCards} suspended`, Icon: XCircle, bg: "bg-red-50", tc: "text-red-600" },
-          { label: "Total Credit Limit", value: `₹ ${totalCreditLimit.toLocaleString("en-IN")}`, sub: "Platform limit sum", Icon: ShieldCheck, bg: "bg-purple-50", tc: "text-purple-600" },
+          { label: "Total Credit Limit", value: `â¹ ${totalCreditLimit.toLocaleString("en-IN")}`, sub: "Platform limit sum", Icon: ShieldCheck, bg: "bg-purple-50", tc: "text-purple-600" },
         ].map((k, i) => {
           const CardIcon = k.Icon;
           return (
@@ -275,7 +275,7 @@ export default function KrivexaCardsManagementView() {
                           </div>
                           <div>
                             <p className="font-bold text-gray-900 leading-tight">{c.name}</p>
-                            <p className="text-[10px] text-gray-400">{c.phone} • {c.district}</p>
+                            <p className="text-[10px] text-gray-400">{c.phone} â¢ {c.district}</p>
                           </div>
                         </div>
                       </td>
@@ -286,7 +286,7 @@ export default function KrivexaCardsManagementView() {
                       </td>
                       <td className="py-3 px-4 font-mono font-medium text-gray-700">{c.cardNumber}</td>
                       <td className="py-3 px-4 text-gray-500">{c.issuedOn}</td>
-                      <td className="py-3 px-4 font-bold text-gray-800">₹ {c.creditLimit.toLocaleString("en-IN")}</td>
+                      <td className="py-3 px-4 font-bold text-gray-800">â¹ {c.creditLimit.toLocaleString("en-IN")}</td>
                       <td className="py-3 px-4">{getStatusBadge(c.status)}</td>
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-1.5">
@@ -343,9 +343,9 @@ export default function KrivexaCardsManagementView() {
         {/* Right Details Panel */}
         {selectedCard && (
           <div className="w-72 space-y-4 shrink-0">
-            {/* Realistic Krivexa Card Preview Box */}
+            {/* Realistic Krivexo Card Preview Box */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-              <p className="text-xs font-bold text-gray-800 mb-3">Krivexa Kisan Card Preview</p>
+              <p className="text-xs font-bold text-gray-800 mb-3">Krivexo Kisan Card Preview</p>
 
               {/* The Visual Card */}
               <div className="relative w-full h-36 rounded-2xl bg-gradient-to-br from-[#0d4734] via-[#093527] to-[#041d15] p-3.5 text-white shadow-lg overflow-hidden border border-emerald-600/30">
@@ -353,7 +353,7 @@ export default function KrivexaCardsManagementView() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5">
                     <Shield className="h-4 w-4 text-emerald-400" />
-                    <span className="font-bold text-xs tracking-wider text-white">Krivexa</span>
+                    <span className="font-bold text-xs tracking-wider text-white">Krivexo</span>
                   </div>
                   <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
                     KISAN CARD
@@ -386,7 +386,7 @@ export default function KrivexaCardsManagementView() {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Credit Limit</span>
                   <span className="font-bold text-gray-800 flex items-center gap-1.5">
-                    ₹ {selectedCard.creditLimit.toLocaleString("en-IN")}
+                    â¹ {selectedCard.creditLimit.toLocaleString("en-IN")}
                     <button
                       onClick={() => handleOpenEditLimit(selectedCard)}
                       className="text-emerald-600 hover:text-emerald-700 hover:underline text-[11px] font-semibold cursor-pointer"
@@ -453,7 +453,7 @@ export default function KrivexaCardsManagementView() {
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1.5">New Credit Limit (₹) *</label>
+                <label className="block font-semibold text-gray-700 mb-1.5">New Credit Limit (â¹) *</label>
                 <Input
                   type="number"
                   min="1000"
@@ -490,7 +490,7 @@ export default function KrivexaCardsManagementView() {
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Kisan Card Database
+        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Kisan Card Database
       </div>
     </div>
   );

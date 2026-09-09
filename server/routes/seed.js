@@ -82,14 +82,14 @@ router.post('/', async (req, res) => {
     const mandiCount = await MandiRate.countDocuments();
     if (mandiCount === 0) {
       await MandiRate.insertMany([
-        { id: "m1", name: "Wheat", hindi: "गेहूं", min: 2150, max: 2400, modal: 2275, unit: "Quintal", change: 2.35, img: "🌾", mandi: "Kanpur Mandi" },
-        { id: "m2", name: "Paddy (Common)", hindi: "धान", min: 1750, max: 1950, modal: 1860, unit: "Quintal", change: 1.78, img: "🌾", mandi: "Kanpur Mandi" },
-        { id: "m3", name: "Soyabean", hindi: "सोयाबीन", min: 4800, max: 5050, modal: 4920, unit: "Quintal", change: 3.12, img: "🟡", mandi: "Kanpur Mandi" },
-        { id: "m4", name: "Maize", hindi: "मक्का", min: 1850, max: 2000, modal: 1920, unit: "Quintal", change: 0.91, img: "🌽", mandi: "Kanpur Mandi" },
-        { id: "m5", name: "Mustard", hindi: "सरसों", min: 5100, max: 5400, modal: 5250, unit: "Quintal", change: -0.5, img: "🌼", mandi: "Kanpur Mandi" },
-        { id: "m6", name: "Gram", hindi: "चना", min: 4600, max: 4900, modal: 4750, unit: "Quintal", change: 1.2, img: "🟤", mandi: "Kanpur Mandi" },
-        { id: "m7", name: "Onion", hindi: "प्याज", min: 800, max: 1200, modal: 1050, unit: "Quintal", change: -2.1, img: "🧅", mandi: "Kanpur Mandi" },
-        { id: "m8", name: "Tomato", hindi: "टमाटर", min: 600, max: 1000, modal: 800, unit: "Quintal", change: 4.5, img: "🍅", mandi: "Kanpur Mandi" },
+        { id: "m1", name: "Wheat", hindi: "à¤à¥à¤¹à¥à¤", min: 2150, max: 2400, modal: 2275, unit: "Quintal", change: 2.35, img: "ð¾", mandi: "Kanpur Mandi" },
+        { id: "m2", name: "Paddy (Common)", hindi: "à¤§à¤¾à¤¨", min: 1750, max: 1950, modal: 1860, unit: "Quintal", change: 1.78, img: "ð¾", mandi: "Kanpur Mandi" },
+        { id: "m3", name: "Soyabean", hindi: "à¤¸à¥à¤¯à¤¾à¤¬à¥à¤¨", min: 4800, max: 5050, modal: 4920, unit: "Quintal", change: 3.12, img: "ð¡", mandi: "Kanpur Mandi" },
+        { id: "m4", name: "Maize", hindi: "à¤®à¤à¥à¤à¤¾", min: 1850, max: 2000, modal: 1920, unit: "Quintal", change: 0.91, img: "ð½", mandi: "Kanpur Mandi" },
+        { id: "m5", name: "Mustard", hindi: "à¤¸à¤°à¤¸à¥à¤", min: 5100, max: 5400, modal: 5250, unit: "Quintal", change: -0.5, img: "ð¼", mandi: "Kanpur Mandi" },
+        { id: "m6", name: "Gram", hindi: "à¤à¤¨à¤¾", min: 4600, max: 4900, modal: 4750, unit: "Quintal", change: 1.2, img: "ð¤", mandi: "Kanpur Mandi" },
+        { id: "m7", name: "Onion", hindi: "à¤ªà¥à¤¯à¤¾à¤", min: 800, max: 1200, modal: 1050, unit: "Quintal", change: -2.1, img: "ð§", mandi: "Kanpur Mandi" },
+        { id: "m8", name: "Tomato", hindi: "à¤à¤®à¤¾à¤à¤°", min: 600, max: 1000, modal: 800, unit: "Quintal", change: 4.5, img: "ð", mandi: "Kanpur Mandi" },
       ]);
     }
 
@@ -232,18 +232,18 @@ router.post('/', async (req, res) => {
       await PathshalaVideo.insertMany([
         {
           id: "vid-1",
-          title: "वैज्ञानिक विधि से गेहूं की खेती | Scientific Wheat Farming Techniques",
+          title: "à¤µà¥à¤à¥à¤à¤¾à¤¨à¤¿à¤ à¤µà¤¿à¤§à¤¿ à¤¸à¥ à¤à¥à¤¹à¥à¤ à¤à¥ à¤à¥à¤¤à¥ | Scientific Wheat Farming Techniques",
           youtubeUrl: "https://www.youtube.com/watch?v=co3_pS74L-Q",
           category: "soil",
-          description: "इस वीडियो में देखें गेहूं की बुवाई से लेकर कटाई तक की पूरी जानकारी और वैज्ञानिक तरीके।",
+          description: "à¤à¤¸ à¤µà¥à¤¡à¤¿à¤¯à¥ à¤®à¥à¤ à¤¦à¥à¤à¥à¤ à¤à¥à¤¹à¥à¤ à¤à¥ à¤¬à¥à¤µà¤¾à¤ à¤¸à¥ à¤²à¥à¤à¤° à¤à¤à¤¾à¤ à¤¤à¤ à¤à¥ à¤ªà¥à¤°à¥ à¤à¤¾à¤¨à¤à¤¾à¤°à¥ à¤à¤° à¤µà¥à¤à¥à¤à¤¾à¤¨à¤¿à¤ à¤¤à¤°à¥à¤à¥à¥¤",
           createdAt: new Date().toISOString(),
         },
         {
           id: "vid-2",
-          title: "ड्रिप सिंचाई प्रणाली कैसे काम करती है? | Working of Drip Irrigation System",
+          title: "à¤¡à¥à¤°à¤¿à¤ª à¤¸à¤¿à¤à¤à¤¾à¤ à¤ªà¥à¤°à¤£à¤¾à¤²à¥ à¤à¥à¤¸à¥ à¤à¤¾à¤® à¤à¤°à¤¤à¥ à¤¹à¥? | Working of Drip Irrigation System",
           youtubeUrl: "https://www.youtube.com/watch?v=FmYj08m52_I",
           category: "water",
-          description: "खेतों में ड्रिप सिंचाई (टपक सिंचाई) लगाने के फायदे और उसकी पूरी कार्यप्रणाली।",
+          description: "à¤à¥à¤¤à¥à¤ à¤®à¥à¤ à¤¡à¥à¤°à¤¿à¤ª à¤¸à¤¿à¤à¤à¤¾à¤ (à¤à¤ªà¤ à¤¸à¤¿à¤à¤à¤¾à¤) à¤²à¤à¤¾à¤¨à¥ à¤à¥ à¤«à¤¾à¤¯à¤¦à¥ à¤à¤° à¤à¤¸à¤à¥ à¤ªà¥à¤°à¥ à¤à¤¾à¤°à¥à¤¯à¤ªà¥à¤°à¤£à¤¾à¤²à¥à¥¤",
           createdAt: new Date().toISOString(),
         },
       ]);
@@ -310,8 +310,8 @@ router.post('/', async (req, res) => {
         {
           id: `notif-${Date.now()}-1`,
           userId: 'broadcast',
-          title: 'New Order Received 📦',
-          message: 'Order #ORD-920145 of ₹2,940 has been placed by Rajesh Kumar Sharma.',
+          title: 'New Order Received ð¦',
+          message: 'Order #ORD-920145 of â¹2,940 has been placed by Rajesh Kumar Sharma.',
           time: 'Just now',
           read: false,
           isRead: false,
@@ -323,8 +323,8 @@ router.post('/', async (req, res) => {
         {
           id: `notif-${Date.now()}-2`,
           userId: 'broadcast',
-          title: 'New Farmer Registered 🌾',
-          message: 'Ramesh Kumar (Patna, Bihar) has joined Krivexa platform.',
+          title: 'New Farmer Registered ð¾',
+          message: 'Ramesh Kumar (Patna, Bihar) has joined Krivexo platform.',
           time: '15 mins ago',
           read: false,
           isRead: false,
@@ -336,7 +336,7 @@ router.post('/', async (req, res) => {
         {
           id: `notif-${Date.now()}-3`,
           userId: 'broadcast',
-          title: 'KCC Application Pending Review 💳',
+          title: 'KCC Application Pending Review ð³',
           message: 'Kisan Credit Card application KCC-801294 is awaiting admin verification.',
           time: '1 hour ago',
           read: false,
@@ -436,7 +436,7 @@ router.post('/', async (req, res) => {
           name: 'Organic Neem Oil Bio-Pesticide 10000 PPM',
           slug: 'organic-neem-oil-bio-pesticide',
           description: '100% natural cold-pressed bio-pesticide for effective control of sucking pests, caterpillars, and fungal pathogens.',
-          brand: 'Krivexa Bio',
+          brand: 'Krivexo Bio',
           images: ['https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=600&q=80'],
           unit: '1L Bottle',
           price: 499,
@@ -492,8 +492,8 @@ router.post('/', async (req, res) => {
     const settingsCount = await PlatformSettings.countDocuments();
     if (settingsCount === 0) {
       await PlatformSettings.create({
-        platformName: 'Krivexa Agritech',
-        supportEmail: 'support@krivexa.in',
+        platformName: 'Krivexo Agritech',
+        supportEmail: 'support@krivexo.in',
         phone: '+91 9876543210',
         address: 'Patna, Bihar - 800001',
         timezone: 'Asia/Kolkata',

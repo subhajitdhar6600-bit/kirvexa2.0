@@ -85,7 +85,7 @@ export default function MachineryBookingPage() {
 
       // Send notification with PDF receipt
       addNotification(
-        "Machinery Booking Request Submitted 🚜",
+        "Machinery Booking Request Submitted ð",
         `Your request for booking ${selectedMachine} has been registered (Ref: ${refId}). Download PDF receipt.`,
         "success",
         "/machinery-booking",
@@ -222,7 +222,7 @@ export default function MachineryBookingPage() {
               </div>
 
               <Button type="submit" className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl">
-                Submit Booking Request →
+                Submit Booking Request â
               </Button>
             </form>
           </div>
@@ -249,7 +249,7 @@ export default function MachineryBookingPage() {
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div>
                         <h3 className="font-bold text-base text-white">{b.machineryType}</h3>
-                        <p className="text-xs text-gray-400">{b.userName} · {b.phone}</p>
+                        <p className="text-xs text-gray-400">{b.userName} Â· {b.phone}</p>
                       </div>
                       <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${
                         b.status === "allotted"
@@ -258,7 +258,7 @@ export default function MachineryBookingPage() {
                           ? "bg-red-500/10 text-red-400 border-red-500/30"
                           : "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse"
                       }`}>
-                        {b.status === "allotted" ? "✓ Machine Allotted" : b.status === "rejected" ? "Cancelled" : "Pending Allotment"}
+                        {b.status === "allotted" ? "â Machine Allotted" : b.status === "rejected" ? "Cancelled" : "Pending Allotment"}
                       </span>
                     </div>
 

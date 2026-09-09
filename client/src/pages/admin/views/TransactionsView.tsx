@@ -352,7 +352,7 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[11px] font-medium text-gray-500">Total Volume</p>
-            <p className="text-xl font-black text-gray-900 mt-0.5">₹ {walletTotal.toLocaleString("en-IN")}</p>
+            <p className="text-xl font-black text-gray-900 mt-0.5">â¹ {walletTotal.toLocaleString("en-IN")}</p>
             <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">{totalTx} DB transactions</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -363,7 +363,7 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[11px] font-medium text-gray-500">Settled / Settling</p>
-            <p className="text-xl font-black text-blue-600 mt-0.5">₹ {walletAvailable.toLocaleString("en-IN")}</p>
+            <p className="text-xl font-black text-blue-600 mt-0.5">â¹ {walletAvailable.toLocaleString("en-IN")}</p>
             <p className="text-[10px] text-blue-600 font-semibold mt-0.5">{successCount} successful</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -374,7 +374,7 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[11px] font-medium text-gray-500">Pending Transactions</p>
-            <p className="text-xl font-black text-amber-600 mt-0.5">₹ {walletOnHold.toLocaleString("en-IN")}</p>
+            <p className="text-xl font-black text-amber-600 mt-0.5">â¹ {walletOnHold.toLocaleString("en-IN")}</p>
             <p className="text-[10px] text-amber-600 font-semibold mt-0.5">{pendingCount} in progress</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
@@ -385,7 +385,7 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[11px] font-medium text-gray-500">Failed / Cancelled</p>
-            <p className="text-xl font-black text-red-600 mt-0.5">₹ {refundTotal.toLocaleString("en-IN")}</p>
+            <p className="text-xl font-black text-red-600 mt-0.5">â¹ {refundTotal.toLocaleString("en-IN")}</p>
             <p className="text-[10px] text-red-600 font-semibold mt-0.5">{failedCount} failed</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
@@ -491,7 +491,7 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
                         {t.type}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-bold text-gray-900">₹ {t.amount.toLocaleString("en-IN")}</td>
+                    <td className="py-3 px-4 font-bold text-gray-900">â¹ {t.amount.toLocaleString("en-IN")}</td>
                     <td className="py-3 px-4 font-medium text-gray-600 text-[11px]">{t.method}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${t.status === "Success" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : t.status === "Pending" ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-red-50 text-red-600 border-red-200"}`}>
@@ -542,7 +542,7 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-700 mb-1 block">Amount (₹)</label>
+                <label className="text-xs font-bold text-gray-700 mb-1 block">Amount (â¹)</label>
                 <Input type="number" value={editAmount} onChange={(e) => setEditAmount(Number(e.target.value))} className="bg-gray-50 border-gray-200 text-xs" required />
               </div>
 

@@ -23,10 +23,10 @@ interface BankAccountItem {
 }
 
 const INITIAL_ACCOUNTS: BankAccountItem[] = [
-  { id: "acc1", bankName: "HDFC Bank", branch: "Patna Main Branch, Bihar", logo: "HDFC", bgColor: "bg-red-600", textColor: "text-white", holderName: "Krivexa Agritech Pvt Ltd", accountNumber: "50100432165678", maskedNumber: "**** **** 5678", ifsc: "HDFC0001234", type: "Current Account", status: "Active", isPrimary: true },
-  { id: "acc2", bankName: "State Bank of India", branch: "Gandhi Maidan Branch, Patna", logo: "SBI", bgColor: "bg-blue-700", textColor: "text-white", holderName: "Krivexa Agritech Pvt Ltd", accountNumber: "32109876542345", maskedNumber: "**** **** 2345", ifsc: "SBIN0001234", type: "Current Account", status: "Active", isPrimary: false },
-  { id: "acc3", bankName: "ICICI Bank", branch: "Boring Road Branch, Patna", logo: "ICIC", bgColor: "bg-amber-600", textColor: "text-white", holderName: "Krivexa Agritech Pvt Ltd", accountNumber: "00812345678910", maskedNumber: "**** **** 8910", ifsc: "ICIC0001234", type: "Current Account", status: "Active", isPrimary: false },
-  { id: "acc4", bankName: "Punjab National Bank", branch: "Dak Bungalow Road, Patna", logo: "PNB", bgColor: "bg-orange-600", textColor: "text-white", holderName: "Krivexa Agritech Pvt Ltd", accountNumber: "09871234567788", maskedNumber: "**** **** 7788", ifsc: "PUNB0001234", type: "Savings Account", status: "Pending", isPrimary: false },
+  { id: "acc1", bankName: "HDFC Bank", branch: "Patna Main Branch, Bihar", logo: "HDFC", bgColor: "bg-red-600", textColor: "text-white", holderName: "Krivexo Agritech Pvt Ltd", accountNumber: "50100432165678", maskedNumber: "**** **** 5678", ifsc: "HDFC0001234", type: "Current Account", status: "Active", isPrimary: true },
+  { id: "acc2", bankName: "State Bank of India", branch: "Gandhi Maidan Branch, Patna", logo: "SBI", bgColor: "bg-blue-700", textColor: "text-white", holderName: "Krivexo Agritech Pvt Ltd", accountNumber: "32109876542345", maskedNumber: "**** **** 2345", ifsc: "SBIN0001234", type: "Current Account", status: "Active", isPrimary: false },
+  { id: "acc3", bankName: "ICICI Bank", branch: "Boring Road Branch, Patna", logo: "ICIC", bgColor: "bg-amber-600", textColor: "text-white", holderName: "Krivexo Agritech Pvt Ltd", accountNumber: "00812345678910", maskedNumber: "**** **** 8910", ifsc: "ICIC0001234", type: "Current Account", status: "Active", isPrimary: false },
+  { id: "acc4", bankName: "Punjab National Bank", branch: "Dak Bungalow Road, Patna", logo: "PNB", bgColor: "bg-orange-600", textColor: "text-white", holderName: "Krivexo Agritech Pvt Ltd", accountNumber: "09871234567788", maskedNumber: "**** **** 7788", ifsc: "PUNB0001234", type: "Savings Account", status: "Pending", isPrimary: false },
 ];
 
 const EMPTY_FORM: { bankName: string; branch: string; holderName: string; accountNumber: string; confirmAccountNumber: string; ifsc: string; type: "Savings Account" | "Current Account" } = { bankName: "", branch: "", holderName: "", accountNumber: "", confirmAccountNumber: "", ifsc: "", type: "Savings Account" };
@@ -34,14 +34,14 @@ const EMPTY_FORM: { bankName: string; branch: string; holderName: string; accoun
 export default function BankAccountsView() {
   const [accounts, setAccounts] = useState<BankAccountItem[]>(() => {
     try {
-      const saved = localStorage.getItem("krivexa_bank_accounts");
+      const saved = localStorage.getItem("krivexo_bank_accounts");
       return saved ? JSON.parse(saved) : INITIAL_ACCOUNTS;
     } catch { return INITIAL_ACCOUNTS; }
   });
 
   const saveAccounts = (updated: BankAccountItem[]) => {
     setAccounts(updated);
-    try { localStorage.setItem("krivexa_bank_accounts", JSON.stringify(updated)); } catch { }
+    try { localStorage.setItem("krivexo_bank_accounts", JSON.stringify(updated)); } catch { }
   };
 
   const [activeTab, setActiveTab] = useState<"my_accounts" | "add_account" | "verification">("my_accounts");
@@ -107,7 +107,7 @@ export default function BankAccountsView() {
       setAddError("Account numbers do not match."); return;
     }
     if (addForm.accountNumber.length < 9 || addForm.accountNumber.length > 18) {
-      setAddError("Account number must be 9–18 digits."); return;
+      setAddError("Account number must be 9â18 digits."); return;
     }
     if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(addForm.ifsc)) {
       setAddError("Invalid IFSC code format (e.g. HDFC0001234)."); return;
@@ -147,7 +147,7 @@ export default function BankAccountsView() {
     if (isNaN(n) || n <= 0 || n >= 2) { toast.error("Incorrect amount. Check your bank statement."); return; }
     const updated = accounts.map(a => a.id === verifyingId ? { ...a, status: "Active" as const } : a);
     saveAccounts(updated);
-    toast.success("🎉 Account verified successfully!");
+    toast.success("ð Account verified successfully!");
     setVerifyingId(null);
     setVerifyStep("idle");
     setVerifyAmount("");
@@ -167,9 +167,9 @@ export default function BankAccountsView() {
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>›</span>
+          <span>âº</span>
           <span>Finance &amp; Wallet</span>
-          <span>›</span>
+          <span>âº</span>
           <span className="text-emerald-600 font-semibold">Bank Accounts</span>
         </div>
       </div>
@@ -195,9 +195,9 @@ export default function BankAccountsView() {
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Primary Account</p>
-            <p className="text-xs font-bold text-gray-900 mt-0.5">{primaryAcc?.bankName ?? "—"}</p>
+            <p className="text-xs font-bold text-gray-900 mt-0.5">{primaryAcc?.bankName ?? "â"}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-[10px] text-gray-500 font-mono">{primaryAcc?.maskedNumber ?? "—"}</span>
+              <span className="text-[10px] text-gray-500 font-mono">{primaryAcc?.maskedNumber ?? "â"}</span>
               {primaryAcc?.status === "Active" && (
                 <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Verified</span>
               )}
@@ -212,8 +212,8 @@ export default function BankAccountsView() {
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Total Withdrawn</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">₹ 16,58,230.00</p>
-            <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">This Month ↗ 14.3%</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ 16,58,230.00</p>
+            <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">This Month â 14.3%</p>
           </div>
         </div>
 
@@ -224,8 +224,8 @@ export default function BankAccountsView() {
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Total Refunded</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">₹ 11,13,230.00</p>
-            <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">This Month ↗ 8.7%</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ 11,13,230.00</p>
+            <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">This Month â 8.7%</p>
           </div>
         </div>
       </div>
@@ -379,7 +379,7 @@ export default function BankAccountsView() {
             </div>
             <div><label className="block text-gray-700 font-semibold mb-1">Account Holder Name *</label><input value={addForm.holderName} onChange={(e) => setAddForm(p => ({ ...p, holderName: e.target.value }))} placeholder="Legal name as per bank records" className="w-full h-9 px-3 border border-gray-200 rounded-xl" /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className="block text-gray-700 font-semibold mb-1">Account Number *</label><input type="text" inputMode="numeric" value={addForm.accountNumber} onChange={(e) => setAddForm(p => ({ ...p, accountNumber: e.target.value.replace(/\D/g, "") }))} placeholder="9–18 digit account number" className="w-full h-9 px-3 border border-gray-200 rounded-xl font-mono" /></div>
+              <div><label className="block text-gray-700 font-semibold mb-1">Account Number *</label><input type="text" inputMode="numeric" value={addForm.accountNumber} onChange={(e) => setAddForm(p => ({ ...p, accountNumber: e.target.value.replace(/\D/g, "") }))} placeholder="9â18 digit account number" className="w-full h-9 px-3 border border-gray-200 rounded-xl font-mono" /></div>
               <div><label className="block text-gray-700 font-semibold mb-1">Confirm Account Number *</label><input type="text" inputMode="numeric" value={addForm.confirmAccountNumber} onChange={(e) => setAddForm(p => ({ ...p, confirmAccountNumber: e.target.value.replace(/\D/g, "") }))} placeholder="Re-enter account number" className="w-full h-9 px-3 border border-gray-200 rounded-xl font-mono" /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -389,7 +389,7 @@ export default function BankAccountsView() {
           </div>
           <div className="p-3 rounded-xl bg-amber-50 border border-amber-100 text-amber-800 text-xs flex items-start gap-2">
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-            <p><strong>Verification required:</strong> A ₹1 penny drop will be sent to verify your account. You'll need to confirm the exact amount received.</p>
+            <p><strong>Verification required:</strong> A â¹1 penny drop will be sent to verify your account. You'll need to confirm the exact amount received.</p>
           </div>
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
             <button onClick={() => { setAddForm(EMPTY_FORM); setAddError(""); setActiveTab("my_accounts"); }} className="h-9 px-4 text-xs rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50">Cancel</button>
@@ -403,7 +403,7 @@ export default function BankAccountsView() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl space-y-4">
           <div className="flex items-center gap-2 border-b border-gray-100 pb-4">
             <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center"><ShieldCheck className="h-4 w-4 text-amber-600" /></div>
-            <div><h3 className="text-sm font-bold text-gray-900">Beneficiary Verification</h3><p className="text-[11px] text-gray-400 mt-0.5">Verify pending bank accounts using penny drop (₹1 deposit)</p></div>
+            <div><h3 className="text-sm font-bold text-gray-900">Beneficiary Verification</h3><p className="text-[11px] text-gray-400 mt-0.5">Verify pending bank accounts using penny drop (â¹1 deposit)</p></div>
           </div>
           {pendingAccounts.length === 0 ? (
             <div className="text-center py-10">
@@ -418,24 +418,24 @@ export default function BankAccountsView() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-xl ${acc.bgColor} ${acc.textColor} flex items-center justify-center font-black text-xs`}>{acc.logo}</div>
-                      <div><p className="font-bold text-gray-900 text-xs">{acc.bankName}</p><p className="text-[10px] text-gray-500">{acc.maskedNumber} · {acc.type}</p></div>
+                      <div><p className="font-bold text-gray-900 text-xs">{acc.bankName}</p><p className="text-[10px] text-gray-500">{acc.maskedNumber} Â· {acc.type}</p></div>
                     </div>
                     <span className="text-[9px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-full">Pending</span>
                   </div>
                   {verifyingId === acc.id ? (
                     <div className="space-y-2">
                       {verifyStep === "sending" && (
-                        <div className="flex items-center gap-2 text-xs text-amber-800"><div className="w-4 h-4 rounded-full border-2 border-amber-600 border-t-transparent animate-spin" /> Sending ₹1 penny drop...</div>
+                        <div className="flex items-center gap-2 text-xs text-amber-800"><div className="w-4 h-4 rounded-full border-2 border-amber-600 border-t-transparent animate-spin" /> Sending â¹1 penny drop...</div>
                       )}
                       {verifyStep === "checking" && (
                         <div className="space-y-2">
-                          <p className="text-xs text-gray-700">✅ ₹1 sent! Enter the exact amount received in your bank statement:</p>
+                          <p className="text-xs text-gray-700">â â¹1 sent! Enter the exact amount received in your bank statement:</p>
                           <div className="flex items-center gap-2">
                             <input type="number" step="0.01" value={verifyAmount} onChange={(e) => setVerifyAmount(e.target.value)} placeholder="e.g. 0.53" className="h-9 px-3 border border-gray-200 rounded-xl text-xs w-32 font-mono" />
                             <button onClick={handleConfirmVerify} className="h-9 px-4 text-xs rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">Verify</button>
                             <button onClick={() => { setVerifyingId(null); setVerifyStep("idle"); }} className="h-9 px-3 text-xs rounded-xl border border-gray-200 text-gray-500">Cancel</button>
                           </div>
-                          <p className="text-[10px] text-gray-400">Hint: The amount is between ₹0.01 and ₹1.00</p>
+                          <p className="text-[10px] text-gray-400">Hint: The amount is between â¹0.01 and â¹1.00</p>
                         </div>
                       )}
                     </div>
@@ -555,7 +555,7 @@ export default function BankAccountsView() {
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col items-center text-center justify-between">
           <div>
             <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center text-3xl mx-auto mb-2">
-              👨‍💼
+              ð¨âð¼
             </div>
             <h4 className="text-xs font-bold text-gray-800">Need Help?</h4>
             <p className="text-[11px] text-gray-500 mt-1">
@@ -627,7 +627,7 @@ export default function BankAccountsView() {
             <div className="space-y-3 text-xs">
               <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800">
                 <p className="font-bold">Support Hours</p>
-                <p>Monday – Saturday, 9:00 AM – 7:00 PM IST</p>
+                <p>Monday â Saturday, 9:00 AM â 7:00 PM IST</p>
               </div>
               <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 border border-gray-100">
                 <Phone className="h-4 w-4 text-emerald-600" />

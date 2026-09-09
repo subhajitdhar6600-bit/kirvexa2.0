@@ -24,12 +24,12 @@ const PACKING_TYPES = ["Pack", "Bottle", "Bag", "Box", "Can", "Pouch", "Drum"] a
 
 const packingEmoji = (p: string) => {
   switch (p) {
-    case "Bottle": return "🍾";
-    case "Bag": return "🛍️";
-    case "Box": return "📦";
-    case "Can": return "🥫";
-    case "Drum": return "🪣";
-    default: return "📦";
+    case "Bottle": return "ð¾";
+    case "Bag": return "ðï¸";
+    case "Box": return "ð¦";
+    case "Can": return "ð¥«";
+    case "Drum": return "ðª£";
+    default: return "ð¦";
   }
 };
 
@@ -121,7 +121,7 @@ export default function AddNewProductForm({
     );
   };
 
-  // ── Image helpers ──────────────────────────────────────────────────────────
+  // ââ Image helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   const readFileAsDataUrl = (file: File, cb: (url: string) => void) => {
     const reader = new FileReader();
     reader.onload = () => { if (typeof reader.result === "string") cb(reader.result); };
@@ -175,14 +175,14 @@ export default function AddNewProductForm({
     if (onSuccess) {
       onSuccess(payload);
     } else {
-      toast.success(`🎉 "${productName}" successfully published to catalog!`);
+      toast.success(`ð "${productName}" successfully published to catalog!`);
     }
   };
 
   return (
     <div className="w-full bg-[#f0f4f8] text-gray-800 font-sans min-h-screen">
 
-      {/* ── Top Header ─────────────────────────────────────────────────── */}
+      {/* ââ Top Header âââââââââââââââââââââââââââââââââââââââââââââââââââ */}
       <div className="bg-white border-b border-gray-200 px-5 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 sticky top-0 z-20 shadow-sm">
         <div>
           <h1 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
@@ -210,7 +210,7 @@ export default function AddNewProductForm({
         </div>
       </div>
 
-      {/* ── Step Breadcrumb ─────────────────────────────────────────────── */}
+      {/* ââ Step Breadcrumb âââââââââââââââââââââââââââââââââââââââââââââââ */}
       <div className="bg-white border-b border-gray-200 px-5 py-3">
         <div className="flex items-center gap-1 overflow-x-auto">
           {[
@@ -240,15 +240,15 @@ export default function AddNewProductForm({
         </div>
       </div>
 
-      {/* ── Main Content ────────────────────────────────────────────────── */}
+      {/* ââ Main Content ââââââââââââââââââââââââââââââââââââââââââââââââââ */}
       <div className="p-4 md:p-6 space-y-5 max-w-7xl mx-auto">
 
-        {/* ─ Row 1: Product Details + Variants ─ */}
+        {/* â Row 1: Product Details + Variants â */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
-          {/* ╔══════════════════════════════╗
-              ║   Section 1: Product Details ║
-              ╚══════════════════════════════╝ */}
+          {/* ââââââââââââââââââââââââââââââââ
+              â   Section 1: Product Details â
+              ââââââââââââââââââââââââââââââââ */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="bg-emerald-600 px-5 py-3 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-white/20 text-white text-xs font-black flex items-center justify-center">1</div>
@@ -276,13 +276,13 @@ export default function AddNewProductForm({
                   <label className="block text-xs font-bold text-gray-700 mb-1.5">Category <span className="text-red-500">*</span></label>
                   <select value={category} onChange={e => setCategory(e.target.value)}
                     className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl px-3 h-10 outline-none focus:border-emerald-500 focus:bg-white cursor-pointer font-medium">
-                    <option value="Fertilizer / Plant Nutrition">🌾 Fertilizer / Plant Nutrition</option>
-                    <option value="Seeds & Hybrids">🌱 Seeds & Hybrids</option>
-                    <option value="Pesticides / Insecticides">🧪 Pesticides / Insecticides</option>
-                    <option value="Fungicides & Herbicides">🍂 Fungicides & Herbicides</option>
-                    <option value="Farm Equipment / Tools">🚜 Farm Equipment / Tools</option>
-                    <option value="Organic Bio-Fertilizer">🌿 Organic Bio-Fertilizer</option>
-                    <option value="Animal Feed & Veterinary">🐄 Animal Feed & Veterinary</option>
+                    <option value="Fertilizer / Plant Nutrition">ð¾ Fertilizer / Plant Nutrition</option>
+                    <option value="Seeds & Hybrids">ð± Seeds & Hybrids</option>
+                    <option value="Pesticides / Insecticides">ð§ª Pesticides / Insecticides</option>
+                    <option value="Fungicides & Herbicides">ð Fungicides & Herbicides</option>
+                    <option value="Farm Equipment / Tools">ð Farm Equipment / Tools</option>
+                    <option value="Organic Bio-Fertilizer">ð¿ Organic Bio-Fertilizer</option>
+                    <option value="Animal Feed & Veterinary">ð Animal Feed & Veterinary</option>
                   </select>
                 </div>
                 <div>
@@ -296,7 +296,7 @@ export default function AddNewProductForm({
                     <option>UPL Limited</option>
                     <option>Dhanuka Agritech</option>
                     <option>Tata Rallis</option>
-                    <option>Krivexa Agro Brand</option>
+                    <option>Krivexo Agro Brand</option>
                   </select>
                 </div>
               </div>
@@ -346,9 +346,9 @@ export default function AddNewProductForm({
             </div>
           </div>
 
-          {/* ╔══════════════════════════════════════╗
-              ║  Section 2: Variants (Size / Weight) ║
-              ╚══════════════════════════════════════╝ */}
+          {/* ââââââââââââââââââââââââââââââââââââââââ
+              â  Section 2: Variants (Size / Weight) â
+              ââââââââââââââââââââââââââââââââââââââââ */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="bg-blue-600 px-5 py-3 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-white/20 text-white text-xs font-black flex items-center justify-center">2</div>
@@ -371,8 +371,8 @@ export default function AddNewProductForm({
                 <div className="text-[10px] font-bold text-blue-500 text-center">Img</div>
                 <div className="text-[10px] font-bold text-gray-500 uppercase">Size / Weight</div>
                 <div className="text-[10px] font-bold text-gray-500 uppercase">Packing</div>
-                <div className="text-[10px] font-bold text-gray-500 uppercase">MRP ₹</div>
-                <div className="text-[10px] font-bold text-blue-600 uppercase">Sale ₹</div>
+                <div className="text-[10px] font-bold text-gray-500 uppercase">MRP â¹</div>
+                <div className="text-[10px] font-bold text-blue-600 uppercase">Sale â¹</div>
                 <div className="text-[10px] font-bold text-gray-500 uppercase">Stock</div>
                 <div className="text-[10px] font-bold text-gray-400 uppercase text-center">Del</div>
               </div>
@@ -457,13 +457,13 @@ export default function AddNewProductForm({
                       </button>
                     </div>
 
-                    {/* ── Variant Image Panel (expandable) ── */}
+                    {/* ââ Variant Image Panel (expandable) ââ */}
                     {expandedVariantImg === v.id && (
                       <div className="border-t border-blue-100 bg-blue-50/40 px-3 py-3 animate-in slide-in-from-top-1 duration-150">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
                             <ImageIcon className="h-3.5 w-3.5 text-blue-600" />
-                            Variant Image — <span className="text-blue-700 font-black">{v.sizeWeight}</span>
+                            Variant Image â <span className="text-blue-700 font-black">{v.sizeWeight}</span>
                           </span>
                           {v.variantImageUrl && (
                             <button
@@ -501,11 +501,11 @@ export default function AddNewProductForm({
                             />
                             <UploadCloud className="h-6 w-6 text-blue-500" />
                             <div className="text-[11px] font-bold text-blue-700">Upload Variant Image</div>
-                            <div className="text-[10px] text-gray-500">JPG, PNG, WEBP · Max 5MB</div>
+                            <div className="text-[10px] text-gray-500">JPG, PNG, WEBP Â· Max 5MB</div>
                           </label>
                         </div>
                         <p className="text-[10px] text-gray-500 mt-2">
-                          ℹ️ Yeh image sirf is variant ({v.sizeWeight}) ke liye hogi. Agar upload nahi karenge to main product image use hogi.
+                          â¹ï¸ Yeh image sirf is variant ({v.sizeWeight}) ke liye hogi. Agar upload nahi karenge to main product image use hogi.
                         </p>
                       </div>
                     )}
@@ -518,7 +518,7 @@ export default function AddNewProductForm({
                     >
                       {expandedVariantImg === v.id
                         ? <><ChevronUp className="h-3 w-3" /> Hide Preview</>
-                        : <><ChevronDown className="h-3 w-3" /> {v.variantImageUrl ? "✅ Image Uploaded · View / Remove" : "🔍 Preview & Image Info"}</>
+                        : <><ChevronDown className="h-3 w-3" /> {v.variantImageUrl ? "â Image Uploaded Â· View / Remove" : "ð Preview & Image Info"}</>
                       }
                     </button>
                   </div>
@@ -542,12 +542,12 @@ export default function AddNewProductForm({
           </div>
         </div>
 
-        {/* ─ Row 2: Additional Info + Preview ─ */}
+        {/* â Row 2: Additional Info + Preview â */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
-          {/* ╔══════════════════════════════════╗
-              ║  Section 3: Additional Info       ║
-              ╚══════════════════════════════════╝ */}
+          {/* ââââââââââââââââââââââââââââââââââââ
+              â  Section 3: Additional Info       â
+              ââââââââââââââââââââââââââââââââââââ */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="bg-violet-600 px-5 py-3 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-white/20 text-white text-xs font-black flex items-center justify-center">3</div>
@@ -620,9 +620,9 @@ export default function AddNewProductForm({
             </div>
           </div>
 
-          {/* ╔══════════════════════════════╗
-              ║  Section 4: Preview & Publish ║
-              ╚══════════════════════════════╝ */}
+          {/* ââââââââââââââââââââââââââââââââ
+              â  Section 4: Preview & Publish â
+              ââââââââââââââââââââââââââââââââ */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div className="bg-gray-800 px-5 py-3 flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-white/20 text-white text-xs font-black flex items-center justify-center">4</div>
@@ -636,13 +636,13 @@ export default function AddNewProductForm({
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-base font-black text-gray-900 truncate">{productName || "Product Name"}</h4>
-                    <p className="text-[11px] text-gray-500 mt-0.5">{brand} · {category}</p>
-                    <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{description.slice(0, 80)}{description.length > 80 ? "…" : ""}</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">{brand} Â· {category}</p>
+                    <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{description.slice(0, 80)}{description.length > 80 ? "â¦" : ""}</p>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-[10px] font-bold px-2 py-0">{variants.length} Variants</Badge>
                       {isActive
-                        ? <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] font-bold px-2 py-0">🟢 Live</Badge>
-                        : <Badge className="bg-gray-100 text-gray-500 border-gray-200 text-[10px] font-bold px-2 py-0">⚪ Draft</Badge>
+                        ? <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] font-bold px-2 py-0">ð¢ Live</Badge>
+                        : <Badge className="bg-gray-100 text-gray-500 border-gray-200 text-[10px] font-bold px-2 py-0">âª Draft</Badge>
                       }
                     </div>
                   </div>
@@ -659,11 +659,11 @@ export default function AddNewProductForm({
                         }
                         <span className="font-semibold text-gray-700">{v.sizeWeight}</span>
                         <span className="text-gray-400">{v.packingType}</span>
-                        {v.variantImageUrl && <span className="text-[10px] text-blue-600 font-bold">📷</span>}
+                        {v.variantImageUrl && <span className="text-[10px] text-blue-600 font-bold">ð·</span>}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-400 line-through text-[10px]">₹{v.mrp}</span>
-                        <span className="font-black text-emerald-700">₹{v.salePrice}</span>
+                        <span className="text-gray-400 line-through text-[10px]">â¹{v.mrp}</span>
+                        <span className="font-black text-emerald-700">â¹{v.salePrice}</span>
                         <span className="text-gray-400 text-[10px]">Qty: {v.stockQty}</span>
                       </div>
                     </div>
@@ -682,7 +682,7 @@ export default function AddNewProductForm({
                 <Button type="button" variant="outline"
                   onClick={() => toast.success("Draft saved successfully!")}
                   className="h-10 px-5 rounded-xl text-xs font-bold text-violet-700 bg-violet-50 border-violet-200 hover:bg-violet-100 cursor-pointer">
-                  💾 Save as Draft
+                  ð¾ Save as Draft
                 </Button>
                 <Button type="button" onClick={handlePublish}
                   className="h-10 px-6 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/25 gap-2 cursor-pointer">

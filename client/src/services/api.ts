@@ -22,7 +22,7 @@ export const seedMongoDatabase = async () => {
   }
 };
 
-// ─── In-memory request cache (30 second TTL for GET requests) ─────────────────
+// âââ In-memory request cache (30 second TTL for GET requests) âââââââââââââââââ
 const CACHE_TTL_MS = 30_000; // 30 seconds
 interface CacheEntry { data: any; expiresAt: number; }
 const requestCache = new Map<string, CacheEntry>();
@@ -47,7 +47,7 @@ function invalidateCache(prefix: string): void {
 
 // Expose manual cache clear (useful after mutations from outside api.ts)
 export const clearApiCache = () => requestCache.clear();
-// ─────────────────────────────────────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 // Generic API caller with in-memory GET cache + timeout controller
 async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T | null> {
@@ -62,7 +62,7 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T |
 
   // On write operations, bust the cache for this resource type
   if (!isGet) {
-    // Extract resource prefix e.g. "/users/123/approve" → "/users"
+    // Extract resource prefix e.g. "/users/123/approve" â "/users"
     const parts = endpoint.split('/');
     if (parts.length >= 2) invalidateCache(`/${parts[1]}`);
   }
@@ -99,8 +99,10 @@ export const api = {
   seedDatabase: seedMongoDatabase,
 
   // Users & Authentication
-  loginAuth: (credentials: { phone?: string; email?: string; password?: string }) =>
+  loginAuth: (credentials: { userId?: string; phone?: string; email?: string; password?: string }) =>
     apiFetch<any>('/auth/login', { method: 'POST', body: JSON.stringify(credentials) }),
+  checkUserId: (userId: string) =>
+    apiFetch<{ available: boolean; userId: string; message?: string }>(`/auth/check-userid/${encodeURIComponent(userId)}`),
   registerAuth: (userData: any) =>
     apiFetch<any>('/auth/register', { method: 'POST', body: JSON.stringify(userData) }),
   sendEmailCode: (email: string) =>
@@ -117,6 +119,7 @@ export const api = {
     }),
   getUsers: () => apiFetch<any[]>('/users'),
   getUserById: (id: string) => apiFetch<any>(`/users?id=${encodeURIComponent(id)}`),
+  getUserByUserId: (userId: string) => apiFetch<any>(`/users?userId=${encodeURIComponent(userId)}`),
   getUserByPhone: (phone: string) => apiFetch<any>(`/users?phone=${encodeURIComponent(phone)}`),
   saveUser: (user: any) => apiFetch<any>('/users', { method: 'POST', body: JSON.stringify(user) }),
   updateUser: (id: string, updated: any) => apiFetch<any>(`/users/${id}`, { method: 'PUT', body: JSON.stringify(updated) }),

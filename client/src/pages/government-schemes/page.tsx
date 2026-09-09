@@ -11,9 +11,9 @@ const CATEGORIES = ["All", "Income Support", "Insurance", "Credit & Loans", "Irr
 const SCHEMES = [
   {
     name: "PM Kisan Samman Nidhi", category: "Income Support", ministry: "Ministry of Agriculture",
-    benefit: "₹6,000 per year (₹2,000 every 4 months)", eligibility: "Small & marginal farmers with less than 2 hectares land",
+    benefit: "â¹6,000 per year (â¹2,000 every 4 months)", eligibility: "Small & marginal farmers with less than 2 hectares land",
     deadline: "Ongoing", status: "Active", link: "https://pmkisan.gov.in",
-    desc: "Direct income support scheme for farmers. ₹6000 per year in 3 equal installments transferred directly to bank account.",
+    desc: "Direct income support scheme for farmers. â¹6000 per year in 3 equal installments transferred directly to bank account.",
     color: "bg-green-500/10 border-green-500/20",
   },
   {
@@ -25,7 +25,7 @@ const SCHEMES = [
   },
   {
     name: "Kisan Credit Card (KCC)", category: "Credit & Loans", ministry: "Ministry of Finance",
-    benefit: "Short-term credit up to ₹3 Lakh at 4% interest", eligibility: "All farmers, sharecroppers & tenant farmers",
+    benefit: "Short-term credit up to â¹3 Lakh at 4% interest", eligibility: "All farmers, sharecroppers & tenant farmers",
     deadline: "Ongoing", status: "Active", link: "#",
     desc: "Flexible credit facility for farmers to meet their agricultural and allied activities requirements without multiple bank visits.",
     color: "bg-yellow-500/10 border-yellow-500/20",
@@ -39,7 +39,7 @@ const SCHEMES = [
   },
   {
     name: "Sub-Mission on Agricultural Mechanization", category: "Technology", ministry: "Ministry of Agriculture",
-    benefit: "40–50% subsidy on farm machinery and equipment", eligibility: "All farmers; small & marginal get higher subsidy",
+    benefit: "40â50% subsidy on farm machinery and equipment", eligibility: "All farmers; small & marginal get higher subsidy",
     deadline: "Ongoing", status: "Active", link: "#",
     desc: "Promotes farm mechanization by making modern farm equipment accessible to small farmers through custom hiring centers.",
     color: "bg-purple-500/10 border-purple-500/20",
@@ -60,9 +60,9 @@ const SCHEMES = [
   },
   {
     name: "PM Kisan Mandhan Yojana", category: "Income Support", ministry: "Ministry of Agriculture",
-    benefit: "₹3,000/month pension after age 60", eligibility: "Small & marginal farmers aged 18–40 years",
+    benefit: "â¹3,000/month pension after age 60", eligibility: "Small & marginal farmers aged 18â40 years",
     deadline: "Ongoing", status: "Active", link: "#",
-    desc: "Old Age Pension scheme for farmers. Farmers contribute ₹55–200/month and government contributes equal amount for pension.",
+    desc: "Old Age Pension scheme for farmers. Farmers contribute â¹55â200/month and government contributes equal amount for pension.",
     color: "bg-rose-500/10 border-rose-500/20",
   },
 ];

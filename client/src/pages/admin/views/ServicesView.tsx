@@ -56,7 +56,7 @@ const RECENT_REQUESTS = [
   {
     id: "SRV250150001", service: "Tractor Plowing",
     farmer: "Ramesh Kumar", farmerId: "9876543210",
-    provider: "Krivexa Tractor Service", status: "In Progress",
+    provider: "Krivexo Tractor Service", status: "In Progress",
     date: "25 May 2025", time: "11:30 AM",
   },
   {
@@ -68,7 +68,7 @@ const RECENT_REQUESTS = [
   {
     id: "SRV250150003", service: "Soil Testing",
     farmer: "Anita Devi", farmerId: "9988775690",
-    provider: "Krivexa Soil Lab", status: "Completed",
+    provider: "Krivexo Soil Lab", status: "Completed",
     date: "24 May 2025", time: "02:00 PM",
   },
   {
@@ -86,9 +86,9 @@ const RECENT_REQUESTS = [
 ];
 
 const TOP_PROVIDERS = [
-  { name: "Krivexa Tractor Service", rating: 4.8, reviews: 356, jobs: 245, avatar: "KT" },
+  { name: "Krivexo Tractor Service", rating: 4.8, reviews: 356, jobs: 245, avatar: "KT" },
   { name: "Green Field Labour", rating: 4.6, reviews: 189, jobs: 201, avatar: "GF" },
-  { name: "Krivexa Soil Lab", rating: 4.7, reviews: 194, jobs: 178, avatar: "KS" },
+  { name: "Krivexo Soil Lab", rating: 4.7, reviews: 194, jobs: 178, avatar: "KS" },
   { name: "Agro Care Experts", rating: 4.8, reviews: 124, jobs: 142, avatar: "AC" },
   { name: "Harvest Pro Services", rating: 4.6, reviews: 466, jobs: 126, avatar: "HP" },
 ];
@@ -121,7 +121,7 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
       id: l.id || `SRV${250150000 + idx}`,
       service: `${l.labourType || "Labour"} Service`,
       farmer: l.userName || "Farmer",
-      farmerId: l.phone || "—",
+      farmerId: l.phone || "â",
       provider: "Assigned Labour Team",
       status: l.status === "assigned" ? "Completed" : l.status === "pending" ? "Pending" : "In Progress",
       date: l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "Today",
@@ -131,7 +131,7 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
       id: m.id || `SRV${250160000 + idx}`,
       service: `${m.machineryType || "Machinery"} Service`,
       farmer: m.userName || "Farmer",
-      farmerId: m.phone || "—",
+      farmerId: m.phone || "â",
       provider: m.allottedMachineDetails || "Agri Machinery",
       status: m.status === "allotted" ? "Completed" : m.status === "pending" ? "Pending" : "In Progress",
       date: m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "Today",
@@ -468,7 +468,7 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
-                👨‍💼
+                ð¨âð¼
               </div>
               <div className="flex-1">
                 <p className="text-xs font-bold text-gray-800 mb-1">Need Help?</p>
@@ -487,7 +487,7 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
 
       {/* Footer */}
       <div className="text-center text-[11px] text-gray-400 pb-2">
-        © 2025 Krivexa. All rights reserved. &nbsp; Made with care for Farmers 🌿
+        Â© 2025 Krivexo. All rights reserved. &nbsp; Made with care for Farmers ð¿
       </div>
     </div>
   );

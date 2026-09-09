@@ -138,18 +138,18 @@ export default function NotificationsManagementView() {
   const getCatStyle = (cat?: string) => {
     const c = (cat || "").toLowerCase();
     if (c === "orders") {
-      return { icon: "📦", iconBg: "bg-amber-50 text-amber-600", label: "Orders", badgeColor: "bg-amber-50 text-amber-700 border-amber-200" };
+      return { icon: "ð¦", iconBg: "bg-amber-50 text-amber-600", label: "Orders", badgeColor: "bg-amber-50 text-amber-700 border-amber-200" };
     }
     if (c === "wallet" || c === "finance") {
-      return { icon: "💳", iconBg: "bg-blue-50 text-blue-600", label: "Finance", badgeColor: "bg-blue-50 text-blue-700 border-blue-200" };
+      return { icon: "ð³", iconBg: "bg-blue-50 text-blue-600", label: "Finance", badgeColor: "bg-blue-50 text-blue-700 border-blue-200" };
     }
     if (c === "services" || c === "machinery" || c === "labour" || c === "kcc") {
-      return { icon: "🚜", iconBg: "bg-purple-50 text-purple-600", label: "Services", badgeColor: "bg-purple-50 text-purple-700 border-purple-200" };
+      return { icon: "ð", iconBg: "bg-purple-50 text-purple-600", label: "Services", badgeColor: "bg-purple-50 text-purple-700 border-purple-200" };
     }
     if (c === "crops" || c === "mandi" || c === "promotion") {
-      return { icon: "🌾", iconBg: "bg-emerald-50 text-emerald-600", label: "Promotions", badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+      return { icon: "ð¾", iconBg: "bg-emerald-50 text-emerald-600", label: "Promotions", badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200" };
     }
-    return { icon: "🛡️", iconBg: "bg-teal-50 text-teal-600", label: "System", badgeColor: "bg-teal-50 text-teal-700 border-teal-200" };
+    return { icon: "ð¡ï¸", iconBg: "bg-teal-50 text-teal-600", label: "System", badgeColor: "bg-teal-50 text-teal-700 border-teal-200" };
   };
 
   // Actions
@@ -254,7 +254,7 @@ export default function NotificationsManagementView() {
           </button>
           <div className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400">
             <span>Dashboard</span>
-            <span>›</span>
+            <span>âº</span>
             <span className="text-emerald-600 font-semibold">Notifications</span>
           </div>
         </div>
@@ -389,7 +389,7 @@ export default function NotificationsManagementView() {
           <div className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm space-y-5">
             {groupedNotifications.length === 0 ? (
               <div className="py-16 text-center text-gray-400 space-y-2">
-                <div className="text-3xl">📭</div>
+                <div className="text-3xl">ð­</div>
                 <p className="text-sm font-bold text-gray-700">No notifications found</p>
                 <p className="text-xs text-gray-400 max-w-sm mx-auto">
                   {searchQuery ? `No alerts match "${searchQuery}".` : "There are currently no notifications matching this category."}

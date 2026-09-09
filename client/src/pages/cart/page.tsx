@@ -12,7 +12,7 @@ import { api } from "@/services/api.ts";
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { cart, removeFromCart, updateCartQuantity, clearCart, checkoutCart, orders, user, kccDetails, checkKccPermission, isKccIssued, setIsKccAppModalOpen } = useApp();
+  const { cart, removeFromCart, updateCartQuantity, clearCart, checkoutCart, orders, user, kccDetails, checkKccPermission, isKccIssued, setIsKccAppModalOpen, walletBalance } = useApp();
 
   const [activeTab, setActiveTab] = useState<"cart" | "orders">("cart");
   const [paymentMethod, setPaymentMethod] = useState<"kcc" | "upi" | "cod" | "wallet">("kcc");
@@ -128,11 +128,11 @@ export default function CartPage() {
             <div className="mb-6 bg-linear-to-r from-amber-950/90 via-amber-900/60 to-black border-2 border-amber-500/70 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400 font-bold">
-                  🔒
+                  ð
                 </div>
                 <div>
                   <h3 className="text-base font-black text-amber-200">
-                    Cart Checkout Gated — Apply for KCC Now
+                    Cart Checkout Gated â Apply for KCC Now
                   </h3>
                   <p className="text-xs text-gray-300 max-w-2xl">
                     Kisan Credit Card (KCC) account verification is required to place order and checkout. Apply now to issue your card!
@@ -143,7 +143,7 @@ export default function CartPage() {
                 onClick={() => setIsKccAppModalOpen(true)}
                 className="bg-amber-500 hover:bg-amber-400 text-black font-black text-xs py-2.5 px-6 rounded-xl shrink-0 shadow-md animate-pulse cursor-pointer border border-amber-300"
               >
-                Apply for KCC Now →
+                Apply for KCC Now â
               </Button>
             </div>
           )}
@@ -246,7 +246,7 @@ export default function CartPage() {
                               <p className="text-[11px] text-amber-400 font-medium">Listed by: {item.sellerName}</p>
                             )}
                             <p className="text-xs text-gray-400 mt-0.5">
-                              ₹{item.price} {item.unit ? `/ ${item.unit}` : ""}
+                              â¹{item.price} {item.unit ? `/ ${item.unit}` : ""}
                             </p>
                           </div>
                         </div>
@@ -275,7 +275,7 @@ export default function CartPage() {
                           {/* Subtotal */}
                           <div className="text-right">
                             <div className="text-base font-black text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                              ₹{item.price * item.quantity}
+                              â¹{item.price * item.quantity}
                             </div>
                             <button
                               onClick={() => removeFromCart(item.id)}
@@ -346,7 +346,7 @@ export default function CartPage() {
                           </div>
                         </div>
 
-                        {/* Krivexa Wallet Option */}
+                        {/* Krivexo Wallet Option */}
                         <div
                           onClick={() => setPaymentMethod("wallet")}
                           className={`p-3 rounded-2xl border cursor-pointer transition-all flex items-center gap-3 ${
@@ -359,8 +359,20 @@ export default function CartPage() {
                             <Wallet className="h-4 w-4" />
                           </div>
                           <div className="flex-1">
-                            <div className="text-xs font-bold text-white">Krivexa Kisan Wallet</div>
-                            <div className="text-[10px] text-gray-400 mt-0.5">Direct debit from wallet balance</div>
+                            <div className="text-xs font-bold text-white flex items-center gap-2">
+                              Krivexo Kisan Wallet
+                              <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                walletBalance >= grandTotal ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+                              }`}>
+                                â¹{walletBalance.toLocaleString("en-IN")}
+                              </span>
+                            </div>
+                            <div className="text-[10px] mt-0.5">
+                              {walletBalance >= grandTotal
+                                ? <span className="text-gray-400">Direct debit from wallet balance</span>
+                                : <span className="text-red-400 font-semibold">â  Insufficient balance â add â¹{(grandTotal - walletBalance).toLocaleString("en-IN")} more</span>
+                              }
+                            </div>
                           </div>
                         </div>
 
@@ -406,18 +418,18 @@ export default function CartPage() {
                     <div className="space-y-2 text-xs pt-3 border-t border-white/10">
                       <div className="flex justify-between text-gray-400">
                         <span>Items Subtotal</span>
-                        <span className="font-semibold text-white">₹{subtotal}</span>
+                        <span className="font-semibold text-white">â¹{subtotal}</span>
                       </div>
                       <div className="flex justify-between text-gray-400">
                         <span>Delivery Fee</span>
                         <span className="font-semibold text-emerald-400">
-                          {deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}
+                          {deliveryFee === 0 ? "FREE" : `â¹${deliveryFee}`}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm font-bold text-white pt-2 border-t border-white/10">
                         <span>Total Payable</span>
                         <span className="text-xl font-black text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                          ₹{grandTotal}
+                          â¹{grandTotal}
                         </span>
                       </div>
                     </div>
@@ -428,7 +440,7 @@ export default function CartPage() {
                       disabled={isSubmitting}
                       className="w-full bg-primary hover:bg-primary/90 text-black font-black py-3 rounded-xl text-sm transition-all cursor-pointer shadow-lg shadow-primary/20"
                     >
-                      {isSubmitting ? "Processing Order..." : `Checkout Now (₹${grandTotal})`}
+                      {isSubmitting ? "Processing Order..." : `Checkout Now (â¹${grandTotal})`}
                     </Button>
                   </div>
                 </div>
@@ -469,7 +481,7 @@ export default function CartPage() {
                     onClick={() => navigate("/agri-market")}
                     className="bg-primary hover:bg-primary/90 text-black text-xs font-bold px-4 py-2 rounded-xl cursor-pointer"
                   >
-                    Browse Market →
+                    Browse Market â
                   </Button>
                 </div>
               ) : (
@@ -500,7 +512,7 @@ export default function CartPage() {
                               <span className="font-semibold">{it.quantity || 1}x</span>
                               <span>{it.name || "Agricultural Item"}</span>
                             </div>
-                            <span className="font-mono text-gray-300">₹{((it.price || 0) * (it.quantity || 1)).toLocaleString("en-IN")}</span>
+                            <span className="font-mono text-gray-300">â¹{((it.price || 0) * (it.quantity || 1)).toLocaleString("en-IN")}</span>
                           </div>
                         ))}
                       </div>
@@ -510,7 +522,7 @@ export default function CartPage() {
                           Delivery Address: {ord.deliveryAddress || (ord.shippingAddress?.addressLine ? ord.shippingAddress.addressLine : "Registered Farm Address")}
                         </span>
                         <span className="font-black text-sm text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                          Total: ₹{(ord.totalAmount || ord.amount || 0).toLocaleString("en-IN")}
+                          Total: â¹{(ord.totalAmount || ord.amount || 0).toLocaleString("en-IN")}
                         </span>
                       </div>
                     </div>

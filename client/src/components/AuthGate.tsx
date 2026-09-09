@@ -15,7 +15,7 @@ export default function AuthGate({ children }: AuthGateProps) {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      toast.info("Please login or register to explore and use Krivexa platform features.");
+      toast.info("Please login or register to explore and use Krivexo platform features.");
     }
   }, [isAuthenticated]);
 

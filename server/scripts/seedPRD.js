@@ -264,7 +264,7 @@ export const seedPRDData = async () => {
   console.log('[Seed] New unverified Farmer created: newfarmer@farma.com / Farmer@123 (KCC: NOT_APPLIED)');
 
   console.log('=======================================================');
-  console.log('✅ PRD Database Seed Completed Successfully!');
+  console.log('â PRD Database Seed Completed Successfully!');
   console.log('=======================================================');
 };
 

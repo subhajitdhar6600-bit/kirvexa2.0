@@ -70,8 +70,8 @@ export default function RolesView({ roles: propRoles, setRoles }: RolesViewProps
           <p className="text-xs text-gray-500 mt-0.5">Manage your platform roles and set permissions for different modules</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span>›</span>
-          <span>Users Management</span><span>›</span>
+          <span>Dashboard</span><span>âº</span>
+          <span>Users Management</span><span>âº</span>
           <span className="text-emerald-600 font-medium">Roles & Permissions</span>
         </div>
       </div>
@@ -248,7 +248,7 @@ export default function RolesView({ roles: propRoles, setRoles }: RolesViewProps
       </div>
 
       <div className="text-center text-[11px] text-gray-400">
-        © 2026 Farma. All rights reserved. &nbsp; Made with pure SVG icons for Bihar Farmers
+        Â© 2026 Farma. All rights reserved. &nbsp; Made with pure SVG icons for Bihar Farmers
       </div>
     </div>
   );

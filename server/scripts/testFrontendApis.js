@@ -2,7 +2,7 @@ const BASE_URL = 'http://localhost:5000/api';
 
 async function testAllFrontendApis() {
   console.log('=======================================================');
-  console.log('🔍 Testing All Frontend API Integrations...');
+  console.log('ð Testing All Frontend API Integrations...');
   console.log('=======================================================');
 
   let passed = 0;
@@ -10,10 +10,10 @@ async function testAllFrontendApis() {
 
   function assert(condition, message) {
     if (condition) {
-      console.log(`  ✅ ${message}`);
+      console.log(`  â ${message}`);
       passed++;
     } else {
-      console.error(`  ❌ ${message}`);
+      console.error(`  â ${message}`);
       failed++;
     }
   }
@@ -194,7 +194,7 @@ async function testAllFrontendApis() {
     assert(cardRes.status === 200, 'api.checkFarmerCardBalance() -> success');
 
     console.log('=======================================================');
-    console.log(`🎯 FRONTEND API TEST RUN: ${passed} passed, ${failed} failed`);
+    console.log(`ð¯ FRONTEND API TEST RUN: ${passed} passed, ${failed} failed`);
     console.log('=======================================================');
 
     if (failed > 0) process.exit(1);

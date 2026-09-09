@@ -34,8 +34,8 @@ import SupportTicketsView from "./views/SupportTicketsView";
 import CmsManagementView from "./views/CmsManagementView";
 import KisanCardView from "./views/KisanCardView";
 import AllCardsView from "./views/AllCardsView";
-import KrivexaKisanCardOverviewView from "./views/KrivexaKisanCardOverviewView";
-import KrivexaCardsManagementView from "./views/KrivexaCardsManagementView";
+import KrivexoKisanCardOverviewView from "./views/KrivexoKisanCardOverviewView";
+import KrivexoCardsManagementView from "./views/KrivexoCardsManagementView";
 import CardRequestsView from "./views/CardRequestsView";
 import CardTypesView from "./views/CardTypesView";
 import BenefitsOffersView from "./views/BenefitsOffersView";
@@ -55,8 +55,8 @@ import { useApp } from "@/context/AppContext.tsx";
 import { api } from "@/services/api.ts";
 
 const EMPTY_SETTINGS: AdminSettings = {
-  platformName: "Krivexa",
-  supportEmail: "support@krivexa.in",
+  platformName: "Krivexo",
+  supportEmail: "support@krivexo.in",
   phone: "+91 9876543210",
   address: "Patna, Bihar - 800001",
   timezone: "Asia/Kolkata",
@@ -90,8 +90,8 @@ const URL_TO_TAB: Record<string, AdminTab> = {
   "kisan-card": "kisan_card_overview",
   "kisan-card-overview": "kisan_card_overview",
   "card-overview": "kisan_card_overview",
-  "krivexa-cards": "krivexa_cards",
-  "krivexa-card": "krivexa_cards",
+  "krivexo-cards": "krivexo_cards",
+  "krivexo-card": "krivexo_cards",
   "card-request": "card_requests",
   "card-requests": "card_requests",
   "card-type": "card_types",
@@ -174,7 +174,7 @@ const TAB_TO_URL: Record<AdminTab, string> = {
   dealer_profile: "dealers",
   kisan_card: "cards",
   kisan_card_overview: "kisan-card-overview",
-  krivexa_cards: "krivexa-cards",
+  krivexo_cards: "krivexo-cards",
   card_requests: "card-requests",
   card_types: "card-types",
   card_benefits: "card-benefits",
@@ -240,9 +240,9 @@ export default function AdminDashboard() {
     setAdminTheme(nextTheme);
     localStorage.setItem("admin_theme", nextTheme);
     if (nextTheme === "dark") {
-      toast.success("Dark Mode activated for Admin Panel 🌙");
+      toast.success("Dark Mode activated for Admin Panel ð");
     } else {
-      toast.success("Light Mode activated for Admin Panel ☀️");
+      toast.success("Light Mode activated for Admin Panel âï¸");
     }
   };
 
@@ -261,7 +261,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // ─── Data Stores (all empty by default — populated from DB) ───
+  // âââ Data Stores (all empty by default â populated from DB) âââ
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [dealers, setDealers] = useState<Dealer[]>([]);
   const [rawUsers, setRawUsers] = useState<any[]>([]);
@@ -279,7 +279,7 @@ export default function AdminDashboard() {
     {
       id: "ADM001",
       name: "Aditya Saha (Super Admin)",
-      email: "aditya@krivexa.com",
+      email: "aditya@krivexo.com",
       role: "Super Admin",
       status: "active",
       lastLogin: "Today, 10:30 AM",
@@ -287,17 +287,17 @@ export default function AdminDashboard() {
     },
     {
       id: "ADM002",
-      name: "Krivexa Operations Admin",
-      email: "ops@krivexa.com",
+      name: "Krivexo Operations Admin",
+      email: "ops@krivexo.com",
       role: "Operations Admin",
       status: "active",
       lastLogin: "Yesterday",
-      password: "OpsKrivexa#2026",
+      password: "OpsKrivexo#2026",
     },
     {
       id: "ADM003",
       name: "Finance Manager",
-      email: "finance@krivexa.com",
+      email: "finance@krivexo.com",
       role: "Finance Admin",
       status: "active",
       lastLogin: "2 days ago",
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
   const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
   const [settings, setSettings] = useState<AdminSettings>(EMPTY_SETTINGS);
 
-  // ─── Load data from MongoDB on mount concurrently ───
+  // âââ Load data from MongoDB on mount concurrently âââ
   const loadAdminData = useCallback(async () => {
     setLoading(true);
 
@@ -345,69 +345,110 @@ export default function AdminDashboard() {
       }
 
       const localAccounts = Array.isArray(registeredAccounts) ? registeredAccounts : [];
-      const existingPhones = new Set(fetchedUsers.map((u: any) => u.phone).filter(Boolean));
-      const combinedUsers = [...fetchedUsers];
+      const localByPhone = new Map<string, any>();
+      const localByUserId = new Map<string, any>();
+      localAccounts.forEach((acc: any) => {
+        if (acc.phone) localByPhone.set(acc.phone.replace(/\D/g, "").slice(-10), acc);
+        if (acc.userId) localByUserId.set(acc.userId.trim().toLowerCase(), acc);
+      });
+
+      // Merge fetchedUsers with localAccounts (local accounts provide complete registration fields)
+      const mergedUsers = fetchedUsers.map((u: any) => {
+        const cleanPhone = (u.phone || "").replace(/\D/g, "").slice(-10);
+        const cleanUserId = (u.userId || "").trim().toLowerCase();
+        const local = (cleanPhone ? localByPhone.get(cleanPhone) : null) || (cleanUserId ? localByUserId.get(cleanUserId) : null);
+        if (!local) return u;
+        return {
+          ...u,
+          userId: u.userId || local.userId,
+          gender: (u.gender && u.gender !== "â") ? u.gender : (local.gender || "Male"),
+          dob: (u.dob && u.dob !== "â") ? u.dob : (local.dob || ""),
+          email: (u.email && u.email !== "â" && !u.email.endsWith("@farma.local")) ? u.email : (local.email || u.email || ""),
+          address: u.address || local.address || "",
+          village: u.village || local.village || "",
+          district: u.district || local.district || "",
+          state: u.state || local.state || "",
+        };
+      });
+
+      const existingPhones = new Set(mergedUsers.map((u: any) => (u.phone || "").replace(/\D/g, "").slice(-10)).filter(Boolean));
+      const combinedUsers = [...mergedUsers];
 
       localAccounts.forEach((acc: any) => {
-        if (acc.phone && !existingPhones.has(acc.phone)) {
+        const cleanP = (acc.phone || "").replace(/\D/g, "").slice(-10);
+        if (cleanP && !existingPhones.has(cleanP)) {
           combinedUsers.push({
             id: acc.id,
+            userId: acc.userId,
             name: acc.fullName || acc.name || "User",
             fullName: acc.fullName || acc.name || "User",
             phone: acc.phone,
+            email: acc.email || "",
+            gender: acc.gender || "Male",
+            dob: acc.dob || "",
+            address: acc.address || "",
             role: acc.role || "farmer",
             state: acc.state || "Bihar",
             district: acc.district || "Patna",
-            village: acc.village || "—",
+            village: acc.village || "â",
             businessName: acc.businessName,
             dealerType: acc.dealerType,
             occupation: acc.occupation,
             status: acc.status || (acc.role === "dealer" ? "pending" : "active"),
             createdAt: acc.createdAt,
           });
-          existingPhones.add(acc.phone);
+          existingPhones.add(cleanP);
         }
       });
 
       setRawUsers(combinedUsers);
 
-      const farmerUsers = combinedUsers.filter((u: any) => (u.role || "").toLowerCase() === "farmer").map((u: any, idx: number) => ({
-        id: u.id || u._id || `FRM${1000 + idx}`,
-        name: u.fullName || u.name || "—",
-        fatherName: u.fatherName || "—",
-        phone: u.phone || "—",
-        email: u.email && u.email !== "—" && !u.email.endsWith("@farma.local") ? u.email : "—",
-        gender: u.gender || "—",
-        dob: u.dob || "—",
-        state: u.state || "Bihar",
-        district: u.district || "Patna",
-        village: u.village || "—",
-        address: u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "—",
-        location: [u.village, u.district || u.state].filter(Boolean).join(", ") || u.district || u.state || "Bihar",
-        occupation: u.occupation || "Farmer",
-        crops: u.occupation || "Agricultural Crops",
-        status: (u.status?.toLowerCase() === "pending" ? "pending" : u.status?.toLowerCase() === "suspended" ? "suspended" : "active") as any,
-        verified: (u.verificationStatus === "Verified" ? "verified" : u.verificationStatus === "Rejected" ? "unverified" : "pending") as any,
-        totalProducts: 0,
-        totalOrders: 0,
-        totalSales: 0,
-        totalEarnings: 0,
-        farmName: u.businessName || `${u.fullName || u.name || "Farmer"} Farm`,
-        totalLand: u.landSize || "—",
-        landType: "—",
-        mainCrops: u.occupation || "Grain, Vegetables",
-        organicCertified: "No" as const,
-        createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
-        avatar: u.avatar || "",
-        rawUser: u,
-      }));
+      const farmerUsers = combinedUsers.filter((u: any) => (u.role || "").toLowerCase() === "farmer").map((u: any, idx: number) => {
+        const farmerUserId = u.userId || u.id || `FRM${1000 + idx}`;
+        const farmerEmail = (u.email && u.email !== "â" && !u.email.endsWith("@farma.local")) ? u.email : (u.email || "â");
+        const farmerGender = (u.gender && u.gender !== "â") ? u.gender : "Male";
+        const farmerDob = (u.dob && u.dob !== "â") ? u.dob : "â";
+        const farmerAddress = u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "â";
+
+        return {
+          id: farmerUserId,
+          userId: farmerUserId,
+          name: u.fullName || u.name || "â",
+          fatherName: farmerUserId,
+          phone: u.phone || "â",
+          email: farmerEmail,
+          gender: farmerGender,
+          dob: farmerDob,
+          state: u.state || "Bihar",
+          district: u.district || "Patna",
+          village: u.village || "â",
+          address: farmerAddress,
+          location: [u.village, u.district || u.state].filter(Boolean).join(", ") || u.district || u.state || "Bihar",
+          occupation: u.occupation || "Farmer",
+          crops: u.occupation || "Agricultural Crops",
+          status: (u.status?.toLowerCase() === "pending" ? "pending" : u.status?.toLowerCase() === "suspended" ? "suspended" : "active") as any,
+          verified: (u.verificationStatus === "Verified" ? "verified" : u.verificationStatus === "Rejected" ? "unverified" : "pending") as any,
+          totalProducts: 0,
+          totalOrders: 0,
+          totalSales: 0,
+          totalEarnings: 0,
+          farmName: u.businessName || `${u.fullName || u.name || "Farmer"} Farm`,
+          totalLand: u.landSize || "â",
+          landType: "â",
+          mainCrops: u.occupation || "Grain, Vegetables",
+          organicCertified: "No" as const,
+          createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
+          avatar: u.avatar || "",
+          rawUser: u,
+        };
+      });
 
       const dealerUsers = combinedUsers.filter((u: any) => (u.role || "").toLowerCase() === "dealer").map((u: any, idx: number) => ({
         id: u.id || u._id || `DLR${2000 + idx}`,
         businessName: u.businessName || u.fullName || u.name || "Agri Dealer",
-        owner: u.fullName || u.owner || u.name || "—",
-        phone: u.phone || "—",
-        email: u.email && u.email !== "—" && !u.email.endsWith("@farma.local") ? u.email : "—",
+        owner: u.fullName || u.owner || u.name || "â",
+        phone: u.phone || "â",
+        email: u.email && u.email !== "â" && !u.email.endsWith("@farma.local") ? u.email : "â",
         dealerType: u.dealerType || "Seeds & Fertilizer Dealer",
         businessType: u.dealerType || "Seeds & Fertilizer Dealer",
         gstin: u.gstin || u.gstNumber || "Not provided",
@@ -415,8 +456,8 @@ export default function AdminDashboard() {
         licenseNumber: u.licenseNumber || "Not provided",
         state: u.state || "Bihar",
         district: u.district || "Patna",
-        village: u.village || "—",
-        address: u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "—",
+        village: u.village || "â",
+        address: u.address || [u.village, u.district, u.state].filter(Boolean).join(", ") || "â",
         location: [u.village, u.district || u.state].filter(Boolean).join(", ") || u.district || u.state || "Bihar",
         status: (u.status?.toLowerCase() === "pending" ? "pending" : u.status?.toLowerCase() === "suspended" ? "suspended" : "active") as any,
         verified: (u.verificationStatus === "Verified" ? "verified" : u.verificationStatus === "Rejected" ? "unverified" : "pending") as any,
@@ -493,16 +534,16 @@ export default function AdminDashboard() {
           const orderItem: OrderItem = {
             id: o.id || `ORD${8000 + idx}`,
             buyer: o.buyer || o.userName || (o.userId && !o.userId.startsWith("usr_") ? o.userId : "Registered Farmer"),
-            buyerId: o.userId || "—",
+            buyerId: o.userId || "â",
             dealer: o.assignedDealerName || "Kisan Agro Kendra",
-            dealerId: "—",
+            dealerId: "â",
             product: o.items?.[0]?.name || "Agricultural Supplies",
             qty: String(o.items?.length || 1),
             amount: o.totalAmount || o.amount || 0,
             status: (o.status?.toLowerCase() || "placed") as OrderItem["status"],
             paymentStatus: "paid",
             paymentMethod: o.paymentMethod || "UPI",
-            date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "—",
+            date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "â",
             tracking: [],
           };
 
@@ -540,14 +581,14 @@ export default function AdminDashboard() {
       }
       if (txList.length > 0) setTransactions(txList);
 
-      // Process products from /products API — real catalog products only
+      // Process products from /products API â real catalog products only
       const newProducts: ProductItem[] = [];
       if (productsRes.status === "fulfilled" && productsRes.value) {
         const pList = productsRes.value.data?.products || (Array.isArray(productsRes.value) ? productsRes.value : []);
         pList.forEach((p: any) => {
           newProducts.push({
             id: p.id || p._id || `PROD${Math.random()}`,
-            name: p.name || "—",
+            name: p.name || "â",
             seller: p.brand || p.vendor || "Verified Vendor",
             sellerType: "Dealer",
             category: p.category || (typeof p.categoryId === 'string' ? p.categoryId.replace("cat_", "") : "") || "Agricultural Supplies",
@@ -574,11 +615,11 @@ export default function AdminDashboard() {
         cropsRes.value.forEach((c: any) => {
           newProducts.push({
             id: c.id || c._id || `CRP${Math.random()}`,
-            name: c.cropName || "—",
+            name: c.cropName || "â",
             seller: c.sellerName || "Farmer",
             sellerType: "Farmer",
             category: "Farmer Crops",
-            quantity: c.weight || "—",
+            quantity: c.weight || "â",
             price: Number(c.price || 0),
             status: (c.status === "approved" ? "active" : c.status || "pending") as ProductItem["status"],
             image: c.image,
@@ -592,11 +633,11 @@ export default function AdminDashboard() {
         dealerListingsRes.value.forEach((d: any) => {
           newProducts.push({
             id: d.id || d._id || `DLR${Math.random()}`,
-            name: d.title || d.name || "—",
+            name: d.title || d.name || "â",
             seller: d.dealerName || "Dealer",
             sellerType: "Dealer",
             category: d.category || d.type || "Agricultural Supplies",
-            quantity: d.unit || d.quantity || "—",
+            quantity: d.unit || d.quantity || "â",
             price: typeof d.price === "number" ? d.price : Number(d.price || 0),
             status: (d.status === "approved" ? "active" : d.status || "pending") as ProductItem["status"],
             image: d.image,
@@ -612,15 +653,15 @@ export default function AdminDashboard() {
         labourRes.value.forEach((l: any, idx: number) => {
           reqItems.push({
             id: l.id || `RQ${3000 + idx}`,
-            user: l.userName || "—",
+            user: l.userName || "â",
             userType: "Farmer",
             type: "Labour Booking",
             subject: `${l.labourType} Request`,
-            date: l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "—",
+            date: l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "â",
             status: l.status === "assigned" ? "resolved" : l.status === "pending" ? "new" : "in_review",
             priority: "Medium",
             description: `Need ${l.count} ${l.labourType}(s) for ${l.days} days from ${l.startDate}`,
-            assignedTo: "—",
+            assignedTo: "â",
             conversation: [],
           });
         });
@@ -630,15 +671,15 @@ export default function AdminDashboard() {
         machineryRes.value.forEach((m: any, idx: number) => {
           reqItems.push({
             id: m.id || `RQ${4000 + idx}`,
-            user: m.userName || "—",
+            user: m.userName || "â",
             userType: "Farmer",
             type: "Machinery Booking",
             subject: `${m.machineryType} Booking`,
-            date: m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "—",
+            date: m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "â",
             status: m.status === "allotted" ? "resolved" : m.status === "pending" ? "new" : "closed",
             priority: "Medium",
             description: `Machinery: ${m.machineryType}, Date: ${m.bookingDate}, Duration: ${m.durationHours}h`,
-            assignedTo: "—",
+            assignedTo: "â",
             conversation: [],
           });
         });
@@ -648,15 +689,15 @@ export default function AdminDashboard() {
         expertRes.value.forEach((e: any, idx: number) => {
           reqItems.push({
             id: e.id || `RQ${5000 + idx}`,
-            user: e.farmerName || "—",
+            user: e.farmerName || "â",
             userType: "Farmer",
             type: "Expert Advice",
             subject: `${e.cropName} Problem`,
-            date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-IN") : "—",
+            date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-IN") : "â",
             status: e.status === "resolved" ? "resolved" : "new",
             priority: "High",
-            description: e.problemDetails || "—",
-            assignedTo: "—",
+            description: e.problemDetails || "â",
+            assignedTo: "â",
             conversation: [],
           });
         });
@@ -670,9 +711,9 @@ export default function AdminDashboard() {
           adminName: "System",
           action: n.title || "Notification",
           module: n.category || "General",
-          details: n.message || "—",
+          details: n.message || "â",
           dateTime: n.time || new Date().toISOString(),
-          ipAddress: "—",
+          ipAddress: "â",
         })));
       }
 
@@ -698,7 +739,7 @@ export default function AdminDashboard() {
           date: "Yesterday",
           status: "resolved",
           priority: "Low",
-          details: "Farmer enquired about credit limit enhancement from ₹25,000 to ₹50,000.",
+          details: "Farmer enquired about credit limit enhancement from â¹25,000 to â¹50,000.",
         },
       ]);
 
@@ -720,7 +761,7 @@ export default function AdminDashboard() {
           type: "Policy Update",
           publishedOn: "05 Sept 2026",
           status: "published",
-          content: "State government subsidy scheme of up to 60% is now available through Krivexa Kisan Card holders.",
+          content: "State government subsidy scheme of up to 60% is now available through Krivexo Kisan Card holders.",
         },
       ]);
 
@@ -810,9 +851,9 @@ export default function AdminDashboard() {
     support_tickets: "Support Tickets",
     cms_management: "CMS / Pages Management",
     transactions: "Transactions Management",
-    kisan_card: "Krivexa Card Management",
-    kisan_card_overview: "Krivexa Kisan Card Overview",
-    krivexa_cards: "Krivexa Kisan Card Management",
+    kisan_card: "Krivexo Card Management",
+    kisan_card_overview: "Krivexo Kisan Card Overview",
+    krivexo_cards: "Krivexo Kisan Card Management",
     card_requests: "Card Requests",
     card_types: "Card Types Management",
     card_benefits: "Benefits & Offers Management",
@@ -1002,8 +1043,8 @@ export default function AdminDashboard() {
           {activeTab === "support_tickets" && <SupportTicketsView />}
           {activeTab === "cms_management" && <CmsManagementView />}
           {activeTab === "kisan_card" && <AllCardsView />}
-          {activeTab === "kisan_card_overview" && <KrivexaKisanCardOverviewView onNavigateTab={(tab) => setActiveTab(tab as AdminTab)} />}
-          {activeTab === "krivexa_cards" && <KrivexaCardsManagementView />}
+          {activeTab === "kisan_card_overview" && <KrivexoKisanCardOverviewView onNavigateTab={(tab) => setActiveTab(tab as AdminTab)} />}
+          {activeTab === "krivexo_cards" && <KrivexoCardsManagementView />}
           {activeTab === "card_requests" && <CardRequestsView />}
           {activeTab === "card_types" && <CardTypesView />}
           {activeTab === "card_benefits" && <BenefitsOffersView />}

@@ -63,7 +63,7 @@ export default function AddNewUserView({ onBack, onSuccess, initialData }: AddNe
     occupation: initialData?.occupation || "Farmer",
     gstNumber: initialData?.gstin || initialData?.gstNumber || "",
     licenseNumber: initialData?.licenseNumber || "",
-    email: initialData?.email && initialData?.email !== "—" ? initialData.email : "",
+    email: initialData?.email && initialData?.email !== "â" ? initialData.email : "",
     mobile: initialData?.phone || "",
     username: initialData?.username || "",
     password: "",
@@ -98,7 +98,7 @@ export default function AddNewUserView({ onBack, onSuccess, initialData }: AddNe
         occupation: initialData.occupation || "Farmer",
         gstNumber: initialData.gstin || initialData.gstNumber || "",
         licenseNumber: initialData.licenseNumber || "",
-        email: initialData.email && initialData.email !== "—" ? initialData.email : "",
+        email: initialData.email && initialData.email !== "â" ? initialData.email : "",
         mobile: initialData.phone || "",
         username: initialData.username || "",
         password: "",
@@ -297,9 +297,9 @@ export default function AddNewUserView({ onBack, onSuccess, initialData }: AddNe
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>›</span>
+          <span>âº</span>
           <span>Users Management</span>
-          <span>›</span>
+          <span>âº</span>
           <span className="text-emerald-600 font-medium">{isEdit ? "Edit User" : "Add New User"}</span>
         </div>
       </div>
@@ -767,7 +767,7 @@ export default function AddNewUserView({ onBack, onSuccess, initialData }: AddNe
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                       <Input
                         type="email"
-                        placeholder="user@krivexa.com"
+                        placeholder="user@krivexo.com"
                         value={form.email}
                         onChange={e => set("email", e.target.value)}
                         className="pl-9 h-9 text-xs border-gray-200 rounded-xl"
@@ -1048,7 +1048,7 @@ export default function AddNewUserView({ onBack, onSuccess, initialData }: AddNe
                 </div>
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-gray-400 shrink-0">Mobile</span>
-                  <span className="font-semibold text-gray-800 text-right">{form.mobile ? `+91 ${form.mobile}` : "—"}</span>
+                  <span className="font-semibold text-gray-800 text-right">{form.mobile ? `+91 ${form.mobile}` : "â"}</span>
                 </div>
                 {form.email && (
                   <div className="flex items-start justify-between gap-2">
@@ -1062,7 +1062,7 @@ export default function AddNewUserView({ onBack, onSuccess, initialData }: AddNe
                   <>
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-gray-400 shrink-0">Father/Husband</span>
-                      <span className="font-semibold text-gray-800 text-right">{form.fatherName || "—"}</span>
+                      <span className="font-semibold text-gray-800 text-right">{form.fatherName || "â"}</span>
                     </div>
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-gray-400 shrink-0">Occupation</span>
@@ -1075,11 +1075,11 @@ export default function AddNewUserView({ onBack, onSuccess, initialData }: AddNe
                   <>
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-gray-400 shrink-0">GSTIN</span>
-                      <span className="font-mono font-bold text-emerald-700 text-right">{form.gstNumber || "—"}</span>
+                      <span className="font-mono font-bold text-emerald-700 text-right">{form.gstNumber || "â"}</span>
                     </div>
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-gray-400 shrink-0">License</span>
-                      <span className="font-mono font-semibold text-gray-800 text-right truncate max-w-[130px]">{form.licenseNumber || "—"}</span>
+                      <span className="font-mono font-semibold text-gray-800 text-right truncate max-w-[130px]">{form.licenseNumber || "â"}</span>
                     </div>
                   </>
                 )}

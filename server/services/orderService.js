@@ -135,7 +135,7 @@ export const createProductOrder = async ({
   await createNotification({
     userId: buyerId,
     title: 'Order Confirmed',
-    message: `Your order #${orderNumber} for ₹${totalAmount} has been placed successfully.`,
+    message: `Your order #${orderNumber} for â¹${totalAmount} has been placed successfully.`,
     type: 'ORDER',
     data: { orderId, orderNumber },
   });
@@ -144,7 +144,7 @@ export const createProductOrder = async ({
     await createNotification({
       userId: sellerId,
       title: 'New Customer Order Received',
-      message: `You have received a new order #${orderNumber} for ₹${totalAmount}.`,
+      message: `You have received a new order #${orderNumber} for â¹${totalAmount}.`,
       type: 'ORDER',
       data: { orderId, orderNumber },
     });

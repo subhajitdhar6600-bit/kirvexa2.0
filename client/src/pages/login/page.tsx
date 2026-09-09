@@ -27,6 +27,7 @@ export default function LoginPage() {
   const { loginUser, adminLogin, registeredAccounts } = useApp();
   const [loginType, setLoginType] = useState<LoginType>("farmer");
   const [showPass, setShowPass] = useState(false);
+  const [farmerUserId, setFarmerUserId] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [adminId, setAdminId] = useState("");
   const [dealerId, setDealerId] = useState("");
@@ -46,7 +47,7 @@ export default function LoginPage() {
   const [isSubmittingForgot, setIsSubmittingForgot] = useState(false);
 
   const typeConfig = {
-    farmer: { label: "Farmer Login", subtitle: "Login with Mobile", icon: User },
+    farmer: { label: "Farmer Login", subtitle: "Login with User ID", icon: User },
     dealer: { label: "Dealer Login", subtitle: "Login with Dealer ID", icon: Store },
     admin: { label: "Admin Login", subtitle: "Login as System Administrator", icon: Shield },
   };
@@ -74,9 +75,9 @@ export default function LoginPage() {
     sendEmailJS({
       to_email: forgotIdentifier,
       verification_code: randomCode,
-      subject: "Krivexa Password Reset Code",
+      subject: "Krivexo Password Reset Code",
     }).catch(() => {});
-    toast.success(`📧 Email Verification Code sent to ${forgotIdentifier}: Code is ${randomCode}`, { duration: 8000 });
+    toast.success(`ð§ Email Verification Code sent to ${forgotIdentifier}: Code is ${randomCode}`, { duration: 8000 });
   };
 
   // Forgot Password Step 2: Verify Email Code
@@ -108,13 +109,13 @@ export default function LoginPage() {
       await api.resetPassword({ identifier: forgotIdentifier, newPassword: newForgotPass });
       
       // Update local storage registered accounts if present
-      const savedAccounts = localStorage.getItem("krivexa_registered_accounts");
+      const savedAccounts = localStorage.getItem("krivexo_registered_accounts");
       if (savedAccounts) {
         const parsed = JSON.parse(savedAccounts);
         const updated = parsed.map((acc: any) =>
           acc.phone === forgotIdentifier || acc.email === forgotIdentifier ? { ...acc, password: newForgotPass } : acc
         );
-        localStorage.setItem("krivexa_registered_accounts", JSON.stringify(updated));
+        localStorage.setItem("krivexo_registered_accounts", JSON.stringify(updated));
       }
 
       toast.success("Password reset successfully! You can now log in with your new password.");
@@ -277,10 +278,11 @@ export default function LoginPage() {
         return;
       }
 
-      const identifier = (loginType === "admin" ? adminId : mobileNumber).trim();
+      const identifier = (loginType === "admin" ? adminId : (farmerUserId || mobileNumber)).trim();
 
       // 2. Authenticate directly with seeded MongoDB database
       const authRes = await api.loginAuth({
+        userId: identifier,
         phone: identifier,
         email: identifier,
         password: password.trim(),
@@ -309,6 +311,7 @@ export default function LoginPage() {
 
         const mappedAccount = {
           id: u.id || u._id,
+          userId: u.userId || u.id,
           name: u.name || u.fullName || "User",
           fullName: u.name || u.fullName || "User",
           phone: u.phone,
@@ -356,16 +359,23 @@ export default function LoginPage() {
       }
 
       // 3. User check from database
-      const enteredPhone = mobileNumber.trim();
+      const enteredIdentifier = (farmerUserId || mobileNumber).trim();
       let existingAccount = registeredAccounts.find(
-        (acc) => acc.phone.trim() === enteredPhone
+        (acc) =>
+          (acc.userId && acc.userId.trim().toLowerCase() === enteredIdentifier.toLowerCase()) ||
+          acc.phone.trim() === enteredIdentifier ||
+          acc.id === enteredIdentifier
       );
 
       if (!existingAccount) {
-        const remoteUser = await api.getUserByPhone(enteredPhone);
-        if (remoteUser && remoteUser.phone) {
+        let remoteUser = await api.getUserByUserId(enteredIdentifier);
+        if (!remoteUser || !remoteUser.id) {
+          remoteUser = await api.getUserByPhone(enteredIdentifier);
+        }
+        if (remoteUser && (remoteUser.phone || remoteUser.userId || remoteUser.id)) {
           existingAccount = {
             id: remoteUser.id || `acc-${Date.now()}`,
+            userId: remoteUser.userId,
             fullName: remoteUser.fullName || remoteUser.name || "User",
             phone: remoteUser.phone,
             password: remoteUser.password || "",
@@ -482,7 +492,7 @@ export default function LoginPage() {
           <div className="md:col-span-2 bg-[#0e0e0e] border border-white/10 rounded-2xl p-6 flex flex-col items-center text-center">
             <h2 className="text-2xl font-bold mb-1">Welcome <span className="text-primary">Back!</span></h2>
             <p className="text-gray-400 text-sm mb-6">Login to continue your smart farming journey.</p>
-            <img src="/krivexa-logo.jpg" alt="KRIVEXA" className="w-32 h-32 object-cover rounded-2xl border border-primary/40 shadow-xl mb-6" />
+            <img src="/krivexo-logo.jpg" alt="KRIVEXO" className="w-32 h-32 object-cover rounded-2xl border border-primary/40 shadow-xl mb-6" />
             <div className="space-y-4 w-full text-left">
               {[
                 { icon: Shield, title: "Secure & Safe", desc: "Your data is 100% safe and secure with us." },
@@ -547,17 +557,14 @@ export default function LoginPage() {
                 </div>
               ) : (
                 <div>
-                  <Label className="text-gray-300 text-sm mb-1.5 block">Mobile Number <span className="text-red-400">*</span></Label>
+                  <Label className="text-gray-300 text-sm mb-1.5 block">User ID <span className="text-red-400">*</span></Label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400" />
                     <Input 
-                      type="tel"
-                      inputMode="numeric"
-                      maxLength={10}
-                      value={mobileNumber}
-                      onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                      placeholder="Enter your 10-digit mobile number" 
-                      className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600" 
+                      value={farmerUserId}
+                      onChange={(e) => setFarmerUserId(e.target.value)}
+                      placeholder="Enter your User ID (e.g. farmer101)" 
+                      className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus-visible:border-emerald-500" 
                       required
                     />
                   </div>
@@ -621,7 +628,7 @@ export default function LoginPage() {
               </div>
 
               <Button type="submit" disabled={isLoading} className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer">
-                {isLoading ? "Logging in..." : "Login →"}
+                {isLoading ? "Logging in..." : "Login â"}
               </Button>
 
               {loginType === "dealer" ? (
@@ -629,7 +636,7 @@ export default function LoginPage() {
                   <p className="text-xs text-gray-400">
                     {"Don't have a Dealer ID yet? "}
                     <Link to="/register" className="text-amber-400 font-semibold hover:underline">
-                      Register Dealership for Approval →
+                      Register Dealership for Approval â
                     </Link>
                   </p>
                 </div>
@@ -661,7 +668,7 @@ export default function LoginPage() {
                   onClick={() => setIsForgotOpen(false)}
                   className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-white/10 cursor-pointer"
                 >
-                  ✕
+                  â
                 </button>
               </div>
 
@@ -681,7 +688,7 @@ export default function LoginPage() {
                     />
                   </div>
                   <Button type="submit" className="w-full bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer">
-                    Send Email Verification Code →
+                    Send Email Verification Code â
                   </Button>
                 </form>
               )}
@@ -689,7 +696,7 @@ export default function LoginPage() {
               {forgotStep === 2 && (
                 <form onSubmit={handleVerifyForgotOtp} className="space-y-4">
                   <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs space-y-1">
-                    <div className="font-bold text-primary">📧 Live Email Verification Code</div>
+                    <div className="font-bold text-primary">ð§ Live Email Verification Code</div>
                     <div className="text-gray-300">
                       Your reset email code is: <strong className="text-primary font-mono text-sm">{forgotGeneratedCode}</strong>
                     </div>
@@ -702,7 +709,7 @@ export default function LoginPage() {
                       }}
                       className="mt-1 bg-primary text-black text-[11px] font-bold px-2.5 py-1 rounded cursor-pointer"
                     >
-                      ⚡ Auto-Fill Email Code ({forgotGeneratedCode})
+                      â¡ Auto-Fill Email Code ({forgotGeneratedCode})
                     </button>
                   </div>
 
@@ -737,7 +744,7 @@ export default function LoginPage() {
                       Back
                     </Button>
                     <Button type="submit" className="w-2/3 bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer">
-                      Verify Email Code →
+                      Verify Email Code â
                     </Button>
                   </div>
                 </form>
@@ -773,7 +780,7 @@ export default function LoginPage() {
                     disabled={isSubmittingForgot}
                     className="w-full bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer"
                   >
-                    {isSubmittingForgot ? "Saving Password..." : "Save Password & Login →"}
+                    {isSubmittingForgot ? "Saving Password..." : "Save Password & Login â"}
                   </Button>
                 </form>
               )}

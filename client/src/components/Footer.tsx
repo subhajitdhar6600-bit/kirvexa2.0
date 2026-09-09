@@ -53,7 +53,7 @@ export default function Footer() {
               <p className="text-amber-300 font-bold text-sm">{t.nav.applyKcc}</p>
               <p className="text-amber-500/80 text-xs">Get instant credit & unlock all platform features</p>
             </div>
-            <span className="text-amber-400 font-bold text-sm group-hover:translate-x-1 transition-transform">→</span>
+            <span className="text-amber-400 font-bold text-sm group-hover:translate-x-1 transition-transform">â</span>
           </div>
         )}
 
@@ -78,7 +78,7 @@ export default function Footer() {
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-4">
                 <p className="text-primary text-xs font-bold mb-1">{t.footer.helpline}</p>
                 <p className="text-white text-lg font-black" style={{ fontFamily: "Rajdhani, sans-serif" }}>+91 87087 42170</p>
-                <p className="text-gray-500 text-xs">support@krivexa.com</p>
+                <p className="text-gray-500 text-xs">support@krivexo.com</p>
               </div>
 
               <div className="flex gap-3">
@@ -104,7 +104,7 @@ export default function Footer() {
                 {QUICK_LINKS.map((item) => (
                   <li key={item.label}>
                     <Link to={item.href} className="hover:text-primary transition-colors hover:pl-1 inline-block">
-                      → {item.label}
+                      â {item.label}
                     </Link>
                   </li>
                 ))}
@@ -121,7 +121,7 @@ export default function Footer() {
                 {RESOURCES_LINKS.map((item) => (
                   <li key={item.label}>
                     <Link to={item.href} className="hover:text-primary transition-colors hover:pl-1 inline-block">
-                      → {item.label}
+                      â {item.label}
                     </Link>
                   </li>
                 ))}
@@ -138,7 +138,7 @@ export default function Footer() {
                 {SERVICES_LINKS.map((item) => (
                   <li key={item.label}>
                     <Link to={item.href} className="hover:text-primary transition-colors hover:pl-1 inline-block">
-                      → {item.label}
+                      â {item.label}
                     </Link>
                   </li>
                 ))}
@@ -158,11 +158,11 @@ export default function Footer() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
-                  <span>support@krivexa.com</span>
+                  <span>support@krivexo.com</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Globe className="h-3.5 w-3.5 text-primary shrink-0" />
-                  <span>www.krivexa.com</span>
+                  <span>www.krivexo.com</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <MapPin className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
@@ -177,7 +177,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/5 px-4 py-4">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p className="text-gray-600 text-xs">© {year} KRIVEXA. {t.footer.rights}</p>
+            <p className="text-gray-600 text-xs">Â© {year} KRIVEXO. {t.footer.rights}</p>
             <div className="flex items-center gap-4 text-xs text-gray-600">
               <Link to="/admin" className="hover:text-primary flex items-center gap-1 transition-colors">
                 <Shield className="h-3 w-3" /> Admin

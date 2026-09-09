@@ -29,7 +29,11 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
   const filtered = farmers.filter((f) => {
     const matchSearch =
       f.name.toLowerCase().includes(search.toLowerCase()) ||
+      (f.userId && f.userId.toLowerCase().includes(search.toLowerCase())) ||
       (f.fatherName && f.fatherName.toLowerCase().includes(search.toLowerCase())) ||
+      (f.email && f.email.toLowerCase().includes(search.toLowerCase())) ||
+      (f.gender && f.gender.toLowerCase().includes(search.toLowerCase())) ||
+      (f.dob && f.dob.toLowerCase().includes(search.toLowerCase())) ||
       f.phone.includes(search) ||
       f.id.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || f.status === statusFilter;
@@ -50,12 +54,6 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
     return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[11px] font-semibold">Inactive</span>;
   };
 
-  const getKycBadge = (verified: string) => {
-    if (verified === "verified") return <span className="inline-flex items-center gap-1 text-emerald-600 text-[11px] font-semibold"><CheckCircle className="h-3.5 w-3.5" />Verified</span>;
-    if (verified === "pending") return <span className="inline-flex items-center gap-1 text-amber-600 text-[11px] font-semibold"><Clock className="h-3.5 w-3.5" />Pending</span>;
-    return <span className="inline-flex items-center gap-1 text-red-500 text-[11px] font-semibold"><XCircle className="h-3.5 w-3.5" />Rejected</span>;
-  };
-
   return (
     <div className="space-y-5">
       {/* Page Header */}
@@ -65,19 +63,18 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
           <p className="text-xs text-gray-500 mt-0.5">Manage all registered farmers and inspect complete profile details</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span className="text-gray-300">›</span>
-          <span>Farmers Management</span><span className="text-gray-300">›</span>
+          <span>Dashboard</span><span className="text-gray-300">âº</span>
+          <span>Farmers Management</span><span className="text-gray-300">âº</span>
           <span className="text-emerald-600 font-medium">All Farmers</span>
         </div>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Total Farmers", value: totalFarmers.toString(), sub: "Registered in database", Icon: UserCheck, color: "text-emerald-600", light: "bg-emerald-50" },
           { label: "Active Farmers", value: activeFarmers.toString(), sub: `${totalFarmers > 0 ? Math.round((activeFarmers / totalFarmers) * 100) : 0}% active platform users`, Icon: CheckCircle, color: "text-blue-600", light: "bg-blue-50" },
           { label: "Inactive Farmers", value: inactiveFarmers.toString(), sub: "Pending or deactivated", Icon: UserX, color: "text-red-500", light: "bg-red-50" },
-          { label: "KYC Verified", value: verifiedFarmers.toString(), sub: `${totalFarmers > 0 ? Math.round((verifiedFarmers / totalFarmers) * 100) : 0}% verified profiles`, Icon: ShieldCheck, color: "text-violet-600", light: "bg-violet-50" },
         ].map((s, i) => {
           const IconComp = s.Icon;
           return (
@@ -129,11 +126,11 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                 <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 text-[11px] uppercase tracking-wider font-semibold">
                   <th className="py-3 px-4 text-left w-8">#</th>
                   <th className="py-3 px-4 text-left">Farmer Details</th>
-                  <th className="py-3 px-4 text-left">Father / Husband</th>
+                  <th className="py-3 px-4 text-left">User ID</th>
+                  <th className="py-3 px-4 text-left">Gender & DOB</th>
                   <th className="py-3 px-4 text-left">Mobile / Email</th>
                   <th className="py-3 px-4 text-left">State & District</th>
                   <th className="py-3 px-4 text-left">Occupation</th>
-                  <th className="py-3 px-4 text-left">KYC</th>
                   <th className="py-3 px-4 text-left">Status</th>
                   <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
@@ -170,17 +167,24 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-gray-700 font-medium">{f.fatherName || "—"}</td>
+                      <td className="py-3.5 px-4">
+                        <span className="inline-block px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-mono font-bold">
+                          {f.userId || f.id || "â"}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <p className="text-gray-800 font-semibold">{f.gender || "â"}</p>
+                        <p className="text-[10px] text-gray-400">{f.dob || "â"}</p>
+                      </td>
                       <td className="py-3.5 px-4">
                         <p className="text-gray-800 font-medium">{f.phone}</p>
-                        <p className="text-[10px] text-gray-400 truncate max-w-[140px]">{f.email || "—"}</p>
+                        <p className="text-[10px] text-emerald-700 font-medium truncate max-w-[140px]">{f.email || "â"}</p>
                       </td>
                       <td className="py-3.5 px-4">
                         <p className="text-gray-800 font-medium">{f.district || "Patna"}</p>
                         <p className="text-[10px] text-gray-400">{f.state || "Bihar"}</p>
                       </td>
                       <td className="py-3.5 px-4 text-gray-700">{f.occupation || "Farmer"}</td>
-                      <td className="py-3.5 px-4">{getKycBadge(f.verified)}</td>
                       <td className="py-3.5 px-4">{getStatusBadge(f.status)}</td>
                       <td className="py-3.5 px-4 text-center">
                         <div className="flex items-center justify-center gap-1.5">
@@ -267,9 +271,9 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                   <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Personal Information</p>
                   {[
                     { label: "Full Name", value: selectedFarmer.name },
-                    { label: "Father/Husband", value: selectedFarmer.fatherName || "—" },
-                    { label: "Gender", value: selectedFarmer.gender || "Male" },
-                    { label: "Date of Birth", value: selectedFarmer.dob || "—" },
+                    { label: "User ID", value: selectedFarmer.userId || selectedFarmer.id || "â" },
+                    { label: "Gender", value: selectedFarmer.gender || "â" },
+                    { label: "Date of Birth", value: selectedFarmer.dob || "â" },
                     { label: "Occupation", value: selectedFarmer.occupation || "Farmer" },
                   ].map((row, i) => (
                     <div key={i} className="flex items-start justify-between gap-2">
@@ -283,11 +287,11 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                   <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Contact & Address</p>
                   {[
                     { label: "Mobile No.", value: selectedFarmer.phone },
-                    { label: "Email Address", value: selectedFarmer.email || "—" },
+                    { label: "Email Address", value: selectedFarmer.email || "â" },
                     { label: "State", value: selectedFarmer.state || "Bihar" },
                     { label: "District", value: selectedFarmer.district || "Patna" },
-                    { label: "Village", value: selectedFarmer.village || "—" },
-                    { label: "Full Address", value: selectedFarmer.address || "—" },
+                    { label: "Village", value: selectedFarmer.village || "â" },
+                    { label: "Full Address", value: selectedFarmer.address || "â" },
                   ].map((row, i) => (
                     <div key={i} className="flex items-start justify-between gap-2">
                       <span className="text-gray-400 shrink-0">{row.label}</span>
@@ -302,8 +306,8 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                     <span className="text-gray-800 font-semibold">{selectedFarmer.createdAt}</span>
                   </div>
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-gray-400 shrink-0">KYC Status</span>
-                    <span className="text-emerald-700 font-bold">{selectedFarmer.verified === "verified" ? "Verified" : "Pending"}</span>
+                    <span className="text-gray-400 shrink-0">Status</span>
+                    <span className="text-emerald-700 font-bold capitalize">{selectedFarmer.status}</span>
                   </div>
                 </div>
 
@@ -336,7 +340,7 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                 )}
                 <div>
                   <h2 className="text-lg font-bold leading-tight">{viewingModalFarmer.name}</h2>
-                  <p className="text-xs text-emerald-200">Registered Farmer Account Profile • #{viewingModalFarmer.id}</p>
+                  <p className="text-xs text-emerald-200">Registered Farmer Account Profile â¢ User ID: {viewingModalFarmer.userId || viewingModalFarmer.id}</p>
                 </div>
               </div>
               <button
@@ -360,24 +364,24 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                     <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.name}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400 block text-[10.5px]">Father / Husband Name</span>
-                    <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.fatherName || "—"}</span>
+                    <span className="text-gray-400 block text-[10.5px]">User ID (Login ID)</span>
+                    <span className="font-bold text-emerald-700 font-mono text-xs">{viewingModalFarmer.userId || viewingModalFarmer.id || "â"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Gender</span>
-                    <span className="font-bold text-gray-800 text-xs capitalize">{viewingModalFarmer.gender || "Male"}</span>
+                    <span className="font-bold text-gray-800 text-xs capitalize">{viewingModalFarmer.gender || "â"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Date of Birth</span>
-                    <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.dob || "—"}</span>
+                    <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.dob || "â"}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400 block text-[10.5px]">Occupation</span>
-                    <span className="font-bold text-emerald-700 text-xs">{viewingModalFarmer.occupation || "Farmer"}</span>
+                    <span className="text-gray-400 block text-[10.5px]">Email Address</span>
+                    <span className="font-bold text-emerald-700 text-xs">{viewingModalFarmer.email || "â"}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400 block text-[10.5px]">KYC Status</span>
-                    <span className="font-bold text-emerald-600 text-xs capitalize">{viewingModalFarmer.verified}</span>
+                    <span className="text-gray-400 block text-[10.5px]">Account Status</span>
+                    <span className="font-bold text-emerald-600 text-xs capitalize">{viewingModalFarmer.status}</span>
                   </div>
                 </div>
               </div>
@@ -406,7 +410,7 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Village / Panchayat</span>
-                    <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.village || "—"}</span>
+                    <span className="font-bold text-gray-800 text-xs">{viewingModalFarmer.village || "â"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Registration Date</span>
@@ -414,7 +418,7 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                   </div>
                   <div className="col-span-2 sm:col-span-3">
                     <span className="text-gray-400 block text-[10.5px]">Full Residence Address</span>
-                    <span className="font-medium text-gray-800 text-xs">{viewingModalFarmer.address || "—"}</span>
+                    <span className="font-medium text-gray-800 text-xs">{viewingModalFarmer.address || "â"}</span>
                   </div>
                 </div>
               </div>
@@ -435,7 +439,7 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Farmers Database
+        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Farmers Database
       </div>
     </div>
   );

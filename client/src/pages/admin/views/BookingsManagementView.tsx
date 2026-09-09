@@ -70,13 +70,13 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
   // Labour allotment fields
   const [workerNames, setWorkerNames] = useState("");
   const [leadWorkerPhone, setLeadWorkerPhone] = useState("");
-  const [labourDailyRate, setLabourDailyRate] = useState("₹450 / day");
+  const [labourDailyRate, setLabourDailyRate] = useState("â¹450 / day");
 
   // Machine allotment fields
   const [machineRegNo, setMachineRegNo] = useState("");
   const [operatorName, setOperatorName] = useState("");
   const [operatorPhone, setOperatorPhone] = useState("");
-  const [hourlyRate, setHourlyRate] = useState("₹350 / hr");
+  const [hourlyRate, setHourlyRate] = useState("â¹350 / hr");
 
   // Soil / Doctor allotment fields
   const [technicianName, setTechnicianName] = useState("");
@@ -91,12 +91,12 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
     if (typeLower.includes("labour")) {
       setWorkerNames("Ramesh Yadav, Mukesh Kumar, Sunita Devi");
       setLeadWorkerPhone(b.phone || "9876543210");
-      setLabourDailyRate("₹450 / day per worker");
+      setLabourDailyRate("â¹450 / day per worker");
     } else if (typeLower.includes("machin") || typeLower.includes("tractor")) {
       setMachineRegNo("BR-01-AX-4892");
       setOperatorName("Vikram Singh (Certified Operator)");
       setOperatorPhone("9812345678");
-      setHourlyRate("₹350 / hr (Fuel included)");
+      setHourlyRate("â¹350 / hr (Fuel included)");
     } else {
       setTechnicianName("Dr. R. K. Sharma (Senior Soil Analyst)");
       setTechnicianPhone("9431012345");
@@ -181,9 +181,9 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
           combined.push({
             id: l.id || `LAB${100 + idx}`,
             serviceType: "Labour Booking",
-            icon: "👥",
+            icon: "ð¥",
             customer: l.userName || "Farmer Customer",
-            phone: l.phone || "—",
+            phone: l.phone || "â",
             date: l.startDate || (l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "Today"),
             time: "09:00 AM",
             status: l.status === "assigned" || l.status === "completed" ? "Confirmed" : l.status === "pending" ? "Ongoing" : "Confirmed",
@@ -199,9 +199,9 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
           combined.push({
             id: m.id || `MAC${100 + idx}`,
             serviceType: m.machineryType || "Tractor Booking",
-            icon: "🚜",
+            icon: "ð",
             customer: m.userName || "Farmer Customer",
-            phone: m.phone || "—",
+            phone: m.phone || "â",
             date: m.bookingDate || (m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "Today"),
             time: "10:30 AM",
             status: m.status === "allotted" ? "Confirmed" : m.status === "rejected" ? "Cancelled" : "Ongoing",
@@ -217,9 +217,9 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
           combined.push({
             id: e.id || `EXP${100 + idx}`,
             serviceType: "Doctor Booking",
-            icon: "🩺",
+            icon: "ð©º",
             customer: e.farmerName || "Farmer Customer",
-            phone: e.phone || "—",
+            phone: e.phone || "â",
             date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-IN") : "Today",
             time: "11:00 AM",
             status: e.status === "resolved" ? "Completed" : "Confirmed",
@@ -296,7 +296,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
         createdRow = {
           id: res.id || id,
           serviceType: "Labour Booking",
-          icon: "👥",
+          icon: "ð¥",
           customer: createCustomer,
           phone: createPhone,
           date: createDate,
@@ -319,7 +319,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
         createdRow = {
           id: res.id || id,
           serviceType: "Doctor Booking",
-          icon: "🩺",
+          icon: "ð©º",
           customer: createCustomer,
           phone: createPhone,
           date: createDate,
@@ -343,7 +343,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
         createdRow = {
           id: res.id || id,
           serviceType: createServiceType,
-          icon: typeLower.includes("soil") ? "🧪" : typeLower.includes("warehouse") ? "🏬" : typeLower.includes("transport") ? "🚚" : "🚜",
+          icon: typeLower.includes("soil") ? "ð§ª" : typeLower.includes("warehouse") ? "ð¬" : typeLower.includes("transport") ? "ð" : "ð",
           customer: createCustomer,
           phone: createPhone,
           date: createDate,
@@ -465,11 +465,11 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
       {/* 5 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: "Total Bookings", value: bookings.length.toString(), sub: "Live MongoDB records", icon: "📅", bg: "bg-emerald-50", tc: "text-emerald-600" },
-          { label: "Confirmed", value: bookings.filter(b => b.status === "Confirmed").length.toString(), sub: "Confirmed bookings", icon: "✅", bg: "bg-blue-50", tc: "text-blue-600" },
-          { label: "Ongoing", value: bookings.filter(b => b.status === "Ongoing").length.toString(), sub: "In-progress services", icon: "⏳", bg: "bg-amber-50", tc: "text-amber-600" },
-          { label: "Completed", value: bookings.filter(b => b.status === "Completed").length.toString(), sub: "Fulfilled bookings", icon: "🏆", bg: "bg-purple-50", tc: "text-purple-600" },
-          { label: "Cancelled", value: bookings.filter(b => b.status === "Cancelled").length.toString(), sub: "Cancelled bookings", icon: "❌", bg: "bg-red-50", tc: "text-red-600" },
+          { label: "Total Bookings", value: bookings.length.toString(), sub: "Live MongoDB records", icon: "ð", bg: "bg-emerald-50", tc: "text-emerald-600" },
+          { label: "Confirmed", value: bookings.filter(b => b.status === "Confirmed").length.toString(), sub: "Confirmed bookings", icon: "â", bg: "bg-blue-50", tc: "text-blue-600" },
+          { label: "Ongoing", value: bookings.filter(b => b.status === "Ongoing").length.toString(), sub: "In-progress services", icon: "â³", bg: "bg-amber-50", tc: "text-amber-600" },
+          { label: "Completed", value: bookings.filter(b => b.status === "Completed").length.toString(), sub: "Fulfilled bookings", icon: "ð", bg: "bg-purple-50", tc: "text-purple-600" },
+          { label: "Cancelled", value: bookings.filter(b => b.status === "Cancelled").length.toString(), sub: "Cancelled bookings", icon: "â", bg: "bg-red-50", tc: "text-red-600" },
         ].map((k, i) => (
           <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-2">
@@ -485,13 +485,13 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
       {/* Service Type Quick Filter Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {[
-          { label: "All Services", value: "all", icon: "📋" },
-          { label: "Tractor Booking", value: "tractor", icon: "🚜" },
-          { label: "Labour Booking", value: "labour", icon: "👥" },
-          { label: "Doctor Booking", value: "doctor", icon: "🩺" },
-          { label: "Soil Test", value: "soil", icon: "🧪" },
-          { label: "Warehouse", value: "warehouse", icon: "🏬" },
-          { label: "Transport", value: "transport", icon: "🚚" },
+          { label: "All Services", value: "all", icon: "ð" },
+          { label: "Tractor Booking", value: "tractor", icon: "ð" },
+          { label: "Labour Booking", value: "labour", icon: "ð¥" },
+          { label: "Doctor Booking", value: "doctor", icon: "ð©º" },
+          { label: "Soil Test", value: "soil", icon: "ð§ª" },
+          { label: "Warehouse", value: "warehouse", icon: "ð¬" },
+          { label: "Transport", value: "transport", icon: "ð" },
         ].map((s) => (
           <button
             key={s.value}
@@ -596,7 +596,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                     <td className="py-3.5 px-4 text-gray-600">{b.phone}</td>
                     <td className="py-3.5 px-4 text-gray-500">{b.date}</td>
                     <td className="py-3.5 px-4">{getStatusBadge(b.status)}</td>
-                    <td className="py-3.5 px-4 font-bold text-gray-900">₹ {b.amount.toLocaleString("en-IN")}</td>
+                    <td className="py-3.5 px-4 font-bold text-gray-900">â¹ {b.amount.toLocaleString("en-IN")}</td>
                     <td className="py-3.5 px-4 text-center">
                       <div className="flex items-center justify-center gap-1.5">
                         {/* View & Allot */}
@@ -656,12 +656,12 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                   className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-xs rounded-xl px-3 py-2 outline-none cursor-pointer focus:border-emerald-500"
                   required
                 >
-                  <option value="Tractor Booking">🚜 Tractor Booking</option>
-                  <option value="Labour Booking">👥 Labour Booking</option>
-                  <option value="Doctor Booking">🩺 Doctor Booking / Crop Advisory</option>
-                  <option value="Soil Test Booking">🧪 Soil Test Booking</option>
-                  <option value="Warehouse Booking">🏬 Warehouse Booking</option>
-                  <option value="Transport Booking">🚚 Transport Booking</option>
+                  <option value="Tractor Booking">ð Tractor Booking</option>
+                  <option value="Labour Booking">ð¥ Labour Booking</option>
+                  <option value="Doctor Booking">ð©º Doctor Booking / Crop Advisory</option>
+                  <option value="Soil Test Booking">ð§ª Soil Test Booking</option>
+                  <option value="Warehouse Booking">ð¬ Warehouse Booking</option>
+                  <option value="Transport Booking">ð Transport Booking</option>
                 </select>
               </div>
 
@@ -682,7 +682,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                   <Input type="date" value={createDate} onChange={(e) => setCreateDate(e.target.value)} className="bg-gray-50 border-gray-200 text-xs" required />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-700 mb-1 block">Booking Amount (₹)</label>
+                  <label className="text-xs font-bold text-gray-700 mb-1 block">Booking Amount (â¹)</label>
                   <Input type="number" value={createAmount} onChange={(e) => setCreateAmount(Number(e.target.value))} className="bg-gray-50 border-gray-200 text-xs" required />
                 </div>
               </div>
@@ -758,7 +758,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
               </div>
 
               <div>
-                <label className="text-xs font-bold text-gray-700 mb-1 block">Booking Amount (₹)</label>
+                <label className="text-xs font-bold text-gray-700 mb-1 block">Booking Amount (â¹)</label>
                 <Input type="number" value={editAmount} onChange={(e) => setEditAmount(Number(e.target.value))} className="bg-gray-50 border-gray-200 text-xs" required />
               </div>
 
@@ -773,7 +773,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
         </div>
       )}
 
-      {/* ─── REVIEW & ALLOT SERVICE MODAL (Point 6) ─── */}
+      {/* âââ REVIEW & ALLOT SERVICE MODAL (Point 6) âââ */}
       {isAllotOpen && allottingBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white border border-gray-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 relative max-h-[90vh] overflow-y-auto">
@@ -786,11 +786,11 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
 
             <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 text-xl font-bold shrink-0">
-                {allottingBooking.icon || "🚜"}
+                {allottingBooking.icon || "ð"}
               </div>
               <div>
                 <h3 className="text-base font-bold text-gray-900">Review & Allot Service Details</h3>
-                <p className="text-xs text-gray-500">Booking #{allottingBooking.id} • {allottingBooking.serviceType}</p>
+                <p className="text-xs text-gray-500">Booking #{allottingBooking.id} â¢ {allottingBooking.serviceType}</p>
               </div>
             </div>
 
@@ -810,7 +810,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500">Booking Amount:</span>
-                <span className="font-bold text-emerald-700">₹ {allottingBooking.amount.toLocaleString("en-IN")}</span>
+                <span className="font-bold text-emerald-700">â¹ {allottingBooking.amount.toLocaleString("en-IN")}</span>
               </div>
             </div>
 
@@ -849,7 +849,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                       <Input
                         value={labourDailyRate}
                         onChange={e => setLabourDailyRate(e.target.value)}
-                        placeholder="e.g. ₹450 / day per worker"
+                        placeholder="e.g. â¹450 / day per worker"
                         className="text-xs bg-gray-50 rounded-xl"
                         required
                       />
@@ -903,7 +903,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                     <Input
                       value={hourlyRate}
                       onChange={e => setHourlyRate(e.target.value)}
-                      placeholder="e.g. ₹350 / hour (with fuel and driver)"
+                      placeholder="e.g. â¹350 / hour (with fuel and driver)"
                       className="text-xs bg-gray-50 rounded-xl"
                       required
                     />

@@ -3,6 +3,38 @@ import { type Language, TRANSLATIONS, type Translations } from "@/lib/translatio
 import { toast } from "sonner";
 import { api } from "@/services/api";
 
+// ── One-time migration: rename krivexa_* localStorage keys to krivexo_* ──────
+(function migrateLocalStorageKeys() {
+  const keyMap: Record<string, string> = {
+    "krivexa_user_profile": "krivexo_user_profile",
+    "krivexa_registered_accounts": "krivexo_registered_accounts",
+    "krivexa_wallet_txns": "krivexo_wallet_txns",
+    "krivexa_notifications": "krivexo_notifications",
+    "krivexa_user_notifications": "krivexo_user_notifications",
+    "krivexa_dealer_listings": "krivexo_dealer_listings",
+    "krivexa_kcc_apps": "krivexo_kcc_apps",
+    "krivexa_kcc_status": "krivexo_kcc_status",
+    "krivexa_farmer_cards": "krivexo_farmer_cards",
+    "krivexa_crop_listings": "krivexo_crop_listings",
+    "krivexa_labour_bookings": "krivexo_labour_bookings",
+    "krivexa_machinery_bookings": "krivexo_machinery_bookings",
+    "krivexa_expert_queries": "krivexo_expert_queries",
+    "krivexa_cart": "krivexo_cart",
+    "krivexa_orders": "krivexo_orders",
+  };
+  if (localStorage.getItem("krivexo_migrated_v1")) return;
+  Object.entries(keyMap).forEach(([oldKey, newKey]) => {
+    const val = localStorage.getItem(oldKey);
+    if (val !== null && !localStorage.getItem(newKey)) {
+      localStorage.setItem(newKey, val);
+    }
+    if (val !== null) localStorage.removeItem(oldKey);
+  });
+  localStorage.setItem("krivexo_migrated_v1", "1");
+})();
+// ─────────────────────────────────────────────────────────────────────────────
+
+
 export interface CropListing {
   id: string;
   sellerName: string;
@@ -111,16 +143,24 @@ export interface UserProfile {
   isVerified?: boolean;
   kccCardNumber?: string;
   kccCreditLimit?: number;
+  userId?: string;
+  gender?: string;
+  dob?: string;
+  address?: string;
   createdAt: string;
 }
 
 export interface RegisteredAccount {
   id: string;
+  userId?: string;
   fullName: string;
   phone: string;
   email?: string;
   password?: string;
   role: "farmer" | "dealer";
+  gender?: string;
+  dob?: string;
+  address?: string;
   state: string;
   district: string;
   village: string;
@@ -136,7 +176,15 @@ export interface RegisteredAccount {
   isVerified?: boolean;
   kccCardNumber?: string;
   kccCreditLimit?: number;
+  pincode?: string;
+  aadhaarNumber?: string;
+  bankHolder?: string;
+  bankName?: string;
+  bankAccount?: string;
+  bankIfsc?: string;
+  bankAddress?: string;
   createdAt: string;
+  [key: string]: any;
 }
 
 export interface MachineryBookingRequest {
@@ -403,43 +451,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Language State
   const [language, setLanguageState] = useState<Language>(() => {
-    return (localStorage.getItem("krivexa_lang") as Language) || "en";
+    return (localStorage.getItem("krivexo_lang") as Language) || "en";
   });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem("krivexa_lang", lang);
+    localStorage.setItem("krivexo_lang", lang);
   };
 
   const t = TRANSLATIONS[language];
 
   // Admin Auth State
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
-    return localStorage.getItem("krivexa_admin_session") === "true";
+    return localStorage.getItem("krivexo_admin_session") === "true";
   });
   const [adminName, setAdminName] = useState<string>(() => {
-    return localStorage.getItem("krivexa_admin_name") || "Aditya Saha";
+    return localStorage.getItem("krivexo_admin_name") || "Aditya Saha";
   });
 
   const adminLogin = (id: string, _pass: string): boolean => {
     const nameToUse = id.trim() || "Aditya Saha";
     setIsAdminLoggedIn(true);
     setAdminName(nameToUse);
-    localStorage.setItem("krivexa_admin_session", "true");
-    localStorage.setItem("krivexa_admin_name", nameToUse);
+    localStorage.setItem("krivexo_admin_session", "true");
+    localStorage.setItem("krivexo_admin_name", nameToUse);
     return true;
   };
 
   const adminLogout = () => {
     setIsAdminLoggedIn(false);
-    localStorage.removeItem("krivexa_admin_session");
-    localStorage.removeItem("krivexa_admin_name");
+    localStorage.removeItem("krivexo_admin_session");
+    localStorage.removeItem("krivexo_admin_name");
   };
 
-  // KCC State — hydrate from localStorage / DB
+  // KCC State â hydrate from localStorage / DB
   const [isKccIssuedState, setIsKccIssuedState] = useState<boolean>(false);
   const [kccApplications, setKccApplications] = useState<KccApplication[]>(() => {
-    return safeJsonParse("krivexa_kcc_apps", []);
+    return safeJsonParse("krivexo_kcc_apps", []);
   });
   const [isKccAlertOpen, setIsKccAlertOpen] = useState<boolean>(false);
   const [isKccAppModalOpen, setIsKccAppModalOpen] = useState<boolean>(false);
@@ -491,7 +539,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               prev.forEach((item) => map.set(item.id, item));
               remoteKcc.forEach((item: any) => map.set(item.id, item));
               const merged = Array.from(map.values());
-              localStorage.setItem("krivexa_kcc_apps", JSON.stringify(merged));
+              localStorage.setItem("krivexo_kcc_apps", JSON.stringify(merged));
               return merged;
             });
           }
@@ -549,7 +597,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("krivexa_kcc_apps", JSON.stringify(kccApplications));
+    localStorage.setItem("krivexo_kcc_apps", JSON.stringify(kccApplications));
   }, [kccApplications]);
 
   const submitKccApplication = (appData: Omit<KccApplication, "id" | "status" | "createdAt">) => {
@@ -564,7 +612,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setKccApplications((prev) => [newApp, ...prev.filter((a) => a.phone !== newApp.phone)]);
     api.submitKccApplication(newApp);
     addNotification(
-      "KCC Application Submitted 💳",
+      "KCC Application Submitted ð³",
       `Your Kisan Credit Card application has been submitted. We will review it shortly.`,
       "info",
       "/dashboard",
@@ -575,7 +623,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const toggleKccDemoStatus = () => {
     const nextState = !isKccIssuedState;
     setIsKccIssuedState(nextState);
-    localStorage.setItem("krivexa_kcc_issued", nextState ? "true" : "false");
+    localStorage.setItem("krivexo_kcc_issued", nextState ? "true" : "false");
   };
 
   const approveKccApplication = (id: string, customCardNumber?: string, customLimit?: number) => {
@@ -608,14 +656,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return app;
     });
     setKccApplications(updatedApps);
-    localStorage.setItem("krivexa_kcc_apps", JSON.stringify(updatedApps));
+    localStorage.setItem("krivexo_kcc_apps", JSON.stringify(updatedApps));
 
     api.approveKccApplication(id, cardNumber, limit);
 
     // If matches currently logged-in user, unlock KCC immediately
     if (user && matchesApplicant(user.phone, user.name)) {
       setIsKccIssuedState(true);
-      localStorage.setItem("krivexa_kcc_issued", "true");
+      localStorage.setItem("krivexo_kcc_issued", "true");
       const updatedUser: UserProfile = {
         ...user,
         isKccIssued: true,
@@ -624,7 +672,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         kccCreditLimit: limit,
       };
       setUser(updatedUser);
-      localStorage.setItem("krivexa_user_profile", JSON.stringify(updatedUser));
+      localStorage.setItem("krivexo_user_profile", JSON.stringify(updatedUser));
     }
 
     // Also update registered account if found
@@ -635,7 +683,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return acc;
       });
-      localStorage.setItem("krivexa_registered_accounts", JSON.stringify(updated));
+      localStorage.setItem("krivexo_registered_accounts", JSON.stringify(updated));
       return updated;
     });
 
@@ -650,8 +698,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     addNotification(
-      "Kisan Credit Card (KCC) Approved & Allotted 💳",
-      `Congratulations ${targetApp?.fullName || "User"}! Your KCC card application has been approved by the Admin. Allotted Card Number: ${cardNumber} with Credit Limit of ₹${limit.toLocaleString("en-IN")}. All platform features (buying, selling, bookings & trading) are now 100% unlocked!`,
+      "Kisan Credit Card (KCC) Approved & Allotted ð³",
+      `Congratulations ${targetApp?.fullName || "User"}! Your KCC card application has been approved by the Admin. Allotted Card Number: ${cardNumber} with Credit Limit of â¹${limit.toLocaleString("en-IN")}. All platform features (buying, selling, bookings & trading) are now 100% unlocked!`,
       "success",
       "/wallet",
       "kcc"
@@ -697,7 +745,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return app;
       });
-      localStorage.setItem("krivexa_kcc_apps", JSON.stringify(updated));
+      localStorage.setItem("krivexo_kcc_apps", JSON.stringify(updated));
       return updated;
     });
 
@@ -712,7 +760,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           kccCreditLimit: newLimit,
         };
         setUser(updatedUser);
-        localStorage.setItem("krivexa_user_profile", JSON.stringify(updatedUser));
+        localStorage.setItem("krivexo_user_profile", JSON.stringify(updatedUser));
         api.saveUser(updatedUser).catch(() => {});
       }
     }
@@ -731,7 +779,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return acc;
       });
-      localStorage.setItem("krivexa_registered_accounts", JSON.stringify(updated));
+      localStorage.setItem("krivexo_registered_accounts", JSON.stringify(updated));
       return updated;
     });
 
@@ -754,8 +802,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 6. Dispatch notification
     addNotification(
-      "KCC Credit Limit Updated 💳",
-      `KCC Card limit for #${cleanCard} has been updated to ₹${newLimit.toLocaleString("en-IN")}.`,
+      "KCC Credit Limit Updated ð³",
+      `KCC Card limit for #${cleanCard} has been updated to â¹${newLimit.toLocaleString("en-IN")}.`,
       "info",
       "/wallet",
       "kcc"
@@ -793,7 +841,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return acc;
       });
-      localStorage.setItem("krivexa_registered_accounts", JSON.stringify(updated));
+      localStorage.setItem("krivexo_registered_accounts", JSON.stringify(updated));
       return updated;
     });
 
@@ -813,11 +861,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Crop Listings State
   const [cropListings, setCropListings] = useState<CropListing[]>(() => {
-    return safeJsonParse("krivexa_crop_listings", INITIAL_CROPS);
+    return safeJsonParse("krivexo_crop_listings", INITIAL_CROPS);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_crop_listings", JSON.stringify(cropListings));
+    localStorage.setItem("krivexo_crop_listings", JSON.stringify(cropListings));
   }, [cropListings]);
 
   const addCropListing = (listing: Omit<CropListing, "id" | "status" | "createdAt">) => {
@@ -830,7 +878,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCropListings((prev) => [newListing, ...prev]);
     api.addCrop(newListing);
     addNotification(
-      "Crop Listing Submitted 🌾",
+      "Crop Listing Submitted ð¾",
       `Your listing for "${listing.cropName}" (${listing.weight}) has been submitted and is pending review.`,
       "info",
       "/sell-crops",
@@ -846,7 +894,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.approveCrop(id);
     if (listing) {
       addNotification(
-        "Crop Listing Approved ✅",
+        "Crop Listing Approved â",
         `Your crop listing "${listing.cropName}" has been approved and is now live on the marketplace.`,
         "success",
         "/agri-market",
@@ -864,11 +912,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Machinery Booking State
   const [machineryBookings, setMachineryBookings] = useState<MachineryBookingRequest[]>(() => {
-    return safeJsonParse("krivexa_machinery_bookings", []);
+    return safeJsonParse("krivexo_machinery_bookings", []);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_machinery_bookings", JSON.stringify(machineryBookings));
+    localStorage.setItem("krivexo_machinery_bookings", JSON.stringify(machineryBookings));
   }, [machineryBookings]);
 
   const addMachineryBooking = (booking: Omit<MachineryBookingRequest, "id" | "status" | "createdAt">) => {
@@ -881,7 +929,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMachineryBookings((prev) => [newBooking, ...prev]);
     api.addMachineryBooking(newBooking);
     addNotification(
-      "Machinery Booking Request Sent 🚜",
+      "Machinery Booking Request Sent ð",
       `Your booking request for ${booking.machineryType} on ${booking.bookingDate} has been sent to admin for allotment.`,
       "info",
       "/machinery-booking",
@@ -900,7 +948,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     api.allotMachinery(id, machineDetails, notes);
     addNotification(
-      "Machinery Allotted! 🚜",
+      "Machinery Allotted! ð",
       `Your requested machine (${target?.machineryType || "Machinery"}) has been allotted by Admin: ${machineDetails}.`,
       "success",
       "/machinery-booking",
@@ -915,7 +963,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     api.rejectMachinery(id);
     addNotification(
-      "Machinery Request Declined ❌",
+      "Machinery Request Declined â",
       `Your booking request for ${target?.machineryType || "Machinery"} could not be fulfilled at this time.`,
       "warning",
       "/machinery-booking",
@@ -925,11 +973,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Labour Booking & Types State
   const [labourTypes, setLabourTypes] = useState<string[]>(() => {
-    return safeJsonParse("krivexa_labour_types", INITIAL_LABOUR_TYPES);
+    return safeJsonParse("krivexo_labour_types", INITIAL_LABOUR_TYPES);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_labour_types", JSON.stringify(labourTypes));
+    localStorage.setItem("krivexo_labour_types", JSON.stringify(labourTypes));
   }, [labourTypes]);
 
   const addLabourType = (type: string) => {
@@ -944,11 +992,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const [labourBookings, setLabourBookings] = useState<LabourBookingRequest[]>(() => {
-    return safeJsonParse("krivexa_labour_bookings", []);
+    return safeJsonParse("krivexo_labour_bookings", []);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_labour_bookings", JSON.stringify(labourBookings));
+    localStorage.setItem("krivexo_labour_bookings", JSON.stringify(labourBookings));
   }, [labourBookings]);
 
   const addLabourBooking = (booking: Omit<LabourBookingRequest, "id" | "status" | "createdAt">) => {
@@ -961,7 +1009,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLabourBookings((prev) => [newBooking, ...prev]);
     api.addLabourBooking(newBooking);
     addNotification(
-      "Labour Booking Request Sent 👷",
+      "Labour Booking Request Sent ð·",
       `Your request for ${booking.count} ${booking.labourType}(s) starting ${booking.startDate} has been submitted.`,
       "info",
       "/labour-booking",
@@ -983,7 +1031,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     api.assignLabours(id, assigned, notes);
     addNotification(
-      "Labour Assigned to You! ✅",
+      "Labour Assigned to You! â",
       `${assigned.length} labourer(s) have been assigned to your booking. Check your booking page for details.`,
       "success",
       "/labour-booking",
@@ -993,11 +1041,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Expert Advice State
   const [expertAdviceQueries, setExpertAdviceQueries] = useState<ExpertAdviceQuery[]>(() => {
-    return safeJsonParse("krivexa_expert_queries", []);
+    return safeJsonParse("krivexo_expert_queries", []);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_expert_queries", JSON.stringify(expertAdviceQueries));
+    localStorage.setItem("krivexo_expert_queries", JSON.stringify(expertAdviceQueries));
   }, [expertAdviceQueries]);
 
   const addExpertQuery = (query: Omit<ExpertAdviceQuery, "id" | "status" | "createdAt">) => {
@@ -1010,7 +1058,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setExpertAdviceQueries((prev) => [newQuery, ...prev]);
     api.addExpertQuery(newQuery);
     addNotification(
-      "Expert Advice Query Submitted 🌿",
+      "Expert Advice Query Submitted ð¿",
       `Your query about "${query.cropName}" has been received. An expert will contact you soon.`,
       "info",
       "/expert-advice",
@@ -1029,7 +1077,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.updateExpertQuery(id, status, reply);
     if (status === "resolved" && reply) {
       addNotification(
-        "Expert Advice Received! 🎓",
+        "Expert Advice Received! ð",
         `Your crop query has been resolved by our expert. Tap to view the reply.`,
         "success",
         "/expert-advice",
@@ -1037,7 +1085,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
     } else if (status === "contacted") {
       addNotification(
-        "Expert Will Contact You 📞",
+        "Expert Will Contact You ð",
         `An agricultural expert will call you shortly regarding your crop query.`,
         "info",
         "/expert-advice",
@@ -1048,11 +1096,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Mandi Rates State
   const [mandiRates, setMandiRates] = useState<MandiRate[]>(() => {
-    return safeJsonParse("krivexa_mandi_rates", INITIAL_MANDI_RATES);
+    return safeJsonParse("krivexo_mandi_rates", INITIAL_MANDI_RATES);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_mandi_rates", JSON.stringify(mandiRates));
+    localStorage.setItem("krivexo_mandi_rates", JSON.stringify(mandiRates));
   }, [mandiRates]);
 
   const addMandiRate = (rate: Omit<MandiRate, "id">) => {
@@ -1078,39 +1126,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // User Profile Session State
   const [user, setUser] = useState<UserProfile | null>(() => {
-    return safeJsonParse<UserProfile | null>("krivexa_user_profile", null);
+    return safeJsonParse<UserProfile | null>("krivexo_user_profile", null);
   });
 
   const [notifications, setNotifications] = useState<UserNotification[]>(() => {
-    return safeJsonParse<UserNotification[]>("krivexa_user_notifications", []);
+    return safeJsonParse<UserNotification[]>("krivexo_user_notifications", []);
   });
 
   const [registeredAccounts, setRegisteredAccounts] = useState<RegisteredAccount[]>(() => {
-    return safeJsonParse<RegisteredAccount[]>("krivexa_registered_accounts", []);
+    return safeJsonParse<RegisteredAccount[]>("krivexo_registered_accounts", []);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_registered_accounts", JSON.stringify(registeredAccounts));
+    localStorage.setItem("krivexo_registered_accounts", JSON.stringify(registeredAccounts));
   }, [registeredAccounts]);
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem("krivexa_user_profile", JSON.stringify(user));
+      localStorage.setItem("krivexo_user_profile", JSON.stringify(user));
     } else {
-      localStorage.removeItem("krivexa_user_profile");
+      localStorage.removeItem("krivexo_user_profile");
     }
   }, [user]);
 
   useEffect(() => {
-    localStorage.setItem("krivexa_user_notifications", JSON.stringify(notifications));
+    localStorage.setItem("krivexo_user_notifications", JSON.stringify(notifications));
   }, [notifications]);
 
   const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>(() => {
-    return safeJsonParse<WalletTransaction[]>("krivexa_wallet_txns", []);
+    return safeJsonParse<WalletTransaction[]>("krivexo_wallet_txns", []);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_wallet_txns", JSON.stringify(walletTransactions));
+    localStorage.setItem("krivexo_wallet_txns", JSON.stringify(walletTransactions));
   }, [walletTransactions]);
 
   const addWalletTransaction = (txn: Omit<WalletTransaction, "id" | "date">) => {
@@ -1129,6 +1177,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const registerNewAccount = (accountData: Omit<RegisteredAccount, "id" | "createdAt">): RegisteredAccount => {
     const accountName = accountData.fullName || (accountData as any).name || "User";
     const newAccount: RegisteredAccount = {
+      phone: accountData.phone || "",
+      role: accountData.role || "farmer",
+      state: accountData.state || "",
+      district: accountData.district || "",
+      village: accountData.village || "",
       ...accountData,
       fullName: accountName,
       id: `acc-${Date.now()}`,
@@ -1150,7 +1203,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const loginUser = (profileData: Omit<UserProfile, "id" | "createdAt">) => {
     const cleanP = (profileData.phone || "").replace(/\D/g, "").slice(-10);
     const existingAcc = registeredAccounts.find(
-      (a) => (a.phone || "").replace(/\D/g, "").slice(-10) === cleanP ||
+      (a) => (profileData.userId && a.userId && a.userId.trim().toLowerCase() === profileData.userId.trim().toLowerCase()) ||
+        (cleanP && (a.phone || "").replace(/\D/g, "").slice(-10) === cleanP) ||
         (profileData.name && a.fullName && a.fullName.trim().toLowerCase() === profileData.name.trim().toLowerCase())
     );
 
@@ -1182,11 +1236,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
         if (userApps.length > 0) {
           setKccApplications(userApps);
-          localStorage.setItem("krivexa_kcc_apps", JSON.stringify(userApps));
+          localStorage.setItem("krivexo_kcc_apps", JSON.stringify(userApps));
           const approvedApp = userApps.find((a) => a.status === "approved" && a.cardNumber);
           if (approvedApp) {
             setIsKccIssuedState(true);
-            localStorage.setItem("krivexa_kcc_issued", "true");
+            localStorage.setItem("krivexo_kcc_issued", "true");
             setUser((u) => {
               if (!u) return null;
               const updated = {
@@ -1196,7 +1250,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 kccCardNumber: approvedApp.cardNumber,
                 kccCreditLimit: approvedApp.creditLimit || approvedApp.paymentAmount || u.kccCreditLimit || 50000,
               };
-              localStorage.setItem("krivexa_user_profile", JSON.stringify(updated));
+              localStorage.setItem("krivexo_user_profile", JSON.stringify(updated));
               return updated;
             });
           }
@@ -1205,7 +1259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }).catch(() => {});
 
     addNotification(
-      "Login Successful 👋",
+      "Login Successful ð",
       `Welcome back, ${newUser.name}! You are logged in as ${newUser.role === "farmer" ? "Farmer" : "Dealer"}.`,
       "success",
       "/",
@@ -1216,11 +1270,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const logoutUser = () => {
     setUser(null);
     // Clear all user-specific state from localStorage on logout
-    localStorage.removeItem("krivexa_user_profile");
-    localStorage.removeItem("krivexa_kcc_issued");
-    localStorage.removeItem("krivexa_kcc_apps");
-    localStorage.removeItem("krivexa_user_notifications");
-    localStorage.removeItem("krivexa_wallet_txns");
+    localStorage.removeItem("krivexo_user_profile");
+    localStorage.removeItem("krivexo_kcc_issued");
+    localStorage.removeItem("krivexo_kcc_apps");
+    localStorage.removeItem("krivexo_user_notifications");
+    localStorage.removeItem("krivexo_wallet_txns");
     // Reset KCC & Wallet state in memory so next user starts fresh
     setIsKccIssuedState(false);
     setKccApplications([]);
@@ -1229,9 +1283,58 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateUserProfile = (updated: Partial<UserProfile>) => {
-    setUser((prev) => (prev ? { ...prev, ...updated } : null));
-    if (user?.id) {
-      api.updateUser(user.id, updated);
+    setUser((prev) => {
+      if (!prev) return null;
+      const nextUser = { ...prev, ...updated };
+      localStorage.setItem("krivexo_user_profile", JSON.stringify(nextUser));
+      return nextUser;
+    });
+
+    setRegisteredAccounts((prev) => {
+      const next = prev.map((acc) => {
+        const matches =
+          (user?.id && acc.id === user.id) ||
+          (user?.phone && acc.phone === user.phone) ||
+          (user?.userId && acc.userId === user.userId) ||
+          (updated.phone && acc.phone === updated.phone) ||
+          (updated.userId && acc.userId === updated.userId);
+        if (matches) {
+          return {
+            ...acc,
+            fullName: updated.name || acc.fullName,
+            phone: updated.phone || acc.phone,
+            email: updated.email || acc.email,
+            village: updated.village || acc.village,
+            district: updated.district || acc.district,
+            state: updated.state || acc.state,
+            pincode: updated.pincode || acc.pincode,
+            gender: updated.gender || acc.gender,
+            dob: updated.dob || acc.dob,
+            address: updated.address || acc.address,
+            aadhaarNumber: updated.aadhaarNumber || acc.aadhaarNumber,
+            bankHolder: updated.bankHolder || acc.bankHolder,
+            bankName: updated.bankName || acc.bankName,
+            bankAccount: updated.bankAccount || acc.bankAccount,
+            bankIfsc: updated.bankIfsc || acc.bankIfsc,
+            bankAddress: updated.bankAddress || acc.bankAddress,
+          };
+        }
+        return acc;
+      });
+      localStorage.setItem("krivexo_registered_accounts", JSON.stringify(next));
+      return next;
+    });
+
+    const identifier = user?.id || user?.phone || user?.userId || updated.phone;
+    if (identifier) {
+      api.updateUser(identifier, updated).catch(err => console.warn("Backend update user error:", err));
+      api.saveUser({
+        ...user,
+        ...updated,
+        name: updated.name || user?.name,
+        phone: updated.phone || user?.phone,
+        id: user?.id
+      }).catch(err => console.warn("Backend save user error:", err));
     }
   };
 
@@ -1381,7 +1484,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
-    // 4. KCC must be approved with an assigned card number — unlocks 100% of website features!
+    // 4. KCC must be approved with an assigned card number â unlocks 100% of website features!
     if (isKccIssued) {
       return true;
     }
@@ -1442,7 +1545,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const holderName = info.cardHolder ?? "Farmer";
 
     if (currentBalance < amount) {
-      return { success: false, message: `Insufficient balance on KCC. Current available limit: ₹${currentBalance}` };
+      return { success: false, message: `Insufficient balance on KCC. Current available limit: â¹${currentBalance}` };
     }
 
     const newBalance = currentBalance - amount;
@@ -1458,7 +1561,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     addNotification(
       "KCC Payment Debited",
-      `₹${amount} debited for "${itemDesc}" from Card ${cleaned} (${holderName}).`,
+      `â¹${amount} debited for "${itemDesc}" from Card ${cleaned} (${holderName}).`,
       "success",
       "/wallet",
       "wallet"
@@ -1466,14 +1569,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return {
       success: true,
-      message: `Payment of ₹${amount} debited successfully!`,
+      message: `Payment of â¹${amount} debited successfully!`,
       remainingBalance: newBalance
     };
   };
 
   // Dealer Product / Service Listings State (Point 4)
   const [dealerListings, setDealerListings] = useState<DealerListing[]>(() => {
-    return safeJsonParse<DealerListing[]>("krivexa_dealer_listings", [
+    return safeJsonParse<DealerListing[]>("krivexo_dealer_listings", [
       {
         id: "dl-101",
         dealerId: "usr-dealer-1",
@@ -1492,7 +1595,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_dealer_listings", JSON.stringify(dealerListings));
+    localStorage.setItem("krivexo_dealer_listings", JSON.stringify(dealerListings));
   }, [dealerListings]);
 
   const addDealerListing = (item: Omit<DealerListing, "id" | "status" | "createdAt">) => {
@@ -1505,7 +1608,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDealerListings((prev) => [newListing, ...prev]);
     api.addDealerListing(newListing);
     addNotification(
-      "New Listing Request Sent 📦",
+      "New Listing Request Sent ð¦",
       `Your request to list "${item.title}" (${item.type}) has been sent to Admin for approval.`,
       "info",
       "/dashboard",
@@ -1521,7 +1624,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.approveDealerListing(id);
     if (target) {
       addNotification(
-        "Listing Approved by Admin ✅",
+        "Listing Approved by Admin â",
         `Your ${target.type} listing "${target.title}" is now active and live across all panels!`,
         "success",
         "/agri-market",
@@ -1555,36 +1658,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Kisan Pathshala Videos State & Actions
   const [pathshalaVideos, setPathshalaVideos] = useState<PathshalaVideo[]>(() => {
-    return safeJsonParse<PathshalaVideo[]>("krivexa_pathshala_videos", [
+    return safeJsonParse<PathshalaVideo[]>("krivexo_pathshala_videos", [
       {
         id: "vid-1",
-        title: "वैज्ञानिक विधि से गेहूं की खेती | Scientific Wheat Farming Techniques",
+        title: "à¤µà¥à¤à¥à¤à¤¾à¤¨à¤¿à¤ à¤µà¤¿à¤§à¤¿ à¤¸à¥ à¤à¥à¤¹à¥à¤ à¤à¥ à¤à¥à¤¤à¥ | Scientific Wheat Farming Techniques",
         youtubeUrl: "https://www.youtube.com/watch?v=co3_pS74L-Q",
         category: "soil",
-        description: "इस वीडियो में देखें गेहूं की बुवाई से लेकर कटाई तक की पूरी जानकारी और वैज्ञानिक तरीके।",
+        description: "à¤à¤¸ à¤µà¥à¤¡à¤¿à¤¯à¥ à¤®à¥à¤ à¤¦à¥à¤à¥à¤ à¤à¥à¤¹à¥à¤ à¤à¥ à¤¬à¥à¤µà¤¾à¤ à¤¸à¥ à¤²à¥à¤à¤° à¤à¤à¤¾à¤ à¤¤à¤ à¤à¥ à¤ªà¥à¤°à¥ à¤à¤¾à¤¨à¤à¤¾à¤°à¥ à¤à¤° à¤µà¥à¤à¥à¤à¤¾à¤¨à¤¿à¤ à¤¤à¤°à¥à¤à¥à¥¤",
         createdAt: new Date().toISOString()
       },
       {
         id: "vid-2",
-        title: "ड्रिप सिंचाई प्रणाली कैसे काम करती है? | Working of Drip Irrigation System",
+        title: "à¤¡à¥à¤°à¤¿à¤ª à¤¸à¤¿à¤à¤à¤¾à¤ à¤ªà¥à¤°à¤£à¤¾à¤²à¥ à¤à¥à¤¸à¥ à¤à¤¾à¤® à¤à¤°à¤¤à¥ à¤¹à¥? | Working of Drip Irrigation System",
         youtubeUrl: "https://www.youtube.com/watch?v=FmYj08m52_I",
         category: "water",
-        description: "खेतों में ड्रिप सिंचाई (टपक सिंचाई) लगाने के फायदे और उसकी पूरी कार्यप्रणाली।",
+        description: "à¤à¥à¤¤à¥à¤ à¤®à¥à¤ à¤¡à¥à¤°à¤¿à¤ª à¤¸à¤¿à¤à¤à¤¾à¤ (à¤à¤ªà¤ à¤¸à¤¿à¤à¤à¤¾à¤) à¤²à¤à¤¾à¤¨à¥ à¤à¥ à¤«à¤¾à¤¯à¤¦à¥ à¤à¤° à¤à¤¸à¤à¥ à¤ªà¥à¤°à¥ à¤à¤¾à¤°à¥à¤¯à¤ªà¥à¤°à¤£à¤¾à¤²à¥à¥¤",
         createdAt: new Date().toISOString()
       },
       {
         id: "vid-3",
-        title: "जैविक खाद बनाने की सबसे आसान विधि | How to make Organic Compost at home",
+        title: "à¤à¥à¤µà¤¿à¤ à¤à¤¾à¤¦ à¤¬à¤¨à¤¾à¤¨à¥ à¤à¥ à¤¸à¤¬à¤¸à¥ à¤à¤¸à¤¾à¤¨ à¤µà¤¿à¤§à¤¿ | How to make Organic Compost at home",
         youtubeUrl: "https://www.youtube.com/watch?v=P84nI0TpxmU",
         category: "soil",
-        description: "केंचुआ खाद (Vermicompost) और अन्य जैविक खाद बनाने की विधि तथा खेतों में इसके उपयोग।",
+        description: "à¤à¥à¤à¤à¥à¤ à¤à¤¾à¤¦ (Vermicompost) à¤à¤° à¤à¤¨à¥à¤¯ à¤à¥à¤µà¤¿à¤ à¤à¤¾à¤¦ à¤¬à¤¨à¤¾à¤¨à¥ à¤à¥ à¤µà¤¿à¤§à¤¿ à¤¤à¤¥à¤¾ à¤à¥à¤¤à¥à¤ à¤®à¥à¤ à¤à¤¸à¤à¥ à¤à¤ªà¤¯à¥à¤à¥¤",
         createdAt: new Date().toISOString()
       }
     ]);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_pathshala_videos", JSON.stringify(pathshalaVideos));
+    localStorage.setItem("krivexo_pathshala_videos", JSON.stringify(pathshalaVideos));
   }, [pathshalaVideos]);
 
   const addPathshalaVideo = (video: Omit<PathshalaVideo, "id" | "createdAt">) => {
@@ -1606,11 +1709,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Dealer Registered Farmers State (Point 1.iii)
   const [registeredFarmers, setRegisteredFarmers] = useState<RegisteredFarmer[]>(() => {
-    return safeJsonParse<RegisteredFarmer[]>("krivexa_registered_farmers", []);
+    return safeJsonParse<RegisteredFarmer[]>("krivexo_registered_farmers", []);
   });
 
   useEffect(() => {
-    localStorage.setItem("krivexa_registered_farmers", JSON.stringify(registeredFarmers));
+    localStorage.setItem("krivexo_registered_farmers", JSON.stringify(registeredFarmers));
   }, [registeredFarmers]);
 
   const registerFarmerByDealer = (farmerData: Omit<RegisteredFarmer, "id" | "createdAt">): RegisteredFarmer => {
@@ -1622,7 +1725,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setRegisteredFarmers((prev) => [newFarmer, ...prev]);
     api.registerFarmer(newFarmer);
     addNotification(
-      "New Farmer Registered 👤",
+      "New Farmer Registered ð¤",
       `Farmer ${farmerData.name} (+91 ${farmerData.phone}) registered successfully by ${farmerData.registeredByDealer}.`,
       "success",
       "/dashboard",
@@ -1700,13 +1803,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Cart & Order State Management (Personal per user)
-  const cartStorageKey = user ? `krivexa_cart_${user.phone || user.id}` : "krivexa_cart_guest";
+  const cartStorageKey = user ? `krivexo_cart_${user.phone || user.id}` : "krivexo_cart_guest";
   const [cart, setCart] = useState<CartItem[]>(() => {
     return safeJsonParse<CartItem[]>(cartStorageKey, []);
   });
 
   const [orders, setOrders] = useState<CartOrder[]>(() => {
-    return safeJsonParse<CartOrder[]>("krivexa_cart_orders", []);
+    return safeJsonParse<CartOrder[]>("krivexo_cart_orders", []);
   });
 
   useEffect(() => {
@@ -1718,7 +1821,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [cart, cartStorageKey]);
 
   useEffect(() => {
-    localStorage.setItem("krivexa_cart_orders", JSON.stringify(orders));
+    localStorage.setItem("krivexo_cart_orders", JSON.stringify(orders));
   }, [orders]);
 
   const addToCart = (item: { id: string; name: string; category?: string; price: number; unit?: string; image?: string; sellerName?: string }) => {
@@ -1765,19 +1868,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, message: "Your cart is empty!" };
     }
     const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const itemNames = cart.map(i => i.name).join(", ");
 
+    // ââ Wallet payment: check balance first ââ
+    if (paymentMethod === "wallet") {
+      if (walletBalance < totalAmount) {
+        return {
+          success: false,
+          message: `Insufficient wallet balance! Available: â¹${walletBalance.toLocaleString("en-IN")}, Required: â¹${totalAmount.toLocaleString("en-IN")}. Please add money to your wallet.`,
+        };
+      }
+    }
+
+    // ââ KCC payment: check credit limit ââ
     if (paymentMethod === "kcc") {
-      const kccCard = kccDetails?.cardNumber || "KCC-BH-2026-9041";
-      const chargeRes = chargeFarmerCard(kccCard, totalAmount, `Order of ${cart.length} items`);
+      const kccCard = kccDetails?.cardNumber || user?.kccCardNumber || "";
+      if (!kccCard) {
+        return { success: false, message: "No active KCC card found on your account." };
+      }
+      const chargeRes = chargeFarmerCard(kccCard, totalAmount, `Order of ${cart.length} item(s)`);
       if (!chargeRes.success) {
         return chargeRes;
       }
+      // Record KCC debit as wallet transaction so it appears in user, admin, dealer panels
+      addWalletTransaction({
+        title: `KCC Payment â ${cart.length} item(s)`,
+        type: "debit",
+        amount: totalAmount,
+        category: "KCC Order Payment",
+      });
+    }
+
+    // ââ Wallet: record the debit transaction ââ
+    if (paymentMethod === "wallet") {
+      addWalletTransaction({
+        title: `Wallet Payment â ${cart.length} item(s)`,
+        type: "debit",
+        amount: totalAmount,
+        category: "Wallet Order Payment",
+      });
     }
 
     const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
     const newOrder: CartOrder = {
       id: orderId,
-      userId: user?.id || "guest",
+      userId: user?.id || user?.userId || "guest",
       userName: user?.name || "Customer",
       items: [...cart],
       totalAmount,
@@ -1792,19 +1927,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     clearCart();
 
     addNotification(
-      "Order Placed Successfully! 🛒",
-      `Order ${orderId} for ₹${totalAmount} has been placed. Items will be delivered to ${deliveryAddress || "your registered address"}.`,
+      "Order Placed Successfully! ð",
+      `Order ${orderId} for â¹${totalAmount.toLocaleString("en-IN")} has been placed via ${paymentMethod.toUpperCase()}. Items: ${itemNames}.`,
       "success",
       "/cart",
       "orders"
     );
 
-    // Dual notification: notify seller(s) of the purchased crops / dealer products
+    // Notify seller(s) of the purchased crops / dealer products
     cart.forEach((item) => {
       if (item.sellerName) {
         addNotification(
-          "Your Listed Item Was Purchased! 🌾",
-          `Customer ${user?.name || "Verified Farmer"} placed an order for "${item.name}" (${item.quantity} ${item.unit || "unit"}). Total: ₹${(item.price * item.quantity).toLocaleString("en-IN")}.`,
+          "Your Listed Item Was Purchased! ð¾",
+          `Customer ${user?.name || "Verified Farmer"} placed an order for "${item.name}" (${item.quantity} ${item.unit || "unit"}). Total: â¹${(item.price * item.quantity).toLocaleString("en-IN")}. Payment via: ${paymentMethod.toUpperCase()}.`,
           "success",
           "/sell-crops",
           "crops"
@@ -1825,7 +1960,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     api.updateOrderStatus(orderId, newStatus);
     addNotification(
-      `Order #${orderId} Updated 📦`,
+      `Order #${orderId} Updated ð¦`,
       `Your product order status has been updated to "${newStatus}" by the dealer.`,
       "info",
       "/profile",

@@ -20,6 +20,7 @@ export const comparePassword = async (password, hash) => {
 
 export const registerUser = async ({
   name,
+  userId: customUserId,
   phone,
   email,
   password,
@@ -30,7 +31,29 @@ export const registerUser = async ({
   licenseNumber = '',
   district = '',
   state = 'Bihar',
+  gender = 'Male',
+  dob = '',
+  address = '',
 }) => {
+  if (customUserId && customUserId.trim()) {
+    const cleanId = customUserId.trim();
+    const hasUpper = /[A-Z]/.test(cleanId);
+    const hasLower = /[a-z]/.test(cleanId);
+    const hasNum = /[0-9]/.test(cleanId);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(cleanId);
+
+    if (!hasUpper || !hasLower || !hasNum || !hasSpecial) {
+      throw new Error('User ID must contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
+    }
+
+    const existingUserId = await User.findOne({
+      userId: { $regex: new RegExp(`^${cleanId}$`, 'i') }
+    });
+    if (existingUserId) {
+      throw new Error('This userID is already taken, please try another one.');
+    }
+  }
+
   const existingPhone = await User.findOne({ phone });
   if (existingPhone) {
     throw new Error('An account with this phone number already exists.');
@@ -43,15 +66,19 @@ export const registerUser = async ({
     }
   }
 
-  const userId = `usr_${crypto.randomBytes(8).toString('hex')}`;
+  const generatedId = `usr_${crypto.randomBytes(8).toString('hex')}`;
   const passwordHash = password ? await hashPassword(password) : '';
   const initialStatus = role === ROLES.DEALER ? 'PENDING_APPROVAL' : USER_STATUS.ACTIVE;
 
   const user = await User.create({
-    id: userId,
+    id: generatedId,
+    userId: customUserId ? customUserId.trim() : undefined,
     name,
     phone,
     email: email ? email.toLowerCase() : undefined,
+    gender,
+    dob,
+    address,
     passwordHash,
     role,
     status: initialStatus,
@@ -65,7 +92,7 @@ export const registerUser = async ({
   // Create role profile
   if (role === ROLES.FARMER) {
     await FarmerProfile.create({
-      userId,
+      userId: generatedId,
       addresses: [
         {
           id: `addr_${crypto.randomBytes(6).toString('hex')}`,
@@ -80,7 +107,7 @@ export const registerUser = async ({
     });
   } else if (role === ROLES.DEALER) {
     await DealerProfile.create({
-      userId,
+      userId: generatedId,
       businessName: businessName || `${name}'s Agro Store`,
       dealerType: dealerType || 'all',
       gstNumber,
@@ -108,16 +135,18 @@ export const registerUser = async ({
   };
 };
 
-export const loginUser = async ({ phone, email, password }) => {
-  const identifier = (phone || email || '').trim();
+export const loginUser = async ({ phone, email, userId, password }) => {
+  const identifier = (userId || phone || email || '').trim();
   if (!identifier) {
-    throw new Error('Phone number or email is required.');
+    throw new Error('User ID, phone number or email is required.');
   }
 
   const user = await User.findOne({
     $or: [
+      { userId: { $regex: new RegExp(`^${identifier}$`, 'i') } },
       { phone: identifier },
-      { email: identifier.toLowerCase() }
+      { email: identifier.toLowerCase() },
+      { id: identifier }
     ]
   });
 

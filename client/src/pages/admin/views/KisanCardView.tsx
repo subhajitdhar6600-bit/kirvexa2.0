@@ -50,10 +50,10 @@ export default function KisanCardView() {
       {/* Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="text-xs text-gray-400 mb-1">Dashboard &gt; Krivexa Card &gt; Card Requests</div>
+          <div className="text-xs text-gray-400 mb-1">Dashboard &gt; Krivexo Card &gt; Card Requests</div>
           <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
             <CreditCard className="h-6 w-6 text-emerald-600" />
-            Krivexa Kisan Card (KCC) Management
+            Krivexo Kisan Card (KCC) Management
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
             Review incoming applications, issue official Kisan Credit Cards, and unlock features.
@@ -144,7 +144,7 @@ export default function KisanCardView() {
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-gray-900">{app.fullName}</div>
                       <div className="text-[11px] text-gray-400 font-mono">
-                        Aadhaar: {app.aadhaar ? `•••• ${app.aadhaar.slice(-4)}` : "Not provided"}
+                        Aadhaar: {app.aadhaar ? `â¢â¢â¢â¢ ${app.aadhaar.slice(-4)}` : "Not provided"}
                       </div>
                     </td>
                     <td className="py-3.5 px-4">

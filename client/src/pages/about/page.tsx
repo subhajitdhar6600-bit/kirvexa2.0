@@ -20,11 +20,11 @@ const VALUES = [
 ];
 
 const MILESTONES = [
-  { year: "2020", event: "Krivexa founded with a vision to digitize Indian agriculture" },
+  { year: "2020", event: "Krivexo founded with a vision to digitize Indian agriculture" },
   { year: "2021", event: "Launched Mandi Bhav and Agri Market services across 5 states" },
   { year: "2022", event: "Reached 1 Lakh registered farmers; launched Expert Advice platform" },
   { year: "2023", event: "Expanded to 20 states; launched Machinery Booking and Soil Testing" },
-  { year: "2024", event: "10L+ registered farmers; ₹500 Cr+ in transactions facilitated" },
+  { year: "2024", event: "10L+ registered farmers; â¹500 Cr+ in transactions facilitated" },
 ];
 
 export default function AboutPage() {
@@ -38,7 +38,7 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-linear-to-r from-[#0a0a0a] to-transparent flex items-center px-6">
           <div className="max-w-7xl mx-auto w-full">
             <h1 className="text-4xl font-black" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-              About <span className="text-primary">Krivexa</span>
+              About <span className="text-primary">Krivexo</span>
             </h1>
             <p className="text-gray-400 text-sm mt-1">Home &gt; <span className="text-primary">About Us</span></p>
           </div>
@@ -59,14 +59,14 @@ export default function AboutPage() {
               Empowering India's <span className="text-primary">140 Million Farmers</span>
             </h2>
             <p className="text-gray-400 leading-relaxed mb-4">
-              Krivexa is a complete digital platform built for India's farming community. We believe every farmer deserves access to fair prices, modern technology, and expert guidance — regardless of where they live or how much land they own.
+              Krivexo is a complete digital platform built for India's farming community. We believe every farmer deserves access to fair prices, modern technology, and expert guidance â regardless of where they live or how much land they own.
             </p>
             <p className="text-gray-400 leading-relaxed mb-6">
-              From live mandi prices and machinery booking to soil testing and expert consultations, Krivexa puts the power of smart farming in every farmer's hands.
+              From live mandi prices and machinery booking to soil testing and expert consultations, Krivexo puts the power of smart farming in every farmer's hands.
             </p>
             <Link to="/register">
               <Button className="bg-primary text-black font-bold hover:bg-primary/90">
-                Join Krivexa Today →
+                Join Krivexo Today â
               </Button>
             </Link>
           </div>
@@ -82,7 +82,7 @@ export default function AboutPage() {
             { value: "10L+", label: "Registered Farmers" },
             { value: "500+", label: "Mandis Covered" },
             { value: "20+", label: "States" },
-            { value: "₹500Cr+", label: "Transactions Facilitated" },
+            { value: "â¹500Cr+", label: "Transactions Facilitated" },
           ].map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
               className="bg-[#111] border border-white/10 rounded-2xl p-6 text-center">
@@ -158,10 +158,10 @@ export default function AboutPage() {
           <h2 className="text-3xl font-black mb-4" style={{ fontFamily: "Rajdhani, sans-serif" }}>
             Ready to <span className="text-primary">Transform</span> Your Farm?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">Join over 10 lakh farmers who are already benefiting from Krivexa's smart farming platform.</p>
+          <p className="text-gray-400 mb-8 max-w-xl mx-auto">Join over 10 lakh farmers who are already benefiting from Krivexo's smart farming platform.</p>
           <Link to="/register">
             <Button size="lg" className="bg-primary text-black font-bold px-10 hover:bg-primary/90">
-              Register for Free →
+              Register for Free â
             </Button>
           </Link>
         </div>

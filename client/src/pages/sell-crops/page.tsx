@@ -86,7 +86,7 @@ export default function SellCropsPage() {
           "Contact Phone": form.phone,
           "Crop Name": form.cropName,
           "Weight/Quantity": form.weight,
-          "Target Price": `₹${form.price} / Qtl`,
+          "Target Price": `â¹${form.price} / Qtl`,
           "District": form.district,
           "City/Village": form.city || "Not Specified",
           "Address details": form.address || "Not Specified",
@@ -113,7 +113,7 @@ export default function SellCropsPage() {
 
       // Send to notifications with pdfDataUrl
       addNotification(
-        "Crop Listing Submitted 🌾",
+        "Crop Listing Submitted ð¾",
         `Your listing request for ${form.cropName} (${form.weight}) with ${images.length || 1} photo(s) has been received (Ref: ${refId}). Download official PDF.`,
         "success",
         "/sell-crops",
@@ -156,14 +156,14 @@ export default function SellCropsPage() {
             </h2>
             <p className="text-gray-400 leading-relaxed mb-6">{t.sellCrops.submittedMsg}</p>
             <div className="bg-white/5 rounded-xl p-4 text-left text-sm text-gray-300 mb-6 space-y-1">
-              <p>📦 <strong>Crop:</strong> {form.cropName}</p>
-              <p>⚖️ <strong>Weight:</strong> {form.weight}</p>
-              <p>💰 <strong>Price:</strong> ₹{form.price}</p>
-              <p>👨‍🌾 <strong>Seller:</strong> {form.sellerName}</p>
-              <p>📷 <strong>Photos:</strong> {images.length} photo(s) attached</p>
+              <p>ð¦ <strong>Crop:</strong> {form.cropName}</p>
+              <p>âï¸ <strong>Weight:</strong> {form.weight}</p>
+              <p>ð° <strong>Price:</strong> â¹{form.price}</p>
+              <p>ð¨âð¾ <strong>Seller:</strong> {form.sellerName}</p>
+              <p>ð· <strong>Photos:</strong> {images.length} photo(s) attached</p>
             </div>
             <p className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2 inline-block">
-              ⏳ {t.sellCrops.pendingNote}
+              â³ {t.sellCrops.pendingNote}
             </p>
             <div className="mt-6">
               <Button onClick={() => { setSubmitted(false); setForm({ sellerName: "", district: "", city: "", address: "", pincode: "", phone: "", cropName: "", weight: "", price: "" }); setImages([]); }} className="bg-primary text-black font-bold">
@@ -345,7 +345,7 @@ export default function SellCropsPage() {
           "Contact Phone": form.phone,
           "Crop Name": form.cropName,
           "Estimated Weight": form.weight,
-          "Expected Price": `₹${form.price} / Qtl`,
+          "Expected Price": `â¹${form.price} / Qtl`,
           "District Location": form.district,
           "City / Town": form.city || "N/A",
           "Postal Code": form.pincode || "N/A",

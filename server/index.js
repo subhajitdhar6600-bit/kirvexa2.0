@@ -107,8 +107,8 @@ app.use((err, req, res, next) => {
 if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`=======================================================`);
-    console.log(`🌾 Farma Agricultural Marketplace Backend API on port ${PORT}`);
-    console.log(`🔗 Database URL: ${process.env.MONGODB_URI || 'mongodb://localhost:27017/Farma'}`);
+    console.log(`ð¾ Farma Agricultural Marketplace Backend API on port ${PORT}`);
+    console.log(`ð Database URL: ${process.env.MONGODB_URI || 'mongodb://localhost:27017/Farma'}`);
     console.log(`=======================================================`);
   });
 }

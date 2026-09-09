@@ -15,9 +15,9 @@ interface SettingsViewProps {
 
 const DEFAULT_SETTINGS_STATE = {
   // General - Site Info
-  siteName: "Krivexa",
+  siteName: "Krivexo",
   tagline: "Kisan ka Smart Saathi",
-  siteEmail: "support@krivexa.com",
+  siteEmail: "support@krivexo.com",
   sitePhone: "+91 91234 56789",
   defaultCountry: "India",
   timezone: "Asia/Kolkata (GMT +05:30)",
@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS_STATE = {
   faviconUrl: "",
 
   // General - Contact Details
-  contactEmail: "contact@krivexa.com",
+  contactEmail: "contact@krivexo.com",
   helplinePhone: "1800-123-4567",
   emergencyPhone: "+91 98765 43210",
   officeAddress: "Main Road, Near Gandhi Maidan, Patna, Bihar - 800001",
@@ -35,25 +35,25 @@ const DEFAULT_SETTINGS_STATE = {
   pincode: "800001",
 
   // General - Social Links
-  facebookUrl: "https://facebook.com/krivexa",
-  twitterUrl: "https://x.com/krivexa",
-  instagramUrl: "https://instagram.com/krivexa",
-  linkedinUrl: "https://linkedin.com/company/krivexa",
-  youtubeUrl: "https://youtube.com/@krivexa",
+  facebookUrl: "https://facebook.com/krivexo",
+  twitterUrl: "https://x.com/krivexo",
+  instagramUrl: "https://instagram.com/krivexo",
+  linkedinUrl: "https://linkedin.com/company/krivexo",
+  youtubeUrl: "https://youtube.com/@krivexo",
   whatsappPhone: "+91 91234 56789",
 
   // General - Other Settings
-  currencyCode: "INR (₹)",
-  copyrightText: "© 2026 Krivexa Agri Solutions Pvt. Ltd. All rights reserved.",
+  currencyCode: "INR (â¹)",
+  copyrightText: "Â© 2026 Krivexo Agri Solutions Pvt. Ltd. All rights reserved.",
   footerDescription: "Empowering farmers with smart agriculture tools, mandi rates, and direct market access.",
   itemsPerPage: "25",
 
   // Profile Settings
   adminName: "Aditya Saha",
-  adminEmail: "aditya@krivexa.com",
+  adminEmail: "aditya@krivexo.com",
   adminPhone: "+91 89065 54321",
   adminRole: "Super Admin",
-  adminBio: "Lead Administrator managing Krivexa platform operations and user permissions.",
+  adminBio: "Lead Administrator managing Krivexo platform operations and user permissions.",
   avatarUrl: "",
 
   // Security Settings
@@ -74,18 +74,18 @@ const DEFAULT_SETTINGS_STATE = {
 
   // Payment Settings
   razorpayKeyId: "rzp_live_9832749823",
-  razorpaySecret: "••••••••••••••••",
-  upiVpa: "krivexa@upi",
+  razorpaySecret: "â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢",
+  upiVpa: "krivexo@upi",
   commissionRatePct: "5",
   minPayoutThreshold: "500",
 
   // Email Settings (SMTP)
   smtpHost: "smtp.gmail.com",
   smtpPort: "587",
-  smtpUser: "notifications@krivexa.com",
-  smtpPassword: "••••••••••••",
+  smtpUser: "notifications@krivexo.com",
+  smtpPassword: "â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢â¢",
   smtpEncryption: "TLS",
-  smtpFromName: "Krivexa System",
+  smtpFromName: "Krivexo System",
 
   // SMS Settings
   smsProvider: "Fast2SMS",
@@ -96,8 +96,8 @@ const DEFAULT_SETTINGS_STATE = {
   // App Settings
   appVersion: "2.5.0",
   forceAppUpdate: false,
-  playStoreUrl: "https://play.google.com/store/apps/details?id=com.krivexa.app",
-  appStoreUrl: "https://apps.apple.com/app/krivexa/id123456789",
+  playStoreUrl: "https://play.google.com/store/apps/details?id=com.krivexo.app",
+  appStoreUrl: "https://apps.apple.com/app/krivexo/id123456789",
   maintenanceBannerMsg: "Scheduled server maintenance will occur tonight from 2 AM to 3 AM.",
 
   // KYC Settings
@@ -122,15 +122,15 @@ const DEFAULT_SETTINGS_STATE = {
 
   // Maintenance Mode
   maintenanceMode: false,
-  maintenanceMessage: "Krivexa platform is under scheduled maintenance. We will be back shortly!",
+  maintenanceMessage: "Krivexo platform is under scheduled maintenance. We will be back shortly!",
 
   // Cookie Settings
   enableCookieBanner: true,
   cookieExpiryDays: "30",
-  privacyPolicyUrl: "https://krivexa.com/privacy",
+  privacyPolicyUrl: "https://krivexo.com/privacy",
 
   // Language Settings
-  defaultLanguage: "Hindi (हिंदी)",
+  defaultLanguage: "Hindi (à¤¹à¤¿à¤à¤¦à¥)",
 
   // Logs & Activity
   logLevel: "Info",
@@ -237,7 +237,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
           const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(formData, null, 2));
           const downloadAnchor = document.createElement("a");
           downloadAnchor.setAttribute("href", dataStr);
-          downloadAnchor.setAttribute("download", `krivexa_settings_backup_${new Date().toISOString().split("T")[0]}.json`);
+          downloadAnchor.setAttribute("download", `krivexo_settings_backup_${new Date().toISOString().split("T")[0]}.json`);
           document.body.appendChild(downloadAnchor);
           downloadAnchor.click();
           downloadAnchor.remove();
@@ -286,7 +286,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>›</span>
+          <span>âº</span>
           <span className="text-emerald-600 font-semibold">System Settings</span>
         </div>
       </div>
@@ -318,7 +318,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
               <p className="text-[10px] text-gray-400 mt-0.5 leading-snug line-clamp-2">{item.desc}</p>
             </div>
             <span className="text-[10.5px] font-bold text-emerald-700 mt-3 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-              Configure →
+              Configure â
             </span>
           </div>
         ))}
@@ -501,7 +501,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                           ) : (
                             <div className="text-center">
                               <div className="flex items-center gap-1 text-emerald-700 font-black text-sm">
-                                <span className="text-lg">🌿</span> {formData.siteName}
+                                <span className="text-lg">ð¿</span> {formData.siteName}
                               </div>
                               <p className="text-[8px] text-gray-400">{formData.tagline}</p>
                             </div>
@@ -541,7 +541,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                               </button>
                             </>
                           ) : (
-                            <span className="text-2xl">🌱</span>
+                            <span className="text-2xl">ð±</span>
                           )}
                         </div>
 
@@ -851,7 +851,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">Current Password</label>
                   <input
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
                     value={formData.currentPassword}
                     onChange={(e) => updateField("currentPassword", e.target.value)}
                     className="w-full h-9 px-3 rounded-xl border border-gray-200 focus:outline-none focus:border-emerald-500 text-gray-800"
@@ -861,7 +861,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">New Password</label>
                   <input
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
                     value={formData.newPassword}
                     onChange={(e) => updateField("newPassword", e.target.value)}
                     className="w-full h-9 px-3 rounded-xl border border-gray-200 focus:outline-none focus:border-emerald-500 text-gray-800"
@@ -871,7 +871,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">Confirm New Password</label>
                   <input
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
                     value={formData.confirmPassword}
                     onChange={(e) => updateField("confirmPassword", e.target.value)}
                     className="w-full h-9 px-3 rounded-xl border border-gray-200 focus:outline-none focus:border-emerald-500 text-gray-800"
@@ -1009,7 +1009,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-700 mb-1">Minimum Payout Threshold (₹)</label>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1">Minimum Payout Threshold (â¹)</label>
                 <input
                   type="number"
                   value={formData.minPayoutThreshold}
@@ -1285,7 +1285,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
               {[
                 { key: "enableMandiBhav", label: "Enable Mandi Bhav (Market Rates)", desc: "Show daily crop market prices and trend charts." },
                 { key: "enableAdvisory", label: "Enable Crop Advisory & Expert Advice", desc: "Allow farmers to ask questions to agricultural experts." },
-                { key: "enableKisanCard", label: "Enable Krivexa Kisan Card", desc: "Enable digital card applications, credit limits & wallets." },
+                { key: "enableKisanCard", label: "Enable Krivexo Kisan Card", desc: "Enable digital card applications, credit limits & wallets." },
                 { key: "enableBookings", label: "Enable Machinery & Labour Bookings", desc: "Allow booking harvesters, tractors & farm workers." },
                 { key: "enableWallet", label: "Enable Kisan Wallet & UPI Payouts", desc: "Enable digital wallet balance and direct withdrawal features." },
               ].map((item) => (
@@ -1423,17 +1423,17 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
                   onChange={(e) => updateField("defaultLanguage", e.target.value)}
                   className="w-full max-w-md h-9 px-3 rounded-xl border border-gray-200 focus:outline-none focus:border-emerald-500 text-gray-800 bg-white"
                 >
-                  <option>Hindi (हिंदी)</option>
+                  <option>Hindi (à¤¹à¤¿à¤à¤¦à¥)</option>
                   <option>English (US)</option>
-                  <option>Bhojpuri (भोजपुरी)</option>
-                  <option>Maithili (मैथिली)</option>
+                  <option>Bhojpuri (à¤­à¥à¤à¤ªà¥à¤°à¥)</option>
+                  <option>Maithili (à¤®à¥à¤¥à¤¿à¤²à¥)</option>
                 </select>
               </div>
 
               <div className="pt-2">
                 <p className="text-[11px] font-semibold text-gray-700 mb-2">Supported Portal Languages</p>
                 <div className="flex flex-wrap gap-2">
-                  {["Hindi (हिंदी)", "English", "Bhojpuri (भोजपुरी)", "Maithili (मैथिली)", "Punjabi", "Bengali"].map((lang) => (
+                  {["Hindi (à¤¹à¤¿à¤à¤¦à¥)", "English", "Bhojpuri (à¤­à¥à¤à¤ªà¥à¤°à¥)", "Maithili (à¤®à¥à¤¥à¤¿à¤²à¥)", "Punjabi", "Bengali"].map((lang) => (
                     <span key={lang} className="px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-semibold flex items-center gap-1.5">
                       <Check className="h-3 w-3 text-emerald-600" /> {lang}
                     </span>
@@ -1515,7 +1515,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={() => setActiveMenu("Maintenance Mode")}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors cursor-pointer"
           >
-            ⚙ Manage
+            â Manage
           </button>
         </div>
 
@@ -1541,7 +1541,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={() => toast.info("Running in Production mode (v2.5.0)")}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors cursor-pointer"
           >
-            ⚙ Manage
+            â Manage
           </button>
         </div>
 
@@ -1567,7 +1567,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={handleClearCache}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
           >
-            🗑 Clear Cache
+            ð Clear Cache
           </button>
         </div>
 
@@ -1591,7 +1591,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={handleBackup}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
           >
-            ☁ Create Backup
+            â Create Backup
           </button>
         </div>
 
@@ -1615,7 +1615,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             onClick={() => setActiveMenu("Logs & Activity")}
             className="mt-3 w-full border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-1.5 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
           >
-            → View Logs
+            â View Logs
           </button>
         </div>
 

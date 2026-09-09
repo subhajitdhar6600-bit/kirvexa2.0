@@ -6,34 +6,34 @@ import Footer from "@/components/Footer.tsx";
 import { useApp } from "@/context/AppContext.tsx";
 
 const CROPS = [
-  { id: "wheat", name: "Wheat", hindi: "गेहूं", icon: "🌾", basePrice: 2710 },
-  { id: "paddy", name: "Paddy", hindi: "धान", icon: "🌽", basePrice: 1860 },
-  { id: "maize", name: "Maize", hindi: "मक्का", icon: "🌽", basePrice: 1950 },
-  { id: "mustard", name: "Mustard", hindi: "सरसों", icon: "🟡", basePrice: 5420 },
-  { id: "soyabean", name: "Soyabean", hindi: "सोयाबीन", icon: "🫘", basePrice: 4920 },
-  { id: "gram", name: "Gram", hindi: "चना", icon: "🧆", basePrice: 5100 },
-  { id: "potato", name: "Potato", hindi: "आलू", icon: "🥔", basePrice: 1450 },
-  { id: "onion", name: "Onion", hindi: "प्याज", icon: "🧅", basePrice: 2100 },
+  { id: "wheat", name: "Wheat", hindi: "à¤à¥à¤¹à¥à¤", icon: "ð¾", basePrice: 2710 },
+  { id: "paddy", name: "Paddy", hindi: "à¤§à¤¾à¤¨", icon: "ð½", basePrice: 1860 },
+  { id: "maize", name: "Maize", hindi: "à¤®à¤à¥à¤à¤¾", icon: "ð½", basePrice: 1950 },
+  { id: "mustard", name: "Mustard", hindi: "à¤¸à¤°à¤¸à¥à¤", icon: "ð¡", basePrice: 5420 },
+  { id: "soyabean", name: "Soyabean", hindi: "à¤¸à¥à¤¯à¤¾à¤¬à¥à¤¨", icon: "ð«", basePrice: 4920 },
+  { id: "gram", name: "Gram", hindi: "à¤à¤¨à¤¾", icon: "ð§", basePrice: 5100 },
+  { id: "potato", name: "Potato", hindi: "à¤à¤²à¥", icon: "ð¥", basePrice: 1450 },
+  { id: "onion", name: "Onion", hindi: "à¤ªà¥à¤¯à¤¾à¤", icon: "ð§", basePrice: 2100 },
 ];
 
 const LOCATIONS: Record<string, Record<string, string[]>> = {
   "Bihar": {
-    "Samastipur": ["Samastipur Mandi (समस्तीपुर मंडी)", "Rosera Mandi", "Dalsinghsarai Mandi"],
-    "Patna": ["Patna Main Mandi (पटना मंडी)", "Fatuha Mandi", "Bihta Mandi"],
+    "Samastipur": ["Samastipur Mandi (à¤¸à¤®à¤¸à¥à¤¤à¥à¤ªà¥à¤° à¤®à¤à¤¡à¥)", "Rosera Mandi", "Dalsinghsarai Mandi"],
+    "Patna": ["Patna Main Mandi (à¤ªà¤à¤¨à¤¾ à¤®à¤à¤¡à¥)", "Fatuha Mandi", "Bihta Mandi"],
     "Begusarai": ["Begusarai Mandi", "Barauni Mandi"],
     "Muzaffarpur": ["Muzaffarpur Mandi", "Kanti Mandi"],
   },
   "Uttar Pradesh": {
-    "Kanpur": ["Kanpur Grain Mandi (कानपुर मंडी)", "Chakeri Mandi"],
-    "Lucknow": ["Lucknow Mandi (लखनऊ मंडी)", "Dubagga Mandi"],
+    "Kanpur": ["Kanpur Grain Mandi (à¤à¤¾à¤¨à¤ªà¥à¤° à¤®à¤à¤¡à¥)", "Chakeri Mandi"],
+    "Lucknow": ["Lucknow Mandi (à¤²à¤à¤¨à¤ à¤®à¤à¤¡à¥)", "Dubagga Mandi"],
     "Varanasi": ["Varanasi Mandi", "Chandauli Mandi"],
   },
   "Madhya Pradesh": {
-    "Bhopal": ["Bhopal Krishi Mandi (भोपाल मंडी)", "Berasia Mandi"],
+    "Bhopal": ["Bhopal Krishi Mandi (à¤­à¥à¤ªà¤¾à¤² à¤®à¤à¤¡à¥)", "Berasia Mandi"],
     "Indore": ["Indore Mandi", "Sanwer Mandi"],
   },
   "Rajasthan": {
-    "Jaipur": ["Jaipur Grain Mandi (जयपुर मंडी)", "Chomu Mandi"],
+    "Jaipur": ["Jaipur Grain Mandi (à¤à¤¯à¤ªà¥à¤° à¤®à¤à¤¡à¥)", "Chomu Mandi"],
   },
 };
 
@@ -42,7 +42,7 @@ export default function MandiBhavPage() {
 
   const [selectedState, setSelectedState] = useState<string>("Bihar");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("Samastipur");
-  const [selectedMandi, setSelectedMandi] = useState<string>("Samastipur Mandi (समस्तीपुर मंडी)");
+  const [selectedMandi, setSelectedMandi] = useState<string>("Samastipur Mandi (à¤¸à¤®à¤¸à¥à¤¤à¥à¤ªà¥à¤° à¤®à¤à¤¡à¥)");
   const [selectedCrop, setSelectedCrop] = useState<string>("wheat");
 
   const states = Object.keys(LOCATIONS);
@@ -128,7 +128,7 @@ export default function MandiBhavPage() {
           <div className="mb-6 bg-linear-to-r from-amber-950/90 via-amber-900/60 to-black border-2 border-amber-500/70 rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400 font-bold text-lg">
-                🔒
+                ð
               </div>
               <div>
                 <h3 className="text-sm font-black text-amber-200">
@@ -143,7 +143,7 @@ export default function MandiBhavPage() {
               onClick={() => setIsKccAppModalOpen(true)}
               className="bg-amber-500 hover:bg-amber-400 text-black font-black text-xs py-2 px-5 rounded-xl shrink-0 shadow-md animate-pulse cursor-pointer border border-amber-300"
             >
-              Apply for KCC Now →
+              Apply for KCC Now â
             </Button>
           </div>
         )}
@@ -260,7 +260,7 @@ export default function MandiBhavPage() {
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
-            ₹ / Quintal
+            â¹ / Quintal
           </div>
           <div className="text-[11px] text-gray-500">
             Showing rates for <span className="text-emerald-400 font-bold">{activeCropObj.name} ({activeCropObj.hindi})</span> in <span className="text-white font-medium">{selectedMandi}</span>
@@ -289,10 +289,10 @@ export default function MandiBhavPage() {
               {/* Price & Indicator Icon */}
               <div className="flex items-center gap-3">
                 <div className="text-base font-bold text-white tracking-wide" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                  ₹ {item.price.toLocaleString("en-IN")}
+                  â¹ {item.price.toLocaleString("en-IN")}
                 </div>
 
-                {/* Trend Circle Badge (Green ↑ or Red ↓) */}
+                {/* Trend Circle Badge (Green â or Red â) */}
                 <div
                   className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                     item.isUp

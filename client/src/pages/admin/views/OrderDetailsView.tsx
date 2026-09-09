@@ -61,7 +61,7 @@ export default function OrderDetailsView({ order, onOrderChange, onBack }: Order
               </div>
               <div>
                 <p className="text-gray-400">Total Amount</p>
-                <p className="font-bold text-emerald-400 text-sm mt-0.5">₹{order.amount.toLocaleString("en-IN")}</p>
+                <p className="font-bold text-emerald-400 text-sm mt-0.5">â¹{order.amount.toLocaleString("en-IN")}</p>
               </div>
               <div>
                 <p className="text-gray-400">Payment Status & Method</p>

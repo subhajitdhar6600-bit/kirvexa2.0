@@ -1,4 +1,4 @@
-// mockData.ts — All initial arrays are EMPTY [].
+// mockData.ts â All initial arrays are EMPTY [].
 // Admin panel loads 100% of all data dynamically live from MongoDB database via API.
 import type {
   Farmer,
@@ -32,8 +32,8 @@ export const INITIAL_ROLES: RoleItem[] = [];
 export const INITIAL_ADMIN_USERS: AdminUserItem[] = [];
 
 export const INITIAL_SETTINGS: AdminSettings = {
-  platformName: "Krivexa",
-  supportEmail: "support@krivexa.in",
+  platformName: "Krivexo",
+  supportEmail: "support@krivexo.in",
   phone: "+91 9876543210",
   address: "Patna, Bihar - 800001",
   timezone: "Asia/Kolkata",

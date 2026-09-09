@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Phone, MapPin, Lock, CheckCircle, Shield, Zap, Clock, Users, Store, Building2, FileText, Mail, ArrowLeft, KeyRound, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
@@ -27,7 +27,7 @@ const DEALER_TYPES = [
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { loginUser, registerNewAccount } = useApp();
+  const { loginUser, registerNewAccount, registeredAccounts } = useApp();
 
   const [role, setRole] = useState<"farmer" | "dealer">("farmer");
   const [step, setStep] = useState<number>(1);
@@ -35,9 +35,15 @@ export default function RegisterPage() {
 
   // Form State
   const [fullName, setFullName] = useState("");
+  const [userId, setUserId] = useState("");
+  const [userIdStatus, setUserIdStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
+  const [userIdMessage, setUserIdMessage] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [gender, setGender] = useState("Male");
+  const [dob, setDob] = useState("");
+  const [address, setAddress] = useState("");
   const [selectedState, setSelectedState] = useState<string>("Bihar");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("");
   const [village, setVillage] = useState<string>("");
@@ -65,9 +71,96 @@ export default function RegisterPage() {
     setSelectedDistrict(""); // Reset district when state changes
   };
 
+  const hasUppercase = /[A-Z]/.test(userId);
+  const hasLowercase = /[a-z]/.test(userId);
+  const hasNumber = /[0-9]/.test(userId);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(userId);
+  const isUserIdComplex = hasUppercase && hasLowercase && hasNumber && hasSpecial;
+
+  // Real-time unique userId check with debounce
+  useEffect(() => {
+    if (role !== "farmer") return;
+    const clean = userId.trim();
+    if (!clean) {
+      setUserIdStatus("idle");
+      setUserIdMessage("");
+      return;
+    }
+
+    const hasUp = /[A-Z]/.test(clean);
+    const hasLow = /[a-z]/.test(clean);
+    const hasNum = /[0-9]/.test(clean);
+    const hasSpec = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(clean);
+
+    if (!hasUp || !hasLow || !hasNum || !hasSpec) {
+      setUserIdStatus("taken");
+      setUserIdMessage("Must contain uppercase, lowercase, number & special character.");
+      return;
+    }
+
+    setUserIdStatus("checking");
+    const timer = setTimeout(async () => {
+      // 1. Check local registeredAccounts
+      const isTakenLocally = registeredAccounts.some(
+        (acc) => acc.userId && acc.userId.trim().toLowerCase() === clean.toLowerCase()
+      );
+
+      if (isTakenLocally) {
+        setUserIdStatus("taken");
+        setUserIdMessage("This userID is already taken, please try another one.");
+        return;
+      }
+
+      // 2. Check backend API
+      try {
+        const res = await api.checkUserId(clean);
+        const isAvail = res && ((res as any).data ? (res as any).data.available : res.available);
+        if (isAvail === false) {
+          setUserIdStatus("taken");
+          setUserIdMessage("This userID is already taken, please try another one.");
+        } else {
+          setUserIdStatus("available");
+          setUserIdMessage("User ID is available!");
+        }
+      } catch {
+        try {
+          const remoteUser = await api.getUserByUserId(clean);
+          if (remoteUser && (remoteUser.userId || remoteUser.id)) {
+            setUserIdStatus("taken");
+            setUserIdMessage("This userID is already taken, please try another one.");
+          } else {
+            setUserIdStatus("available");
+            setUserIdMessage("User ID is available!");
+          }
+        } catch {
+          setUserIdStatus("available");
+          setUserIdMessage("User ID is available!");
+        }
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [userId, role, registeredAccounts]);
+
   // Farmer: move to Email Verification step. Dealer: validate mandatory GST & License, then direct submit request to Admin panel
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (role === "farmer") {
+      if (!userId.trim()) {
+        toast.error("Please enter a User ID");
+        return;
+      }
+      if (!isUserIdComplex) {
+        toast.error("User ID must contain at least one uppercase, lowercase, number, and special character.");
+        return;
+      }
+      if (userIdStatus === "taken") {
+        toast.error("This userID is already taken, please try another one.");
+        return;
+      }
+    }
+
     if (!email || !email.includes("@")) {
       toast.error("Please enter a valid email address for account verification");
       return;
@@ -142,7 +235,7 @@ export default function RegisterPage() {
     }).catch((err) => console.warn("EmailJS warning:", err));
 
     // Display Email simulation toast
-    toast.success(`📧 Email Sent to ${email}: Your Krivexa verification code is ${randomCode}`, {
+    toast.success(`ð§ Email Sent to ${email}: Your Krivexo verification code is ${randomCode}`, {
       duration: 8000,
     });
 
@@ -171,14 +264,19 @@ export default function RegisterPage() {
       setIsVerifying(false);
       
       const accountName = fullName || (role === "farmer" ? "Farmer User" : "Agri Dealer");
+      const farmerUserId = role === "farmer" && userId ? userId.trim() : undefined;
 
       // Register new user account persistently
       registerNewAccount({
         fullName: accountName,
+        userId: farmerUserId,
         phone,
         email,
         password,
         role,
+        gender,
+        dob,
+        address,
         state: selectedState,
         district: selectedDistrict || "Patna",
         village: village || "Gram Panchayat",
@@ -189,10 +287,14 @@ export default function RegisterPage() {
 
       api.registerAuth({
         name: accountName,
+        userId: farmerUserId,
         phone,
         email,
         password,
         role: "farmer",
+        gender,
+        dob,
+        address,
         district: selectedDistrict || "Patna",
         state: selectedState,
       }).catch((err: any) => console.warn("Backend farmer reg warning:", err));
@@ -200,9 +302,13 @@ export default function RegisterPage() {
       // Save User Session into AppContext
       loginUser({
         name: accountName,
+        userId: farmerUserId,
         phone,
         email,
         role,
+        gender,
+        dob,
+        address,
         state: selectedState,
         district: selectedDistrict || "Patna",
         village: village || "Gram Panchayat",
@@ -244,7 +350,7 @@ export default function RegisterPage() {
           <div className="max-w-7xl mx-auto w-full">
             <h1 className="text-3xl md:text-4xl font-black mb-2" style={{ fontFamily: "Rajdhani, sans-serif" }}>
               Create Your Account<br />
-              <span className="text-primary">Join Krivexa Today!</span>
+              <span className="text-primary">Join Krivexo Today!</span>
             </h1>
             <p className="text-gray-300 text-sm">Register as a Farmer or Agricultural Dealer to start your smart farming journey.</p>
             <p className="text-gray-500 text-xs mt-1">Home &gt; <span className="text-primary">Register</span></p>
@@ -317,14 +423,14 @@ export default function RegisterPage() {
           {/* Left info panel */}
           <div className="bg-[#0e0e0e] border border-white/10 rounded-2xl p-6 text-center">
             <h3 className="text-lg font-bold mb-1">
-              {role === "farmer" ? "Farmer Account" : "Dealer Account"} <span className="text-primary">Krivexa!</span>
+              {role === "farmer" ? "Farmer Account" : "Dealer Account"} <span className="text-primary">Krivexo!</span>
             </h3>
             <p className="text-gray-400 text-xs mb-4">
               {role === "farmer" 
                 ? "One platform for all your farming needs." 
                 : "Expand your agri business directly with thousands of verified farmers."}
             </p>
-            <img src="/krivexa-logo.jpg" alt="KRIVEXA" className="w-24 h-24 mx-auto object-cover rounded-2xl border border-primary/40 shadow-lg mb-6" />
+            <img src="/krivexo-logo.jpg" alt="KRIVEXO" className="w-24 h-24 mx-auto object-cover rounded-2xl border border-primary/40 shadow-lg mb-6" />
             
             <div className="space-y-3 text-left">
               {[
@@ -385,10 +491,53 @@ export default function RegisterPage() {
                         </div>
                       </div>
                       <div>
-                        <Label className="text-gray-300 text-sm mb-1.5 block">Father / Husband Name <span className="text-red-400">*</span></Label>
+                        <Label className="text-gray-300 text-sm mb-1.5 flex items-center justify-between">
+                          <span>User ID <span className="text-red-400">*</span></span>
+                          {userIdStatus === "checking" && (
+                            <span className="text-[11px] text-gray-400 animate-pulse">Checking...</span>
+                          )}
+                          {userIdStatus === "available" && (
+                            <span className="text-[11px] text-emerald-400 font-medium">â Available</span>
+                          )}
+                          {userIdStatus === "taken" && (
+                            <span className="text-[11px] text-red-400 font-medium">Already taken</span>
+                          )}
+                        </Label>
                         <div className="relative">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                          <Input placeholder="Enter father / husband name" className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600" required />
+                          <Input 
+                            value={userId}
+                            onChange={(e) => setUserId(e.target.value.replace(/\s+/g, ""))}
+                            placeholder="Create your unique User ID (e.g. farmer101)" 
+                            className={`pl-10 bg-white/5 text-white placeholder:text-gray-600 ${
+                              userIdStatus === "taken"
+                                ? "border-red-500/70 focus-visible:ring-red-500"
+                                : userIdStatus === "available"
+                                ? "border-emerald-500/60 focus-visible:ring-emerald-500"
+                                : "border-white/10"
+                            }`}
+                            required 
+                          />
+                        </div>
+                        {userIdMessage && (
+                          <p className={`text-xs mt-1.5 ${userIdStatus === "taken" ? "text-red-400" : "text-emerald-400"}`}>
+                            {userIdMessage}
+                          </p>
+                        )}
+                        {/* Complexity requirement checklist */}
+                        <div className="grid grid-cols-2 gap-1.5 mt-2.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 text-[11px]">
+                          <span className={`flex items-center gap-1.5 ${hasUppercase ? "text-emerald-400 font-medium" : "text-gray-500"}`}>
+                            <span>{hasUppercase ? "â" : "â"}</span> Uppercase (A-Z)
+                          </span>
+                          <span className={`flex items-center gap-1.5 ${hasLowercase ? "text-emerald-400 font-medium" : "text-gray-500"}`}>
+                            <span>{hasLowercase ? "â" : "â"}</span> Lowercase (a-z)
+                          </span>
+                          <span className={`flex items-center gap-1.5 ${hasNumber ? "text-emerald-400 font-medium" : "text-gray-500"}`}>
+                            <span>{hasNumber ? "â" : "â"}</span> Number (0-9)
+                          </span>
+                          <span className={`flex items-center gap-1.5 ${hasSpecial ? "text-emerald-400 font-medium" : "text-gray-500"}`}>
+                            <span>{hasSpecial ? "â" : "â"}</span> Special char (@, #, $, etc.)
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -399,7 +548,14 @@ export default function RegisterPage() {
                         <div className="flex gap-4 mt-2">
                           {["Male", "Female", "Other"].map((g) => (
                             <label key={g} className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                              <input type="radio" name="gender" value={g} className="accent-primary" defaultChecked={g === "Male"} />
+                              <input
+                                type="radio"
+                                name="gender"
+                                value={g}
+                                checked={gender === g}
+                                onChange={() => setGender(g)}
+                                className="accent-primary"
+                              />
                               {g}
                             </label>
                           ))}
@@ -407,7 +563,13 @@ export default function RegisterPage() {
                       </div>
                       <div>
                         <Label className="text-gray-300 text-sm mb-1.5 block">Date of Birth <span className="text-red-400">*</span></Label>
-                        <Input type="date" className="bg-white/5 border-white/10 text-white" required />
+                        <Input
+                          type="date"
+                          value={dob}
+                          onChange={(e) => setDob(e.target.value)}
+                          className="bg-white/5 border-white/10 text-white"
+                          required
+                        />
                       </div>
                     </div>
 
@@ -415,7 +577,13 @@ export default function RegisterPage() {
                       <Label className="text-gray-300 text-sm mb-1.5 block">Address <span className="text-red-400">*</span></Label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                        <Input placeholder="Enter house no, street, locality" className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600" required />
+                        <Input
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          placeholder="Enter house no, street, locality"
+                          className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600"
+                          required
+                        />
                       </div>
                     </div>
 
@@ -531,7 +699,7 @@ export default function RegisterPage() {
                     </div>
 
                     <Button type="submit" className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer">
-                      Next Step (Send Email Verification) →
+                      Next Step (Send Email Verification) â
                     </Button>
 
                     <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-xl">
@@ -573,11 +741,11 @@ export default function RegisterPage() {
                       </div>
                     </div>
                     <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl max-w-md mx-auto text-xs text-gray-300">
-                      🔒 Once approved by Admin, your <strong>Dealer Login ID & Password</strong> will be dispatched to your registered email address. You will then be able to log in and change your password from your profile.
+                      ð Once approved by Admin, your <strong>Dealer Login ID & Password</strong> will be dispatched to your registered email address. You will then be able to log in and change your password from your profile.
                     </div>
                     <div className="pt-4">
                       <Button onClick={() => navigate("/login")} className="bg-primary text-black font-bold px-8 py-3 rounded-xl cursor-pointer">
-                        Go to Dealer Login →
+                        Go to Dealer Login â
                       </Button>
                     </div>
                   </div>
@@ -767,7 +935,7 @@ export default function RegisterPage() {
                     </div>
 
                     <Button type="submit" className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer">
-                      Submit Dealer Registration Request →
+                      Submit Dealer Registration Request â
                     </Button>
 
                     <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-xl">
@@ -805,7 +973,7 @@ export default function RegisterPage() {
                   <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div className="flex-1">
                     <div className="text-xs font-bold text-white flex items-center justify-between">
-                      <span>📧 Live Email Gateway</span>
+                      <span>ð§ Live Email Gateway</span>
                       <span className="text-[10px] text-primary font-mono bg-primary/20 px-2 py-0.5 rounded">Active</span>
                     </div>
                     <div className="text-xs text-gray-300 mt-1">
@@ -816,7 +984,7 @@ export default function RegisterPage() {
                       onClick={handleAutoFillEmailCode}
                       className="mt-2 text-xs bg-primary text-black font-bold px-3 py-1 rounded-lg hover:bg-primary/90 cursor-pointer shadow-md"
                     >
-                      ⚡ Auto-Fill Email Code ({generatedEmailCode || "4829"})
+                      â¡ Auto-Fill Email Code ({generatedEmailCode || "4829"})
                     </button>
                   </div>
                 </div>
@@ -844,7 +1012,7 @@ export default function RegisterPage() {
                     disabled={isVerifying}
                     className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl cursor-pointer"
                   >
-                    {isVerifying ? "Verifying Email Code..." : "Verify & Complete Registration →"}
+                    {isVerifying ? "Verifying Email Code..." : "Verify & Complete Registration â"}
                   </Button>
 
                   <div className="text-center text-xs text-gray-400">
@@ -855,7 +1023,7 @@ export default function RegisterPage() {
                         const newCode = Math.floor(1000 + Math.random() * 9000).toString();
                         setGeneratedEmailCode(newCode);
                         api.sendEmailCode(email).catch(() => {});
-                        toast.success(`📧 Resent Email: Your new verification code is ${newCode}`);
+                        toast.success(`ð§ Resent Email: Your new verification code is ${newCode}`);
                       }}
                       className="text-primary font-semibold hover:underline cursor-pointer ml-1"
                     >

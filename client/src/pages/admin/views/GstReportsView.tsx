@@ -43,8 +43,8 @@ interface GstSettings {
 
 const DEFAULT_GST_SETTINGS: GstSettings = {
   gstin: "10ABCDE1234F1Z5",
-  legalName: "Krivexa Agritech Pvt Ltd",
-  tradeName: "Krivexa",
+  legalName: "Krivexo Agritech Pvt Ltd",
+  tradeName: "Krivexo",
   stateCode: "10 - Bihar",
   taxRate5: true,
   taxRate12: false,
@@ -62,7 +62,7 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
   // GST Settings
   const [gstSettings, setGstSettings] = useState<GstSettings>(() => {
     try {
-      const saved = localStorage.getItem("krivexa_gst_settings");
+      const saved = localStorage.getItem("krivexo_gst_settings");
       return saved ? { ...DEFAULT_GST_SETTINGS, ...JSON.parse(saved) } : DEFAULT_GST_SETTINGS;
     } catch { return DEFAULT_GST_SETTINGS; }
   });
@@ -71,7 +71,7 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
 
   const handleSaveGstSettings = () => {
     setGstSettings(tempGstSettings);
-    try { localStorage.setItem("krivexa_gst_settings", JSON.stringify(tempGstSettings)); } catch { }
+    try { localStorage.setItem("krivexo_gst_settings", JSON.stringify(tempGstSettings)); } catch { }
     toast.success("GST settings saved successfully!");
     setShowGstSettingsModal(false);
   };
@@ -221,9 +221,9 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
       {/* 4 KPI Cards - Computed dynamically from filtered invoices */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: "Total GST Collected (Sales)", value: `₹ ${totalGstCollected.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, sub: `From ₹ ${totalSales.toLocaleString("en-IN")} sales`, Icon: IndianRupee, bg: "bg-purple-50", tc: "text-purple-600" },
-          { label: "Total GST Paid (Purchases)", value: `₹ ${totalGstPaid.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, sub: "Input tax credit", Icon: ArrowDownLeft, bg: "bg-emerald-50", tc: "text-emerald-600" },
-          { label: "Net GST Payable", value: `₹ ${netGstPayable.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, sub: "Ready for monthly filing", Icon: Coins, bg: "bg-amber-50", tc: "text-amber-600" },
+          { label: "Total GST Collected (Sales)", value: `â¹ ${totalGstCollected.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, sub: `From â¹ ${totalSales.toLocaleString("en-IN")} sales`, Icon: IndianRupee, bg: "bg-purple-50", tc: "text-purple-600" },
+          { label: "Total GST Paid (Purchases)", value: `â¹ ${totalGstPaid.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, sub: "Input tax credit", Icon: ArrowDownLeft, bg: "bg-emerald-50", tc: "text-emerald-600" },
+          { label: "Net GST Payable", value: `â¹ ${netGstPayable.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, sub: "Ready for monthly filing", Icon: Coins, bg: "bg-amber-50", tc: "text-amber-600" },
           { label: "GST Compliance Rate", value: "100.0%", sub: `${filteredInvoices.length} invoices compliant`, Icon: Percent, bg: "bg-blue-50", tc: "text-blue-600" },
         ].map((k, i) => {
           const IconComp = k.Icon;
@@ -306,7 +306,7 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
               }}
               className="h-8 px-3 rounded-xl border border-gray-200 bg-white text-gray-500 text-xs hover:bg-gray-50 flex items-center gap-1"
             >
-              ✕ Reset
+              â Reset
             </button>
           )}
           <Button
@@ -334,13 +334,13 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
               <circle cx="47.5" cy="47.5" r="35" fill="none" stroke="#e5e7eb" strokeWidth="12" />
               <circle cx="47.5" cy="47.5" r="35" fill="none" stroke="#3b82f6" strokeWidth="12" strokeDasharray="110 220" strokeLinecap="round" transform="rotate(-90 47.5 47.5)" />
               <circle cx="47.5" cy="47.5" r="35" fill="none" stroke="#059669" strokeWidth="12" strokeDasharray="110 220" strokeLinecap="round" transform="rotate(90 47.5 47.5)" strokeDashoffset="-2" />
-              <text x="47.5" y="44" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#111">₹ {totalGstCollected.toLocaleString("en-IN")}</text>
+              <text x="47.5" y="44" textAnchor="middle" fontSize="8" fontWeight="bold" fill="#111">â¹ {totalGstCollected.toLocaleString("en-IN")}</text>
               <text x="47.5" y="54" textAnchor="middle" fontSize="7" fill="#9ca3af">Total Tax</text>
             </svg>
             <div className="space-y-1 text-[10px] flex-1">
-              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" /><span>CGST (2.5%)</span></div><span className="font-bold text-gray-800">₹ {cgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })} (50%)</span></div>
-              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /><span>SGST (2.5%)</span></div><span className="font-bold text-gray-800">₹ {sgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })} (50%)</span></div>
-              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" /><span>IGST</span></div><span className="font-bold text-gray-800">₹ 0.00 (0%)</span></div>
+              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" /><span>CGST (2.5%)</span></div><span className="font-bold text-gray-800">â¹ {cgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })} (50%)</span></div>
+              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /><span>SGST (2.5%)</span></div><span className="font-bold text-gray-800">â¹ {sgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })} (50%)</span></div>
+              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" /><span>IGST</span></div><span className="font-bold text-gray-800">â¹ 0.00 (0%)</span></div>
             </div>
           </div>
         </div>
@@ -368,7 +368,7 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-sm font-bold text-gray-900">GST Invoices ({filteredInvoices.length}{filtersApplied ? ` filtered from ${gstInvoices.length}` : ""})</h3>
-            <p className="text-[11px] text-gray-400 mt-0.5">{filtersApplied ? `FY ${selectedFY} · ${selectedReturnType} · ${selectedStatus}` : "Live order tax records from database"}</p>
+            <p className="text-[11px] text-gray-400 mt-0.5">{filtersApplied ? `FY ${selectedFY} Â· ${selectedReturnType} Â· ${selectedStatus}` : "Live order tax records from database"}</p>
           </div>
         </div>
 
@@ -402,10 +402,10 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
                     <td className="py-3 px-4 font-mono font-bold text-emerald-700 whitespace-nowrap">{row.inv}</td>
                     <td className="py-3 px-4 font-semibold text-gray-900 whitespace-nowrap">{row.party}</td>
                     <td className="py-3 px-4 text-gray-500 whitespace-nowrap">{row.type}</td>
-                    <td className="py-3 px-4 text-right font-medium text-gray-800 whitespace-nowrap">₹ {row.taxable.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
-                    <td className="py-3 px-4 text-right text-gray-600 whitespace-nowrap">₹ {row.cgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
-                    <td className="py-3 px-4 text-right text-gray-600 whitespace-nowrap">₹ {row.sgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
-                    <td className="py-3 px-4 text-right font-bold text-gray-900 whitespace-nowrap">₹ {row.totalGst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
+                    <td className="py-3 px-4 text-right font-medium text-gray-800 whitespace-nowrap">â¹ {row.taxable.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
+                    <td className="py-3 px-4 text-right text-gray-600 whitespace-nowrap">â¹ {row.cgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
+                    <td className="py-3 px-4 text-right text-gray-600 whitespace-nowrap">â¹ {row.sgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
+                    <td className="py-3 px-4 text-right font-bold text-gray-900 whitespace-nowrap">â¹ {row.totalGst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
                     <td className="py-3 px-4 text-center whitespace-nowrap">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
                         row.status === "Filed"
@@ -484,7 +484,7 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
               </div>
 
               <div>
-                <label className="block text-gray-700 font-semibold mb-1">Taxable Value (₹)</label>
+                <label className="block text-gray-700 font-semibold mb-1">Taxable Value (â¹)</label>
                 <Input
                   type="number"
                   value={editForm.taxable}
@@ -493,7 +493,7 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
                   className="h-9 text-xs rounded-xl border-gray-200"
                 />
                 <p className="text-[10px] text-gray-400 mt-1">
-                  GST (5%): ₹ {((editForm.taxable || 0) * 0.05).toFixed(2)} (CGST ₹ {((editForm.taxable || 0) * 0.025).toFixed(2)} + SGST ₹ {((editForm.taxable || 0) * 0.025).toFixed(2)})
+                  GST (5%): â¹ {((editForm.taxable || 0) * 0.05).toFixed(2)} (CGST â¹ {((editForm.taxable || 0) * 0.025).toFixed(2)} + SGST â¹ {((editForm.taxable || 0) * 0.025).toFixed(2)})
                 </p>
               </div>
 
@@ -596,7 +596,7 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
                 <div>
                   <p className="font-semibold text-gray-800">E-Invoicing (IRN Generation)</p>
-                  <p className="text-[10px] text-gray-400">Enable for turnover above ₹5 Cr — as per CBIC mandate</p>
+                  <p className="text-[10px] text-gray-400">Enable for turnover above â¹5 Cr â as per CBIC mandate</p>
                 </div>
                 <button
                   type="button"
@@ -618,7 +618,7 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
         </div>
       )}
 
-      <div className="text-center text-[11px] text-gray-400">© {new Date().getFullYear()} Krivexa. All rights reserved.</div>
+      <div className="text-center text-[11px] text-gray-400">Â© {new Date().getFullYear()} Krivexo. All rights reserved.</div>
     </div>
   );
 }

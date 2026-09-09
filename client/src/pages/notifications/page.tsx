@@ -113,7 +113,7 @@ export default function NotificationsPage() {
                 </span>
               )}
             </div>
-            <p className="text-gray-400 text-sm pl-10">All activity updates related to your Krivexa account.</p>
+            <p className="text-gray-400 text-sm pl-10">All activity updates related to your Krivexo account.</p>
           </div>
         </div>
       </div>

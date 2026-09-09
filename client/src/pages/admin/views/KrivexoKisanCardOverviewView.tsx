@@ -9,7 +9,7 @@ import {
 import { toast } from "sonner";
 import { api } from "@/services/api";
 
-interface KrivexaKisanCardOverviewViewProps {
+interface KrivexoKisanCardOverviewViewProps {
   onNavigateTab?: (tab: string) => void;
 }
 
@@ -21,7 +21,7 @@ const AVATAR_COLORS = [
   "from-rose-400 to-pink-600"
 ];
 
-export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaKisanCardOverviewViewProps) {
+export default function KrivexoKisanCardOverviewView({ onNavigateTab }: KrivexoKisanCardOverviewViewProps) {
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,9 +129,9 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
       id: o.id || o._id || `ORD-${idx}`,
       icon: isCancelled ? ArrowUpRight : ShoppingBag,
       label: `Order #${(o.id || o._id || `ORD${idx}`).slice(-8).toUpperCase()}`,
-      sub: `${o.customerName || (o.deliveryAddress?.name) || "Customer"} • ${o.status || "Completed"}`,
+      sub: `${o.customerName || (o.deliveryAddress?.name) || "Customer"} â¢ ${o.status || "Completed"}`,
       date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Recent",
-      amount: `₹ ${(Number(o.totalAmount) || Number(o.amount) || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
+      amount: `â¹ ${(Number(o.totalAmount) || Number(o.amount) || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
       color: isCancelled ? "text-red-500" : "text-emerald-600",
       bg: isCancelled ? "bg-red-50" : "bg-emerald-50",
     };
@@ -142,7 +142,7 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
     name: u.fullName || u.name || "Platform User",
     role: (u.role || "User").charAt(0).toUpperCase() + (u.role || "user").slice(1),
     rank: i + 1,
-    balance: `₹ ${(totalVolume > 0 ? (totalVolume / (i + 1)) : 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,
+    balance: `â¹ ${(totalVolume > 0 ? (totalVolume / (i + 1)) : 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`,
   }));
 
   // Dynamic Donut Breakdown
@@ -151,9 +151,9 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
   const cancelledPct = totalVolume > 0 ? Math.round((totalWithdrawn / totalVolume) * 100) : 0;
 
   const donutSegments = [
-    { label: "Available (Completed)", pct: deliveredPct, color: "#059669", value: `₹ ${availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` },
-    { label: "On Hold (In Transit)", pct: pendingPct, color: "#f59e0b", value: `₹ ${onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` },
-    { label: "Refunds / Cancelled", pct: cancelledPct, color: "#ef4444", value: `₹ ${totalWithdrawn.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` },
+    { label: "Available (Completed)", pct: deliveredPct, color: "#059669", value: `â¹ ${availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` },
+    { label: "On Hold (In Transit)", pct: pendingPct, color: "#f59e0b", value: `â¹ ${onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` },
+    { label: "Refunds / Cancelled", pct: cancelledPct, color: "#ef4444", value: `â¹ ${totalWithdrawn.toLocaleString("en-IN", { minimumFractionDigits: 2 })}` },
   ];
   const circ = 2 * Math.PI * 32;
 
@@ -162,10 +162,10 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
       const rows = [
         ["Report", "Farma Platform Financial Summary"],
         ["Generated On", new Date().toLocaleString("en-IN")],
-        ["Total Volume", `₹ ${totalVolume.toFixed(2)}`],
-        ["Available Balance", `₹ ${availableBalance.toFixed(2)}`],
-        ["On Hold Balance", `₹ ${onHoldBalance.toFixed(2)}`],
-        ["Refunds Processed", `₹ ${totalWithdrawn.toFixed(2)}`],
+        ["Total Volume", `â¹ ${totalVolume.toFixed(2)}`],
+        ["Available Balance", `â¹ ${availableBalance.toFixed(2)}`],
+        ["On Hold Balance", `â¹ ${onHoldBalance.toFixed(2)}`],
+        ["Refunds Processed", `â¹ ${totalWithdrawn.toFixed(2)}`],
         ["Total Orders", orders.length.toString()],
         ["Total Users", totalUsersCount.toString()],
         [],
@@ -204,8 +204,8 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-400">
-            <span>Dashboard</span><span>›</span>
-            <span>Finance &amp; Wallet</span><span>›</span>
+            <span>Dashboard</span><span>âº</span>
+            <span>Finance &amp; Wallet</span><span>âº</span>
             <span className="text-emerald-600 font-semibold">Wallet Overview</span>
           </div>
           {/* Interactive Date Range Selector Pill */}
@@ -335,11 +335,11 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
       {/* 5 KPI Cards - Bound Strictly to Database */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: "Total Wallet Balance", value: `₹ ${totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${orders.length} total orders`, isPositive: true, Icon: CreditCard, tc: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Available Balance", value: `₹ ${availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${deliveredOrders.length} settled orders`, isPositive: true, Icon: CheckCircle2, tc: "text-blue-600", bg: "bg-blue-50" },
-          { label: "On Hold Balance", value: `₹ ${onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${pendingOrders.length} pending orders`, isPositive: false, Icon: Lock, tc: "text-amber-500", bg: "bg-amber-50" },
-          { label: "Total Add Money", value: `₹ ${totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: "Real transaction volume", isPositive: true, Icon: ArrowDownLeft, tc: "text-violet-600", bg: "bg-violet-50" },
-          { label: "Total Withdrawn", value: `₹ ${totalWithdrawn.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${cancelledOrders.length} refunds processed`, isPositive: false, Icon: ArrowUpRight, tc: "text-red-500", bg: "bg-red-50" },
+          { label: "Total Wallet Balance", value: `â¹ ${totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${orders.length} total orders`, isPositive: true, Icon: CreditCard, tc: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Available Balance", value: `â¹ ${availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${deliveredOrders.length} settled orders`, isPositive: true, Icon: CheckCircle2, tc: "text-blue-600", bg: "bg-blue-50" },
+          { label: "On Hold Balance", value: `â¹ ${onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${pendingOrders.length} pending orders`, isPositive: false, Icon: Lock, tc: "text-amber-500", bg: "bg-amber-50" },
+          { label: "Total Add Money", value: `â¹ ${totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: "Real transaction volume", isPositive: true, Icon: ArrowDownLeft, tc: "text-violet-600", bg: "bg-violet-50" },
+          { label: "Total Withdrawn", value: `â¹ ${totalWithdrawn.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`, trend: `${cancelledOrders.length} refunds processed`, isPositive: false, Icon: ArrowUpRight, tc: "text-red-500", bg: "bg-red-50" },
         ].map((s, i) => {
           const CardIcon = s.Icon;
           return (
@@ -381,7 +381,7 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
                   <CreditCard className="h-5 w-5 text-white/80" />
                 </div>
                 <p className="text-emerald-100 text-[9px] font-medium">Total Platform Volume</p>
-                <p className="text-white font-black text-xl">₹ {totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
+                <p className="text-white font-black text-xl">â¹ {totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</p>
               </div>
             </div>
 
@@ -392,14 +392,14 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                   <span className="text-gray-600 text-[11px]">Available Balance</span>
                 </div>
-                <span className="font-bold text-emerald-600 text-[11px]">₹ {availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                <span className="font-bold text-emerald-600 text-[11px]">â¹ {availableBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center gap-2">
                   <Lock className="h-3.5 w-3.5 text-amber-500" />
                   <span className="text-gray-600 text-[11px]">On Hold Balance</span>
                 </div>
-                <span className="font-bold text-amber-500 text-[11px]">₹ {onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                <span className="font-bold text-amber-500 text-[11px]">â¹ {onHoldBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
               </div>
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center gap-2">
@@ -445,7 +445,7 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
             {/* Total Indicator */}
             <div className="flex items-center justify-between bg-emerald-50 rounded-xl p-2.5 mb-3 text-xs">
               <span className="text-emerald-800 font-medium">Real Platform Volume</span>
-              <span className="font-black text-emerald-700">₹ {totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+              <span className="font-black text-emerald-700">â¹ {totalVolume.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
             </div>
 
             {/* Simple Volume Bars */}
@@ -458,7 +458,7 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
                 const heightPct = totalVolume > 0 ? Math.max(15, Math.round((b.value / totalVolume) * 100)) : 20;
                 return (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-bold text-gray-700">₹{b.value.toLocaleString("en-IN")}</span>
+                    <span className="text-[10px] font-bold text-gray-700">â¹{b.value.toLocaleString("en-IN")}</span>
                     <div className="w-full bg-gray-100 rounded-t-lg h-20 flex items-end overflow-hidden">
                       <div className={`w-full ${b.color} rounded-t-lg transition-all`} style={{ height: `${heightPct}%` }} />
                     </div>
@@ -472,12 +472,12 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
           <div className="grid grid-cols-2 gap-2 pt-3">
             <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-2 text-center">
               <p className="text-[9px] text-gray-500 font-medium">Total Processed</p>
-              <p className="text-xs font-black text-emerald-700 mt-0.5">₹ {availableBalance.toLocaleString("en-IN")}</p>
+              <p className="text-xs font-black text-emerald-700 mt-0.5">â¹ {availableBalance.toLocaleString("en-IN")}</p>
               <p className="text-[8px] text-emerald-600 mt-0.5">{deliveredOrders.length} completed</p>
             </div>
             <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-2 text-center">
               <p className="text-[9px] text-gray-500 font-medium">Pending Release</p>
-              <p className="text-xs font-black text-blue-700 mt-0.5">₹ {onHoldBalance.toLocaleString("en-IN")}</p>
+              <p className="text-xs font-black text-blue-700 mt-0.5">â¹ {onHoldBalance.toLocaleString("en-IN")}</p>
               <p className="text-[8px] text-blue-600 mt-0.5">{pendingOrders.length} in transit</p>
             </div>
           </div>
@@ -540,7 +540,7 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-semibold text-gray-800 truncate">{t.label}</p>
-                    <p className="text-[9px] text-gray-400">{t.sub} • {t.date}</p>
+                    <p className="text-[9px] text-gray-400">{t.sub} â¢ {t.date}</p>
                   </div>
                   <span className={`text-[10px] font-bold ${t.color} shrink-0`}>{t.amount}</span>
                 </div>
@@ -576,7 +576,7 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
                 Total
               </text>
               <text x="45" y="52" textAnchor="middle" fontSize="6.5" fontWeight="bold" fill="#059669">
-                ₹ {totalVolume.toLocaleString("en-IN")}
+                â¹ {totalVolume.toLocaleString("en-IN")}
               </text>
             </svg>
             <div className="w-full space-y-1.5">
@@ -635,7 +635,7 @@ export default function KrivexaKisanCardOverviewView({ onNavigateTab }: KrivexaK
       </div>
 
       <div className="text-center text-[11px] text-gray-400">
-        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Financial Database
+        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Financial Database
       </div>
     </div>
   );

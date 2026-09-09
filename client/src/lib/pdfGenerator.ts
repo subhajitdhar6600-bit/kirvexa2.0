@@ -41,7 +41,7 @@ export function generateFormPdf(params: FormPdfData): { dataUrl: string; fileNam
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(255, 255, 255);
-  doc.text("KRIVEXA", 15, 18);
+  doc.text("KRIVEXO", 15, 18);
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
@@ -142,13 +142,13 @@ export function generateFormPdf(params: FormPdfData): { dataUrl: string; fileNam
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(34, 197, 94);
-  doc.text("KRIVEXA OFFICIAL DIGITAL VERIFICATION RECEIPT", 20, y + 7);
+  doc.text("KRIVEXO OFFICIAL DIGITAL VERIFICATION RECEIPT", 20, y + 7);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
   doc.text(
-    "This document serves as an official confirmation of the submission made on KRIVEXA Smart Agriculture.",
+    "This document serves as an official confirmation of the submission made on KRIVEXO Smart Agriculture.",
     20,
     y + 13
   );
@@ -157,7 +157,7 @@ export function generateFormPdf(params: FormPdfData): { dataUrl: string; fileNam
     20,
     y + 18
   );
-  doc.text("Help Center Hotline: 1800-KRIVEXA | Web: www.krivexa.in", 20, y + 23);
+  doc.text("Help Center Hotline: 1800-KRIVEXO | Web: www.krivexo.in", 20, y + 23);
 
   const fileName = `${formTitle.toLowerCase().replace(/\s+/g, "_")}_${referenceId}.pdf`;
   const dataUrl = doc.output("datauristring");

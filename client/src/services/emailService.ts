@@ -36,9 +36,9 @@ export const sendEmailJS = async (params: SendEmailParams): Promise<{ success: b
     passcode: verification_code || '',
     code: verification_code || '',
     otp: verification_code || '',
-    message: message || `Your Krivexa verification code is: ${verification_code}`,
-    subject: subject || 'Krivexa Account Verification Code',
-    reply_to: 'support@krivexa.in',
+    message: message || `Your Krivexo verification code is: ${verification_code}`,
+    subject: subject || 'Krivexo Account Verification Code',
+    reply_to: 'support@krivexo.in',
   };
 
   // If EmailJS keys exist, send real email via EmailJS SDK
@@ -93,14 +93,14 @@ export const sendDealerCredentialsEmail = async (
   const emailBody = `
 Dear ${to_name} (${businessName}),
 
-Congratulations! Your Dealership Registration has been reviewed and approved by Farma / Krivexa Admin.
+Congratulations! Your Dealership Registration has been reviewed and approved by Farma / Krivexo Admin.
 
 Here are your official Dealer Panel Login Credentials:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Dealer ID : ${dealerId}
-• Password  : ${password}
-• Login URL : ${loginUrl}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+âââââââââââââââââââââââââââââââââââââ
+â¢ Dealer ID : ${dealerId}
+â¢ Password  : ${password}
+â¢ Login URL : ${loginUrl}
+âââââââââââââââââââââââââââââââââââââ
 
 Security Instructions:
 1. Navigate to the Dealer Login section at ${loginUrl}
@@ -108,14 +108,14 @@ Security Instructions:
 3. Enter your Dealer ID (${dealerId}) and Password.
 4. You can update your password at any time from your Dealer Profile.
 
-Thank you for partnering with Krivexa Agricultural Commerce.
+Thank you for partnering with Krivexo Agricultural Commerce.
   `.trim();
 
   return sendEmailJS({
     to_email,
     to_name,
     verification_code: dealerId,
-    subject: `Approved: Your Krivexa Dealer Credentials (${dealerId})`,
+    subject: `Approved: Your Krivexo Dealer Credentials (${dealerId})`,
     message: emailBody,
   });
 };

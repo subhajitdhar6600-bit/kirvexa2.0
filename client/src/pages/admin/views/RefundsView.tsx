@@ -19,24 +19,24 @@ interface RefundItem {
 }
 
 const INITIAL_REFUNDS_DATA: RefundItem[] = [
-  { id: "RFN2505250001", orderId: "ORD2505250001", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 2,450.00", amountNum: 2450, reason: "Order Cancelled by User", method: "UPI\nramesh@upi", status: "Processed", date: "25 May 2025\n10:30 AM" },
-  { id: "RFN2505250002", orderId: "ORD2505250002", user: "Suresh Yadav\n(Farmer)", amount: "₹ 5,000.00", amountNum: 5000, reason: "Product Not Delivered", method: "Bank Transfer\nSBI **** 5678", status: "Processed", date: "25 May 2025\n09:45 AM" },
-  { id: "RFN2505240003", orderId: "ORD2505240003", user: "Anita Devi\n(Farmer)", amount: "₹ 1,230.00", amountNum: 1230, reason: "Wrong Product Received", method: "Wallet", status: "Pending", date: "24 May 2025\n04:20 PM" },
-  { id: "RFN2505240004", orderId: "ORD2505240004", user: "Vikash Singh\n(Farmer)", amount: "₹ 7,500.00", amountNum: 7500, reason: "Product Damaged", method: "UPI\nvikash@upi", status: "Processed", date: "24 May 2025\n11:15 AM" },
-  { id: "RFN2505230005", orderId: "ORD2505230005", user: "Pooja Kumari\n(Farmer)", amount: "₹ 2,000.00", amountNum: 2000, reason: "Payment Failed (Auto Refund)", method: "Wallet", status: "Processed", date: "23 May 2025\n02:30 PM" },
-  { id: "RFN2505230006", orderId: "ORD2505230006", user: "Manoj Thakur\n(Farmer)", amount: "₹ 1,080.00", amountNum: 1080, reason: "Order Cancelled by User", method: "Net Banking\nHDFC **** 2345", status: "Failed", date: "23 May 2025\n12:05 PM" },
-  { id: "RFN2505220007", orderId: "ORD2505220007", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 3,000.00", amountNum: 3000, reason: "Service Not Satisfactory", method: "Bank Transfer\nPNB **** 4567", status: "Pending", date: "22 May 2025\n05:40 PM" },
-  { id: "RFN2505220008", orderId: "ORD2505220008", user: "Sunil Kumar\n(Farmer)", amount: "₹ 1,500.00", amountNum: 1500, reason: "Duplicate Payment", method: "UPI\nsunil@upi", status: "Processed", date: "22 May 2025\n01:20 PM" },
-  { id: "RFN2505210009", orderId: "ORD2505210009", user: "Neha Kumari\n(Farmer)", amount: "₹ 4,500.00", amountNum: 4500, reason: "Order Cancelled by Admin", method: "Wallet", status: "Processed", date: "21 May 2025\n03:15 PM" },
-  { id: "RFN2505210010", orderId: "ORD2505210010", user: "Ajay Kumar\n(Farmer)", amount: "₹ 1,000.00", amountNum: 1000, reason: "Payment Gateway Failure", method: "UPI\najay@upi", status: "Pending", date: "21 May 2025\n11:10 AM" },
+  { id: "RFN2505250001", orderId: "ORD2505250001", user: "Ramesh Kumar\n(Farmer)", amount: "â¹ 2,450.00", amountNum: 2450, reason: "Order Cancelled by User", method: "UPI\nramesh@upi", status: "Processed", date: "25 May 2025\n10:30 AM" },
+  { id: "RFN2505250002", orderId: "ORD2505250002", user: "Suresh Yadav\n(Farmer)", amount: "â¹ 5,000.00", amountNum: 5000, reason: "Product Not Delivered", method: "Bank Transfer\nSBI **** 5678", status: "Processed", date: "25 May 2025\n09:45 AM" },
+  { id: "RFN2505240003", orderId: "ORD2505240003", user: "Anita Devi\n(Farmer)", amount: "â¹ 1,230.00", amountNum: 1230, reason: "Wrong Product Received", method: "Wallet", status: "Pending", date: "24 May 2025\n04:20 PM" },
+  { id: "RFN2505240004", orderId: "ORD2505240004", user: "Vikash Singh\n(Farmer)", amount: "â¹ 7,500.00", amountNum: 7500, reason: "Product Damaged", method: "UPI\nvikash@upi", status: "Processed", date: "24 May 2025\n11:15 AM" },
+  { id: "RFN2505230005", orderId: "ORD2505230005", user: "Pooja Kumari\n(Farmer)", amount: "â¹ 2,000.00", amountNum: 2000, reason: "Payment Failed (Auto Refund)", method: "Wallet", status: "Processed", date: "23 May 2025\n02:30 PM" },
+  { id: "RFN2505230006", orderId: "ORD2505230006", user: "Manoj Thakur\n(Farmer)", amount: "â¹ 1,080.00", amountNum: 1080, reason: "Order Cancelled by User", method: "Net Banking\nHDFC **** 2345", status: "Failed", date: "23 May 2025\n12:05 PM" },
+  { id: "RFN2505220007", orderId: "ORD2505220007", user: "Ramesh Kumar\n(Farmer)", amount: "â¹ 3,000.00", amountNum: 3000, reason: "Service Not Satisfactory", method: "Bank Transfer\nPNB **** 4567", status: "Pending", date: "22 May 2025\n05:40 PM" },
+  { id: "RFN2505220008", orderId: "ORD2505220008", user: "Sunil Kumar\n(Farmer)", amount: "â¹ 1,500.00", amountNum: 1500, reason: "Duplicate Payment", method: "UPI\nsunil@upi", status: "Processed", date: "22 May 2025\n01:20 PM" },
+  { id: "RFN2505210009", orderId: "ORD2505210009", user: "Neha Kumari\n(Farmer)", amount: "â¹ 4,500.00", amountNum: 4500, reason: "Order Cancelled by Admin", method: "Wallet", status: "Processed", date: "21 May 2025\n03:15 PM" },
+  { id: "RFN2505210010", orderId: "ORD2505210010", user: "Ajay Kumar\n(Farmer)", amount: "â¹ 1,000.00", amountNum: 1000, reason: "Payment Gateway Failure", method: "UPI\najay@upi", status: "Pending", date: "21 May 2025\n11:10 AM" },
 ];
 
 const REFUND_REASONS = [
-  { reason: "Order Cancelled by User", count: 42, amount: "₹ 42,450.00" },
-  { reason: "Product Not Delivered", count: 28, amount: "₹ 28,300.00" },
-  { reason: "Wrong Product Received", count: 19, amount: "₹ 18,750.00" },
-  { reason: "Product Damaged", count: 15, amount: "₹ 11,850.00" },
-  { reason: "Payment Failed (Auto Refund)", count: 12, amount: "₹ 7,230.00" },
+  { reason: "Order Cancelled by User", count: 42, amount: "â¹ 42,450.00" },
+  { reason: "Product Not Delivered", count: 28, amount: "â¹ 28,300.00" },
+  { reason: "Wrong Product Received", count: 19, amount: "â¹ 18,750.00" },
+  { reason: "Product Damaged", count: 15, amount: "â¹ 11,850.00" },
+  { reason: "Payment Failed (Auto Refund)", count: 12, amount: "â¹ 7,230.00" },
 ];
 
 export default function RefundsView() {
@@ -140,9 +140,9 @@ export default function RefundsView() {
         <div className="flex items-center gap-3">
           <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-400 mr-2">
             <span>Dashboard</span>
-            <span>›</span>
+            <span>âº</span>
             <span>Finance &amp; Wallet</span>
-            <span>›</span>
+            <span>âº</span>
             <span className="text-emerald-600 font-semibold">Refunds</span>
           </div>
           {/* Date Range Picker */}
@@ -195,8 +195,8 @@ export default function RefundsView() {
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Total Refunds</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">₹ 1,13,230.00</p>
-            <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">↗ 12.6% from last month</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ 1,13,230.00</p>
+            <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">â 12.6% from last month</p>
           </div>
         </div>
 
@@ -207,8 +207,8 @@ export default function RefundsView() {
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Refunds Processed</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">₹ 1,01,450.00</p>
-            <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">↗ 15.4% from last month</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ 1,01,450.00</p>
+            <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">â 15.4% from last month</p>
           </div>
         </div>
 
@@ -219,8 +219,8 @@ export default function RefundsView() {
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Pending Refunds</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">₹ 11,780.00</p>
-            <p className="text-[10px] text-red-500 font-semibold mt-0.5">↘ 8.3% from last month</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ 11,780.00</p>
+            <p className="text-[10px] text-red-500 font-semibold mt-0.5">â 8.3% from last month</p>
           </div>
         </div>
 
@@ -231,8 +231,8 @@ export default function RefundsView() {
           </div>
           <div>
             <p className="text-[11px] font-medium text-gray-500">Failed Refunds</p>
-            <p className="text-lg font-black text-gray-900 mt-0.5">₹ 0.00</p>
-            <p className="text-[10px] text-gray-400 font-semibold mt-0.5">— 0% from last month</p>
+            <p className="text-lg font-black text-gray-900 mt-0.5">â¹ 0.00</p>
+            <p className="text-[10px] text-gray-400 font-semibold mt-0.5">â 0% from last month</p>
           </div>
         </div>
       </div>
@@ -272,7 +272,7 @@ export default function RefundsView() {
           >
             <Filter className="h-3.5 w-3.5" />
             <span>Filters</span>
-            {filtersActive && <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center">✓</span>}
+            {filtersActive && <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] font-black flex items-center justify-center">â</span>}
           </button>
         </div>
       </div>
@@ -357,14 +357,14 @@ export default function RefundsView() {
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold text-gray-800">Refund Trend</h3>
                 <span className="text-[10px] text-gray-500 bg-gray-50 px-2 py-0.5 rounded-lg border border-gray-200">
-                  This Month ▾
+                  This Month â¾
                 </span>
               </div>
 
               {/* Peak Tag */}
               <div className="flex justify-end">
                 <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                  20 May 2025: Refund Amount ₹ 18,450
+                  20 May 2025: Refund Amount â¹ 18,450
                 </span>
               </div>
 
@@ -428,7 +428,7 @@ export default function RefundsView() {
                 onClick={() => toast.info("Viewing all refund reasons")}
                 className="mt-3 text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
               >
-                View All Reasons →
+                View All Reasons â
               </button>
             </div>
           </div>
@@ -471,7 +471,7 @@ export default function RefundsView() {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                   <span className="text-[9px] text-gray-400 font-medium">Total</span>
-                  <span className="text-[11px] font-black text-gray-900 leading-tight">₹ 1,13,230</span>
+                  <span className="text-[11px] font-black text-gray-900 leading-tight">â¹ 1,13,230</span>
                 </div>
               </div>
 
@@ -481,21 +481,21 @@ export default function RefundsView() {
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                     <span>Processed</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 pl-3.5">₹ 1,01,450.00 (89.6%)</p>
+                  <p className="text-[10px] text-gray-400 pl-3.5">â¹ 1,01,450.00 (89.6%)</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5 text-gray-700 font-medium">
                     <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                     <span>Pending</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 pl-3.5">₹ 11,780.00 (10.4%)</p>
+                  <p className="text-[10px] text-gray-400 pl-3.5">â¹ 11,780.00 (10.4%)</p>
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5 text-gray-700 font-medium">
                     <span className="w-2 h-2 rounded-full bg-red-500"></span>
                     <span>Failed</span>
                   </div>
-                  <p className="text-[10px] text-gray-400 pl-3.5">₹ 0.00 (0%)</p>
+                  <p className="text-[10px] text-gray-400 pl-3.5">â¹ 0.00 (0%)</p>
                 </div>
               </div>
             </div>
@@ -506,37 +506,37 @@ export default function RefundsView() {
             <h3 className="text-xs font-bold text-gray-800 mb-3">Refunds by Method</h3>
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 font-medium">⚡ UPI</span>
+                <span className="text-gray-600 font-medium">â¡ UPI</span>
                 <div>
-                  <span className="font-bold text-gray-800">₹ 42,230.00</span>
+                  <span className="font-bold text-gray-800">â¹ 42,230.00</span>
                   <span className="text-gray-400 text-[10px] ml-1.5 font-semibold">37.3%</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 font-medium">🏦 Bank Transfer</span>
+                <span className="text-gray-600 font-medium">ð¦ Bank Transfer</span>
                 <div>
-                  <span className="font-bold text-gray-800">₹ 38,450.00</span>
+                  <span className="font-bold text-gray-800">â¹ 38,450.00</span>
                   <span className="text-gray-400 text-[10px] ml-1.5 font-semibold">33.9%</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 font-medium">👛 Wallet</span>
+                <span className="text-gray-600 font-medium">ð Wallet</span>
                 <div>
-                  <span className="font-bold text-gray-800">₹ 18,980.00</span>
+                  <span className="font-bold text-gray-800">â¹ 18,980.00</span>
                   <span className="text-gray-400 text-[10px] ml-1.5 font-semibold">16.8%</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 font-medium">🌐 Net Banking</span>
+                <span className="text-gray-600 font-medium">ð Net Banking</span>
                 <div>
-                  <span className="font-bold text-gray-800">₹ 10,570.00</span>
+                  <span className="font-bold text-gray-800">â¹ 10,570.00</span>
                   <span className="text-gray-400 text-[10px] ml-1.5 font-semibold">9.3%</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 font-medium">💳 Card</span>
+                <span className="text-gray-600 font-medium">ð³ Card</span>
                 <div>
-                  <span className="font-bold text-gray-800">₹ 3,000.00</span>
+                  <span className="font-bold text-gray-800">â¹ 3,000.00</span>
                   <span className="text-gray-400 text-[10px] ml-1.5 font-semibold">2.7%</span>
                 </div>
               </div>
@@ -551,13 +551,13 @@ export default function RefundsView() {
                 const pendingCount = refunds.filter(r => r.status === "Pending").length;
                 if (pendingCount === 0) { toast.info("No pending refunds to process."); return; }
                 setRefunds(prev => prev.map(r => r.status === "Pending" ? { ...r, status: "Processed" } : r));
-                toast.success(`✅ ${pendingCount} pending refund(s) processed successfully!`);
+                toast.success(`â ${pendingCount} pending refund(s) processed successfully!`);
               }}
               className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 border border-gray-100 text-left transition-colors group"
             >
               <div>
                 <p className="text-xs font-bold text-gray-800">Process Pending Refunds</p>
-                <p className="text-[10px] text-gray-400">{refunds.filter(r => r.status === "Pending").length} pending · Approve and process</p>
+                <p className="text-[10px] text-gray-400">{refunds.filter(r => r.status === "Pending").length} pending Â· Approve and process</p>
               </div>
               <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-emerald-600" />
             </button>
@@ -616,7 +616,7 @@ export default function RefundsView() {
         </div>
       </div>
 
-      {/* ── Filters Modal ── */}
+      {/* ââ Filters Modal ââ */}
       {showFiltersModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowFiltersModal(false); }}>
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
@@ -650,12 +650,12 @@ export default function RefundsView() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-1">Min Amount (₹)</label>
+                  <label className="block text-gray-700 font-semibold mb-1">Min Amount (â¹)</label>
                   <input type="number" value={filterMinAmount} onChange={(e) => setFilterMinAmount(e.target.value)} placeholder="0" className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 text-xs" />
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-1">Max Amount (₹)</label>
-                  <input type="number" value={filterMaxAmount} onChange={(e) => setFilterMaxAmount(e.target.value)} placeholder="∞" className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 text-xs" />
+                  <label className="block text-gray-700 font-semibold mb-1">Max Amount (â¹)</label>
+                  <input type="number" value={filterMaxAmount} onChange={(e) => setFilterMaxAmount(e.target.value)} placeholder="â" className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 text-xs" />
                 </div>
               </div>
             </div>
@@ -667,7 +667,7 @@ export default function RefundsView() {
         </div>
       )}
 
-      {/* ── Manual Refund Modal ── */}
+      {/* ââ Manual Refund Modal ââ */}
       {showManualRefundModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowManualRefundModal(false); }}>
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
@@ -681,7 +681,7 @@ export default function RefundsView() {
             <div className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-2">
                 <div><label className="block text-gray-700 font-semibold mb-1">Order ID</label><input value={manualRefundForm.orderId} onChange={(e) => setManualRefundForm(p => ({...p, orderId: e.target.value}))} placeholder="ORD2505250001" className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
-                <div><label className="block text-gray-700 font-semibold mb-1">Amount (₹)</label><input type="number" value={manualRefundForm.amount} onChange={(e) => setManualRefundForm(p => ({...p, amount: e.target.value}))} placeholder="0.00" className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
+                <div><label className="block text-gray-700 font-semibold mb-1">Amount (â¹)</label><input type="number" value={manualRefundForm.amount} onChange={(e) => setManualRefundForm(p => ({...p, amount: e.target.value}))} placeholder="0.00" className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
               </div>
               <div><label className="block text-gray-700 font-semibold mb-1">Customer Name</label><input value={manualRefundForm.user} onChange={(e) => setManualRefundForm(p => ({...p, user: e.target.value}))} placeholder="Farmer / Customer Name" className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
               <div><label className="block text-gray-700 font-semibold mb-1">Refund Method</label><select value={manualRefundForm.method} onChange={(e) => setManualRefundForm(p => ({...p, method: e.target.value}))} className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-700 text-xs font-medium"><option>UPI</option><option>Bank Transfer</option><option>Wallet</option><option>Net Banking</option></select></div>
@@ -692,7 +692,7 @@ export default function RefundsView() {
               <button onClick={() => {
                 if (!manualRefundForm.orderId || !manualRefundForm.amount || !manualRefundForm.user) { toast.error("Please fill all required fields"); return; }
                 const newId = `RFN${Date.now().toString().slice(-10)}`;
-                const newRefund: RefundItem = { id: newId, orderId: manualRefundForm.orderId, user: manualRefundForm.user + "\n(Manual)", amount: `₹ ${Number(manualRefundForm.amount).toLocaleString("en-IN", {minimumFractionDigits: 2})}`, amountNum: Number(manualRefundForm.amount), reason: manualRefundForm.reason || "Manual Refund", method: manualRefundForm.method, status: "Pending", date: new Date().toLocaleDateString("en-IN", {day:"2-digit",month:"short",year:"numeric"}) + "\n" + new Date().toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"}) };
+                const newRefund: RefundItem = { id: newId, orderId: manualRefundForm.orderId, user: manualRefundForm.user + "\n(Manual)", amount: `â¹ ${Number(manualRefundForm.amount).toLocaleString("en-IN", {minimumFractionDigits: 2})}`, amountNum: Number(manualRefundForm.amount), reason: manualRefundForm.reason || "Manual Refund", method: manualRefundForm.method, status: "Pending", date: new Date().toLocaleDateString("en-IN", {day:"2-digit",month:"short",year:"numeric"}) + "\n" + new Date().toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"}) };
                 setRefunds(prev => [newRefund, ...prev]);
                 toast.success(`Manual refund ${newId} created!`);
                 setShowManualRefundModal(false);
@@ -703,7 +703,7 @@ export default function RefundsView() {
         </div>
       )}
 
-      {/* ── Refund Policies Modal ── */}
+      {/* ââ Refund Policies Modal ââ */}
       {showPoliciesModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowPoliciesModal(false); }}>
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150 max-h-[80vh] overflow-y-auto">
@@ -718,7 +718,7 @@ export default function RefundsView() {
               {[
                 { title: "Standard Refund Window", desc: "Refunds can be initiated within 7 days of delivery for damaged/wrong products and within 24 hours for payment failures." },
                 { title: "Eligible Refund Reasons", desc: "Order cancellation, wrong product, product damage, payment failure (auto-refund), service dissatisfaction, duplicate charge." },
-                { title: "Refund Processing Time", desc: "UPI & Wallet: 24 hours. Bank Transfer: 3–5 business days. Net Banking: 5–7 business days." },
+                { title: "Refund Processing Time", desc: "UPI & Wallet: 24 hours. Bank Transfer: 3â5 business days. Net Banking: 5â7 business days." },
                 { title: "Non-Refundable Items", desc: "Seeds once opened, fertilizers after usage, custom-order items, and perishable goods are not eligible for refund." },
                 { title: "Partial Refunds", desc: "Partial refunds may be issued for partially delivered or partially damaged orders upon admin approval." },
               ].map(p => (
@@ -733,7 +733,7 @@ export default function RefundsView() {
         </div>
       )}
 
-      {/* ── Refund Settings Modal ── */}
+      {/* ââ Refund Settings Modal ââ */}
       {showRefundSettingsModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowRefundSettingsModal(false); }}>
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
@@ -747,7 +747,7 @@ export default function RefundsView() {
             <div className="space-y-3 text-xs">
               {[
                 { key: "autoProcess" as keyof typeof refundSettings, label: "Auto-Process Eligible Refunds", desc: "Automatically approve payment failure refunds" },
-                { key: "allowWalletRefund" as keyof typeof refundSettings, label: "Allow Wallet Refunds", desc: "Let users receive refunds into their Krivexa wallet" },
+                { key: "allowWalletRefund" as keyof typeof refundSettings, label: "Allow Wallet Refunds", desc: "Let users receive refunds into their Krivexo wallet" },
               ].map(({ key, label, desc }) => (
                 <div key={key} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 border border-gray-100">
                   <div><p className="font-semibold text-gray-800">{label}</p><p className="text-[10px] text-gray-400">{desc}</p></div>
@@ -757,7 +757,7 @@ export default function RefundsView() {
                 </div>
               ))}
               <div><label className="block text-gray-700 font-semibold mb-1">Processing Time (days)</label><input type="number" min={1} max={30} value={refundSettings.processingDays} onChange={(e) => setRefundSettings(p => ({ ...p, processingDays: Number(e.target.value) }))} className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
-              <div><label className="block text-gray-700 font-semibold mb-1">Max Refund Amount (₹)</label><input type="number" min={0} value={refundSettings.maxRefundAmt} onChange={(e) => setRefundSettings(p => ({ ...p, maxRefundAmt: Number(e.target.value) }))} className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
+              <div><label className="block text-gray-700 font-semibold mb-1">Max Refund Amount (â¹)</label><input type="number" min={0} value={refundSettings.maxRefundAmt} onChange={(e) => setRefundSettings(p => ({ ...p, maxRefundAmt: Number(e.target.value) }))} className="w-full h-9 px-3 border border-gray-200 rounded-xl text-xs" /></div>
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
               <button onClick={() => setShowRefundSettingsModal(false)} className="h-8 px-3 text-xs rounded-xl border border-gray-200 text-gray-500">Cancel</button>
@@ -767,7 +767,7 @@ export default function RefundsView() {
         </div>
       )}
 
-      {/* ── Contact Support Modal ── */}
+      {/* ââ Contact Support Modal ââ */}
       {showSupportModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setShowSupportModal(false); }}>
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
@@ -781,7 +781,7 @@ export default function RefundsView() {
             <div className="space-y-3 text-xs">
               <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800">
                 <p className="font-bold">Support Hours</p>
-                <p>Monday – Saturday, 9:00 AM – 7:00 PM IST</p>
+                <p>Monday â Saturday, 9:00 AM â 7:00 PM IST</p>
               </div>
               <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 border border-gray-100">
                 <Phone className="h-4 w-4 text-emerald-600" />

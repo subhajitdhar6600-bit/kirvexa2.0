@@ -80,13 +80,19 @@ export default function AllUsersView({
   const users = sourceList.map((u: any, idx: number) => {
     const rawId = u._id || u.id || `usr-${idx}`;
     const name = u.fullName || u.name || "User";
+    const customUserId = u.userId || u.id || `USR${1000 + idx}`;
+    const emailVal = (u.email && u.email !== "â" && !u.email.endsWith("@farma.local")) ? u.email : (u.email || "â");
     return {
-      id: u.id || `USR${1000 + idx}`,
+      id: customUserId,
+      userId: customUserId,
       rawId: rawId,
       name: name,
       role: (u.role || "Farmer").charAt(0).toUpperCase() + (u.role || "farmer").slice(1),
-      phone: u.phone || "—",
-      email: u.email || "—",
+      phone: u.phone || "â",
+      email: emailVal,
+      gender: (u.gender && u.gender !== "â") ? u.gender : "â",
+      dob: (u.dob && u.dob !== "â") ? u.dob : "â",
+      address: u.address || "",
       location: [u.village, u.district, u.state].filter(Boolean).join(", ") || u.location || "Bihar, India",
       joinedOn: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
       status: (u.status === "inactive" || u.isActive === false) ? "Inactive" : "Active",
@@ -153,9 +159,9 @@ export default function AllUsersView({
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>›</span>
+          <span>âº</span>
           <span>Users Management</span>
-          <span>›</span>
+          <span>âº</span>
           <span className="text-emerald-600 font-medium">All Users</span>
         </div>
       </div>
@@ -432,7 +438,7 @@ export default function AllUsersView({
         </div>
       </div>
 
-      {/* ─── 1. View User Details Modal ─── */}
+      {/* âââ 1. View User Details Modal âââ */}
       {viewingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative animate-in fade-in zoom-in-95">
@@ -459,6 +465,18 @@ export default function AllUsersView({
             </div>
 
             <div className="space-y-3 bg-gray-50/80 p-4 rounded-2xl border border-gray-100 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500 font-medium">User ID (Login ID)</span>
+                <span className="font-mono font-bold text-emerald-700">{viewingUser.userId || viewingUser.id}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Gender</span>
+                <span className="font-semibold text-gray-900 capitalize">{viewingUser.gender || "â"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">Date of Birth</span>
+                <span className="font-semibold text-gray-900">{viewingUser.dob || "â"}</span>
+              </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-500 flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-gray-400" /> Phone</span>
                 <span className="font-semibold text-gray-900">{viewingUser.phone}</span>
@@ -508,7 +526,7 @@ export default function AllUsersView({
 
 
 
-      {/* ─── 3. Delete Confirmation Modal ─── */}
+      {/* âââ 3. Delete Confirmation Modal âââ */}
       {deletingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 relative animate-in fade-in zoom-in-95 text-center">

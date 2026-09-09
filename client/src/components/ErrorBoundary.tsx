@@ -38,11 +38,11 @@ export class ErrorBoundary extends Component<Props, State> {
   private handleResetCache = () => {
     try {
       // Clear potentially corrupted application keys
-      const keysToKeep = ["krivexa_lang"];
+      const keysToKeep = ["krivexo_lang"];
       const toRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith("krivexa_") && !keysToKeep.includes(key)) {
+        if (key && key.startsWith("krivexo_") && !keysToKeep.includes(key)) {
           toRemove.push(key);
         }
       }

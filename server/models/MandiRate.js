@@ -10,7 +10,7 @@ const mandiRateSchema = new mongoose.Schema(
     modal: { type: Number, required: true },
     unit: { type: String, default: 'Quintal' },
     change: { type: Number, default: 0 },
-    img: { type: String, default: '🌾' },
+    img: { type: String, default: 'ð¾' },
     mandi: { type: String, default: 'Kanpur Mandi' },
   },
   { timestamps: true }

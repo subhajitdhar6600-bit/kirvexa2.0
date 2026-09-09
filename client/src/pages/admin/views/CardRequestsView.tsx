@@ -27,8 +27,8 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
   const requests = rawList.map((k: any) => ({
     id: k.id || `REQ${Math.floor(10000 + Math.random() * 90000)}`,
     name: k.fullName || "Applicant",
-    phone: k.phone || k.mobileNumber || "—",
-    email: k.email || "—",
+    phone: k.phone || k.mobileNumber || "â",
+    email: k.email || "â",
     address: [k.address, k.district].filter(Boolean).join(", ") || "Bihar",
     cardType: k.cardTier === "nex" ? "Kisan Card Gold" : "Kisan Card Basic",
     cardNumber: k.cardNumber || k.kccCardNumber,
@@ -80,7 +80,7 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
       return;
     }
     approveKccApplication(allottingRequest.id, allottedCardNumber.trim(), allottedCreditLimit);
-    toast.success(`KCC Card "${allottedCardNumber}" allotted with ₹${allottedCreditLimit.toLocaleString("en-IN")} limit! User documents verified.`);
+    toast.success(`KCC Card "${allottedCardNumber}" allotted with â¹${allottedCreditLimit.toLocaleString("en-IN")} limit! User documents verified.`);
     setAllotModalOpen(false);
     setAllottingRequest(null);
   };
@@ -136,10 +136,10 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Card Requests</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Review and manage all live Krivexa Kisan Card applications</p>
+          <p className="text-xs text-gray-500 mt-0.5">Review and manage all live Krivexo Kisan Card applications</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span>›</span><span>Krivexa Card</span><span>›</span>
+          <span>Dashboard</span><span>âº</span><span>Krivexo Card</span><span>âº</span>
           <span className="text-emerald-600 font-medium">Card Requests</span>
         </div>
       </div>
@@ -250,7 +250,7 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
                           </div>
                           <div>
                             <p className="font-bold text-gray-900">{r.name}</p>
-                            <p className="text-[10px] text-gray-400">{r.phone} • {r.address}</p>
+                            <p className="text-[10px] text-gray-400">{r.phone} â¢ {r.address}</p>
                           </div>
                         </div>
                       </td>
@@ -259,7 +259,7 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
                           {r.cardType}
                         </span>
                       </td>
-                      <td className="py-3 px-4 font-bold text-gray-800">₹ {r.creditRequested.toLocaleString("en-IN")}</td>
+                      <td className="py-3 px-4 font-bold text-gray-800">â¹ {r.creditRequested.toLocaleString("en-IN")}</td>
                       <td className="py-3 px-4">{getStatusBadge(r.status)}</td>
                       <td className="py-3 px-4 text-gray-500">{r.appliedOn}</td>
                       <td className="py-3 px-4 text-center">
@@ -358,10 +358,10 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
               <div className="p-4 space-y-2.5 text-xs">
                 {[
                   { label: "Mobile Number", value: selected.phone },
-                  { label: "Email Address", value: selected.email || "—" },
+                  { label: "Email Address", value: selected.email || "â" },
                   { label: "Address", value: selected.address },
                   { label: "Card Type", value: selected.cardType },
-                  { label: "Credit Requested", value: `₹ ${selected.creditRequested.toLocaleString("en-IN")}` },
+                  { label: "Credit Requested", value: `â¹ ${selected.creditRequested.toLocaleString("en-IN")}` },
                   { label: "ID Proof", value: selected.idProof },
                   { label: "Applied On", value: selected.appliedOn },
                 ].map((row, i) => (
@@ -405,7 +405,7 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
         )}
       </div>
 
-      {/* ─── REVIEW & ALLOT KCC CARD MODAL (Point 5) ─── */}
+      {/* âââ REVIEW & ALLOT KCC CARD MODAL (Point 5) âââ */}
       {allotModalOpen && allottingRequest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative animate-in fade-in zoom-in-95">
@@ -463,7 +463,7 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Approved Credit Limit (₹) *</label>
+                <label className="block font-semibold text-gray-700 mb-1">Approved Credit Limit (â¹) *</label>
                 <Input
                   type="number"
                   min="1000"
@@ -514,7 +514,7 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar KCC Applications Database
+        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar KCC Applications Database
       </div>
     </div>
   );

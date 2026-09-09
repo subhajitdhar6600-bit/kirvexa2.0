@@ -19,7 +19,7 @@ const PAGES_DATA: PageItem[] = [
   { id: "1", title: "Home Page", type: "Landing Page", slug: "/", status: "Published", lastUpdated: "25 May 2025 10:30 AM" },
   { id: "2", title: "About Us", type: "Static Page", slug: "/about-us", status: "Published", lastUpdated: "24 May 2025 04:15 PM" },
   { id: "3", title: "Our Services", type: "Static Page", slug: "/services", status: "Published", lastUpdated: "24 May 2025 02:40 PM" },
-  { id: "4", title: "Krivexa Card", type: "Static Page", slug: "/krivexa-card", status: "Published", lastUpdated: "23 May 2025 11:20 AM" },
+  { id: "4", title: "Krivexo Card", type: "Static Page", slug: "/krivexo-card", status: "Published", lastUpdated: "23 May 2025 11:20 AM" },
   { id: "5", title: "For Farmers", type: "Landing Page", slug: "/for-farmers", status: "Published", lastUpdated: "23 May 2025 09:10 AM" },
   { id: "6", title: "For Retailers", type: "Landing Page", slug: "/for-retailers", status: "Published", lastUpdated: "22 May 2025 06:35 PM" },
   { id: "7", title: "Products", type: "Static Page", slug: "/products", status: "Published", lastUpdated: "22 May 2025 05:00 PM" },
@@ -35,7 +35,7 @@ const PAGES_DATA: PageItem[] = [
 
 const POPULAR_PAGES = [
   { title: "Home Page", views: "12,450", unique: "8,230", time: "02:34", bounce: "35.6%" },
-  { title: "Krivexa Card", views: "7,850", unique: "5,420", time: "03:12", bounce: "32.1%" },
+  { title: "Krivexo Card", views: "7,850", unique: "5,420", time: "03:12", bounce: "32.1%" },
   { title: "For Farmers", views: "6,120", unique: "4,230", time: "02:48", bounce: "33.8%" },
   { title: "For Retailers", views: "5,740", unique: "3,980", time: "02:20", bounce: "31.4%" },
   { title: "Products", views: "4,980", unique: "3,210", time: "01:58", bounce: "28.9%" },
@@ -86,9 +86,9 @@ export default function CmsManagementView() {
         <div className="flex items-center gap-3">
           <div className="hidden lg:flex items-center gap-1.5 text-xs text-gray-400 mr-2">
             <span>Dashboard</span>
-            <span>›</span>
+            <span>âº</span>
             <span>CMS</span>
-            <span>›</span>
+            <span>âº</span>
             <span className="text-emerald-600 font-semibold">Pages Management</span>
           </div>
           <button
@@ -286,7 +286,7 @@ export default function CmsManagementView() {
               <span>Showing 1 to 15 of 58 pages</span>
               <div className="flex items-center gap-1">
                 <button className="px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 text-[11px]">
-                  ‹
+                  â¹
                 </button>
                 <button className="px-2.5 py-1 rounded-lg bg-emerald-700 text-white font-bold text-[11px]">
                   1
@@ -305,7 +305,7 @@ export default function CmsManagementView() {
                   6
                 </button>
                 <button className="px-2.5 py-1 rounded-lg border border-gray-200 hover:bg-gray-50 text-[11px]">
-                  ›
+                  âº
                 </button>
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function CmsManagementView() {
                 onClick={() => toast.info("Opening Help Center...")}
                 className="mt-3 w-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
               >
-                Go to Help Center →
+                Go to Help Center â
               </button>
             </div>
           </div>
@@ -552,7 +552,7 @@ export default function CmsManagementView() {
                 { title: "Home Page", time: "25 May 2025, 10:30 AM" },
                 { title: "About Us", time: "24 May 2025, 04:15 PM" },
                 { title: "Our Services", time: "24 May 2025, 02:40 PM" },
-                { title: "Krivexa Card", time: "23 May 2025, 11:20 AM" },
+                { title: "Krivexo Card", time: "23 May 2025, 11:20 AM" },
                 { title: "For Farmers", time: "23 May 2025, 09:10 AM" },
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between text-[11px]">

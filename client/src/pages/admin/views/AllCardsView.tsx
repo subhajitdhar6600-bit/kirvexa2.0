@@ -68,7 +68,7 @@ export default function AllCardsView() {
         setRawUsers(users);
         const mappedCards: CardItem[] = users.map((u: any, idx: number) => {
           const name = u.fullName || u.name || "Farmer User";
-          const phone = u.phone || "—";
+          const phone = u.phone || "â";
           const cleanPhone = phone.replace(/\D/g, "").slice(-10);
           const last4 = cleanPhone.slice(-4) || `${1000 + idx}`;
           const isVerified = u.isVerified === true || u.verificationStatus === "Verified";
@@ -170,7 +170,7 @@ export default function AllCardsView() {
     const newCard: CardItem = {
       id: `card_${Date.now()}`,
       name: targetUser.fullName || targetUser.name || "User",
-      phone: targetUser.phone || "—",
+      phone: targetUser.phone || "â",
       cardNumber: targetUser.kccCardNumber || `KCC-BH-2026-${targetUser.phone ? targetUser.phone.replace(/\D/g, "").slice(-4) : "8899"}`,
       cardType: issueForm.cardType,
       creditLimit: Number(issueForm.creditLimit) || 50000,
@@ -203,7 +203,7 @@ export default function AllCardsView() {
     }
     updateKccLimit(cardNum, newLimit, cardPhone);
     setEditingCard(null);
-    toast.success(`Card #${cardNum} limit updated to ₹${newLimit.toLocaleString("en-IN")} and synced to user account!`);
+    toast.success(`Card #${cardNum} limit updated to â¹${newLimit.toLocaleString("en-IN")} and synced to user account!`);
   };
 
   // 3. Download CSV Report
@@ -225,7 +225,7 @@ export default function AllCardsView() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Krivexa_Kisan_Cards_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `Krivexo_Kisan_Cards_${new Date().toISOString().slice(0, 10)}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -241,14 +241,14 @@ export default function AllCardsView() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Krivexa Card Management</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Manage all Krivexa Kisan Cards, limits, and real account activities</p>
+          <h1 className="text-xl font-bold text-gray-900">Krivexo Card Management</h1>
+          <p className="text-xs text-gray-500 mt-0.5">Manage all Krivexo Kisan Cards, limits, and real account activities</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
           <span>Dashboard</span>
-          <span>›</span>
-          <span>Krivexa Card</span>
-          <span>›</span>
+          <span>âº</span>
+          <span>Krivexo Card</span>
+          <span>âº</span>
           <span className="text-emerald-600 font-medium">All Cards</span>
         </div>
       </div>
@@ -391,8 +391,8 @@ export default function AllCardsView() {
                           {c.cardType}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-semibold text-gray-800">₹ {c.creditLimit.toLocaleString("en-IN")}</td>
-                      <td className="py-3.5 px-4 font-bold text-emerald-600">₹ {c.availableLimit.toLocaleString("en-IN")}</td>
+                      <td className="py-3.5 px-4 font-semibold text-gray-800">â¹ {c.creditLimit.toLocaleString("en-IN")}</td>
+                      <td className="py-3.5 px-4 font-bold text-emerald-600">â¹ {c.availableLimit.toLocaleString("en-IN")}</td>
                       <td className="py-3.5 px-4">{getStatusBadge(c.status)}</td>
                       <td className="py-3.5 px-4 text-gray-500">{c.issuedOn}</td>
                       <td className="py-3.5 px-4 text-center">
@@ -460,7 +460,7 @@ export default function AllCardsView() {
           <div className="w-72 space-y-4 shrink-0">
             {/* Visual Card Preview */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-              <p className="text-xs font-bold text-gray-800 mb-3">Krivexa Card Overview</p>
+              <p className="text-xs font-bold text-gray-800 mb-3">Krivexo Card Overview</p>
 
               {/* The Visual Card */}
               <div className="relative w-full h-36 rounded-2xl bg-gradient-to-br from-[#0d4734] via-[#093527] to-[#041d15] p-3.5 text-white shadow-lg overflow-hidden border border-emerald-600/30">
@@ -468,7 +468,7 @@ export default function AllCardsView() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5">
                     <Shield className="h-4 w-4 text-emerald-400" />
-                    <span className="font-bold text-xs tracking-wider text-white">Krivexa</span>
+                    <span className="font-bold text-xs tracking-wider text-white">Krivexo</span>
                   </div>
                   <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
                     KISAN CARD
@@ -501,8 +501,8 @@ export default function AllCardsView() {
                 <div className="flex justify-between"><span className="text-gray-400">Card Number</span><span className="font-mono text-gray-700">{selectedCard.cardNumber}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Card Type</span><span className="font-semibold text-emerald-600">{selectedCard.cardType}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Status</span>{getStatusBadge(selectedCard.status)}</div>
-                <div className="flex justify-between"><span className="text-gray-400">Credit Limit</span><span className="font-bold text-gray-900">₹ {selectedCard.creditLimit.toLocaleString("en-IN")}</span></div>
-                <div className="flex justify-between"><span className="text-gray-400">Available Limit</span><span className="font-bold text-emerald-600">₹ {selectedCard.availableLimit.toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Credit Limit</span><span className="font-bold text-gray-900">â¹ {selectedCard.creditLimit.toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Available Limit</span><span className="font-bold text-emerald-600">â¹ {selectedCard.availableLimit.toLocaleString("en-IN")}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Issued On</span><span className="text-gray-600">{selectedCard.issuedOn}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Valid Thru</span><span className="text-gray-600">{selectedCard.validThru}</span></div>
               </div>
@@ -518,7 +518,7 @@ export default function AllCardsView() {
         )}
       </div>
 
-      {/* ─── Issue New Card Modal ─── */}
+      {/* âââ Issue New Card Modal âââ */}
       {isIssueModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -530,7 +530,7 @@ export default function AllCardsView() {
             </button>
 
             <h3 className="text-base font-bold text-gray-900 mb-1">Issue New Kisan Card</h3>
-            <p className="text-xs text-gray-500 mb-4">Select a registered farmer or dealer to issue an official Krivexa card</p>
+            <p className="text-xs text-gray-500 mb-4">Select a registered farmer or dealer to issue an official Krivexo card</p>
 
             <form onSubmit={handleIssueCardSubmit} className="space-y-3 text-xs">
               <div>
@@ -557,14 +557,14 @@ export default function AllCardsView() {
                   onChange={(e: any) => setIssueForm({ ...issueForm, cardType: e.target.value })}
                   className="w-full h-9 px-3 border border-gray-200 rounded-xl bg-gray-50 text-xs font-medium cursor-pointer"
                 >
-                  <option value="Kisan Card Basic">Kisan Card Basic (₹ 25,000 Limit)</option>
-                  <option value="Kisan Card Premium">Kisan Card Premium (₹ 50,000 Limit)</option>
-                  <option value="Kisan Card Gold">Kisan Card Gold (₹ 1,00,000 Limit)</option>
+                  <option value="Kisan Card Basic">Kisan Card Basic (â¹ 25,000 Limit)</option>
+                  <option value="Kisan Card Premium">Kisan Card Premium (â¹ 50,000 Limit)</option>
+                  <option value="Kisan Card Gold">Kisan Card Gold (â¹ 1,00,000 Limit)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Credit Limit (₹)</label>
+                <label className="block font-semibold text-gray-700 mb-1">Credit Limit (â¹)</label>
                 <Input
                   type="number"
                   value={issueForm.creditLimit}
@@ -595,7 +595,7 @@ export default function AllCardsView() {
         </div>
       )}
 
-      {/* ─── Edit Card Modal ─── */}
+      {/* âââ Edit Card Modal âââ */}
       {editingCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
@@ -607,7 +607,7 @@ export default function AllCardsView() {
             </button>
 
             <h3 className="text-base font-bold text-gray-900 mb-1">Modify Kisan Card</h3>
-            <p className="text-xs text-gray-500 mb-4">{editingCard.name} • {editingCard.cardNumber}</p>
+            <p className="text-xs text-gray-500 mb-4">{editingCard.name} â¢ {editingCard.cardNumber}</p>
 
             <form onSubmit={handleSaveEditCard} className="space-y-3 text-xs">
               <div>
@@ -625,7 +625,7 @@ export default function AllCardsView() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Credit Limit (₹)</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Credit Limit (â¹)</label>
                   <Input
                     type="number"
                     value={editingCard.creditLimit}
@@ -635,7 +635,7 @@ export default function AllCardsView() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">Available Limit (₹)</label>
+                  <label className="block font-semibold text-gray-700 mb-1">Available Limit (â¹)</label>
                   <Input
                     type="number"
                     value={editingCard.availableLimit}
@@ -681,7 +681,7 @@ export default function AllCardsView() {
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Kisan Cards Database
+        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Kisan Cards Database
       </div>
     </div>
   );

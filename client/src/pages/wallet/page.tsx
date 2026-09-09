@@ -65,7 +65,7 @@ export default function WalletPage() {
 
   /** Send a 6-digit verification code to buyer's registered email */
   const sendOtp = () => {
-    const targetEmail = buyerEmail.trim() || (foundCardInfo?.phone ? `${foundCardInfo.phone}@krivexa.in` : user?.email || "customer@krivexa.in");
+    const targetEmail = buyerEmail.trim() || (foundCardInfo?.phone ? `${foundCardInfo.phone}@krivexo.in` : user?.email || "customer@krivexo.in");
     const code = String(Math.floor(100000 + Math.random() * 900000));
     setGeneratedOtp(code);
     setOtpStep("sending");
@@ -74,8 +74,8 @@ export default function WalletPage() {
       to_email: targetEmail,
       to_name: foundCardInfo?.cardHolder || "Valued Farmer",
       verification_code: code,
-      subject: `Krivexa Debit Authorization Code: ${code}`,
-      message: `Dear ${foundCardInfo?.cardHolder || "Farmer"}, your verification code to authorize POS billing of ₹${billAmount} is: ${code}`,
+      subject: `Krivexo Debit Authorization Code: ${code}`,
+      message: `Dear ${foundCardInfo?.cardHolder || "Farmer"}, your verification code to authorize POS billing of â¹${billAmount} is: ${code}`,
     }).catch(() => {});
 
     setTimeout(() => {
@@ -88,16 +88,16 @@ export default function WalletPage() {
         setOtpTimer(t);
         if (t <= 0) clearInterval(interval);
       }, 1000);
-      toast.success(`📧 Verification code dispatched to ${targetEmail}! Code: ${code}`, { duration: 8000 });
+      toast.success(`ð§ Verification code dispatched to ${targetEmail}! Code: ${code}`, { duration: 8000 });
     }, 1000);
   };
 
   const verifyOtp = () => {
     if (otpInput.trim() === generatedOtp || otpInput.trim() === "123456") {
       setOtpStep("verified");
-      toast.success("✅ Email verification code confirmed! Proceed to checkout.");
+      toast.success("â Email verification code confirmed! Proceed to checkout.");
     } else {
-      toast.error("❌ Incorrect verification code. Please check your email.");
+      toast.error("â Incorrect verification code. Please check your email.");
       setOtpInput("");
     }
   };
@@ -136,7 +136,7 @@ export default function WalletPage() {
           "Land Holding Size": farmerForm.landSize || "Not Specified",
           "District/Village": farmerForm.district || "Not Specified",
           "Permanent Address": farmerForm.address || "Not Specified",
-          "Submitted By (Dealer)": user?.name || "Krivexa Dealer",
+          "Submitted By (Dealer)": user?.name || "Krivexo Dealer",
         },
       });
 
@@ -144,7 +144,7 @@ export default function WalletPage() {
 
       // Send notification with PDF receipt
       addNotification(
-        "Farmer KCC Application Submitted 💳",
+        "Farmer KCC Application Submitted ð³",
         `KCC Application for ${farmerForm.fullName} has been submitted on their behalf (Ref: ${refId}). Download PDF receipt.`,
         "success",
         "/wallet",
@@ -165,16 +165,16 @@ export default function WalletPage() {
       id: "kcc" as const,
       label: "Kisan Credit Card (KCC)",
       sub: `Card: ${searchCardNum || "Enter card number first"}`,
-      icon: "💳",
+      icon: "ð³",
       recommended: true,
       color: "border-primary bg-primary/10",
       activeText: "text-primary",
     },
     {
       id: "wallet" as const,
-      label: "Krivexa Kisan Wallet",
+      label: "Krivexo Kisan Wallet",
       sub: "Direct debit from wallet balance",
-      icon: "👛",
+      icon: "ð",
       recommended: false,
       color: "border-blue-500 bg-blue-500/10",
       activeText: "text-blue-400",
@@ -183,7 +183,7 @@ export default function WalletPage() {
       id: "upi" as const,
       label: "UPI / GPay / PhonePe",
       sub: "Instant online payment via UPI",
-      icon: "📱",
+      icon: "ð±",
       recommended: false,
       color: "border-purple-500 bg-purple-500/10",
       activeText: "text-purple-400",
@@ -192,7 +192,7 @@ export default function WalletPage() {
       id: "cod" as const,
       label: "Cash on Delivery (COD)",
       sub: "Pay cash when items arrive",
-      icon: "🚛",
+      icon: "ð",
       recommended: false,
       color: "border-amber-500 bg-amber-500/10",
       activeText: "text-amber-400",
@@ -228,16 +228,16 @@ export default function WalletPage() {
         details: {
           "Customer / Card Holder": posPaymentMethod === "kcc" ? foundCardInfo?.cardHolder || "N/A" : "Walk-in Customer",
           "Billing Item": billItem,
-          "Bill Amount": `₹${amt}`,
+          "Bill Amount": `â¹${amt}`,
           "Payment Method": payMethodLabel,
           ...(posPaymentMethod === "kcc" ? { "KCC Card Charged": searchCardNum } : {}),
-          "Processed By (Dealer)": user?.name || "Krivexa Dealer",
+          "Processed By (Dealer)": user?.name || "Krivexo Dealer",
         },
       });
 
       addNotification(
-        "POS Sale Invoice Generated 🧾",
-        `Sale of ₹${amt} for "${billItem}" via ${payMethodLabel} processed (Invoice: ${refId}). Download PDF.`,
+        "POS Sale Invoice Generated ð§¾",
+        `Sale of â¹${amt} for "${billItem}" via ${payMethodLabel} processed (Invoice: ${refId}). Download PDF.`,
         "success",
         "/wallet",
         "wallet",
@@ -245,7 +245,7 @@ export default function WalletPage() {
         fileName
       );
 
-      toast.success(`Payment of ₹${amt} via ${payMethodLabel} processed successfully!`);
+      toast.success(`Payment of â¹${amt} via ${payMethodLabel} processed successfully!`);
       setIsPosModalOpen(false);
       setBillAmount("");
       setBillItem("");
@@ -262,7 +262,7 @@ export default function WalletPage() {
   const kccCardNumber = isKccApproved
     ? (user?.kccCardNumber || kccDetails?.cardNumber || "KCC ALLOTTED")
     : null;
-  const kccHolderName = kccDetails?.fullName || user?.name || "KRIVEXA KISAN";
+  const kccHolderName = kccDetails?.fullName || user?.name || "KRIVEXO KISAN";
   const kccIssueDate = kccDetails?.issueDate || (user?.isKccIssued ? new Date().toISOString().split("T")[0] : null);
 
   return (
@@ -300,7 +300,7 @@ export default function WalletPage() {
                 <p className="text-xs text-gray-300 max-w-xl">
                   {hasAppliedKcc
                     ? "Your KCC application has been submitted and is currently being processed by the Admin. Your card number and credit limit will be allotted shortly."
-                    : "Get up to ₹3,00,000 credit limit & unlock all buying, crop selling, machinery & labour booking features across the Bihar platform."}
+                    : "Get up to â¹3,00,000 credit limit & unlock all buying, crop selling, machinery & labour booking features across the Bihar platform."}
                 </p>
               </div>
             </div>
@@ -309,7 +309,7 @@ export default function WalletPage() {
                 onClick={() => setIsKccAppModalOpen(true)}
                 className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs py-3 px-6 rounded-xl shrink-0 cursor-pointer shadow-lg animate-pulse border border-amber-300"
               >
-                <CreditCard className="h-4 w-4 mr-1.5 text-black" /> Apply for KCC Now →
+                <CreditCard className="h-4 w-4 mr-1.5 text-black" /> Apply for KCC Now â
               </Button>
             ) : (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold shrink-0">
@@ -324,7 +324,7 @@ export default function WalletPage() {
           {/* Left Column: Two balance cards stacked + stats */}
           <div className="space-y-4">
 
-            {/* Card 1: Krivexa Kisan Wallet (Deposit Balance) */}
+            {/* Card 1: Krivexo Kisan Wallet (Deposit Balance) */}
             <div className="relative bg-linear-to-br from-[#1a2818] via-[#0f1a0e] to-[#0a0a0a] border border-primary/40 rounded-2xl p-5 overflow-hidden shadow-xl">
               <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
               <div className="flex items-center justify-between mb-3">
@@ -334,7 +334,7 @@ export default function WalletPage() {
                   </div>
                   <div>
                     <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Deposit Wallet</div>
-                    <div className="text-xs text-primary font-semibold">Krivexa Kisan Wallet</div>
+                    <div className="text-xs text-primary font-semibold">Krivexo Kisan Wallet</div>
                   </div>
                 </div>
                 <button onClick={() => setShowBalance(!showBalance)} className="text-gray-400 hover:text-primary cursor-pointer">
@@ -342,24 +342,24 @@ export default function WalletPage() {
                 </button>
               </div>
               <div className="text-3xl font-black text-primary mb-1" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                {showBalance ? `₹${walletBalance.toLocaleString()}.00` : "₹ ****"}
+                {showBalance ? `â¹${walletBalance.toLocaleString()}.00` : "â¹ ****"}
               </div>
               <div className="text-[11px] text-gray-400">Available for purchases &amp; bookings</div>
               <div className="mt-3 pt-3 border-t border-white/10 grid grid-cols-2 gap-2">
                 <div className="bg-primary/10 border border-primary/20 rounded-xl p-2.5 text-center">
                   <ArrowUpRight className="h-3.5 w-3.5 text-primary mx-auto mb-0.5" />
-                  <div className="text-sm font-black text-primary">₹{totalIn.toLocaleString()}</div>
+                  <div className="text-sm font-black text-primary">â¹{totalIn.toLocaleString()}</div>
                   <div className="text-[9px] text-gray-400">{t.wallet.totalIn}</div>
                 </div>
                 <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-2.5 text-center">
                   <ArrowDownRight className="h-3.5 w-3.5 text-red-400 mx-auto mb-0.5" />
-                  <div className="text-sm font-black text-red-400">₹{totalOut.toLocaleString()}</div>
+                  <div className="text-sm font-black text-red-400">â¹{totalOut.toLocaleString()}</div>
                   <div className="text-[9px] text-gray-400">{t.wallet.totalOut}</div>
                 </div>
               </div>
             </div>
 
-            {/* Card 2: Krivexa KCC Credit Card Balance */}
+            {/* Card 2: Krivexo KCC Credit Card Balance */}
             <div className="relative bg-linear-to-br from-[#1a1508] via-[#110f00] to-[#0a0a0a] border border-amber-500/40 rounded-2xl overflow-hidden shadow-xl">
               {/* KCC Card Image */}
               <img
@@ -371,7 +371,7 @@ export default function WalletPage() {
               <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md border border-amber-500/40 rounded-xl px-3 py-1.5">
                 <div className="text-[9px] text-gray-400 font-bold uppercase">KCC Credit</div>
                 <div className="text-sm font-black text-amber-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                  {showBalance ? (isKccApproved ? `₹${kccCreditBalance.toLocaleString()}.00` : "Not Issued") : "₹ ****"}
+                  {showBalance ? (isKccApproved ? `â¹${kccCreditBalance.toLocaleString()}.00` : "Not Issued") : "â¹ ****"}
                 </div>
               </div>
               {/* Card number overlay */}
@@ -387,7 +387,7 @@ export default function WalletPage() {
                     : "Apply KCC to Activate Card"}
                 </div>
               </div>
-              {/* Holder name overlay — always visible */}
+              {/* Holder name overlay â always visible */}
               <div className="absolute left-[5.5%] top-[72%] w-[88%]">
                 <div
                   className="text-[#f5d77f] font-black uppercase tracking-[0.12em] leading-none drop-shadow-md truncate"
@@ -399,14 +399,14 @@ export default function WalletPage() {
               {/* KCC info footer */}
               <div className="px-4 py-3 border-t border-amber-500/20 bg-black/40 flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-gray-400">Krivexa Credit Card</div>
+                  <div className="text-[10px] text-gray-400">Krivexo Credit Card</div>
                   <div className="text-xs font-bold text-amber-400">
-                    {isKccApproved ? `Active · All Features Unlocked` : hasAppliedKcc ? "Under Review" : "Not Applied"}
+                    {isKccApproved ? `Active Â· All Features Unlocked` : hasAppliedKcc ? "Under Review" : "Not Applied"}
                   </div>
                 </div>
                 <div className="text-[10px] text-gray-500 text-right">
                   {isKccApproved ? "Credit Limit" : ""}
-                  <div className="text-amber-400 font-black text-sm">{isKccApproved ? `₹${kccCreditBalance.toLocaleString("en-IN")}` : ""}</div>
+                  <div className="text-amber-400 font-black text-sm">{isKccApproved ? `â¹${kccCreditBalance.toLocaleString("en-IN")}` : ""}</div>
                 </div>
               </div>
             </div>
@@ -435,13 +435,13 @@ export default function WalletPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold">{t.title}</div>
-                      <div className="text-xs text-gray-500">{t.date} • {t.id}</div>
+                      <div className="text-xs text-gray-500">{t.date} â¢ {t.id}</div>
                     </div>
                     <Badge className={`text-[10px] ${t.type === "credit" ? "bg-primary/20 text-primary border-primary/30" : "bg-red-500/20 text-red-400 border-red-500/30"}`}>
                       {t.category}
                     </Badge>
                     <div className={`text-sm font-bold shrink-0 ${t.type === "credit" ? "text-primary" : "text-red-400"}`}>
-                      {t.type === "credit" ? "+" : "-"}₹{t.amount.toLocaleString()}
+                      {t.type === "credit" ? "+" : "-"}â¹{t.amount.toLocaleString()}
                     </div>
                   </div>
                 ))
@@ -460,7 +460,7 @@ export default function WalletPage() {
                 <UserPlus className="h-5 w-5 text-amber-400" />
                 <h3 className="font-bold text-white text-base">Dealer Portal: Apply KCC for Farmer</h3>
               </div>
-              <button onClick={() => setIsDealerApplyModalOpen(false)} className="text-gray-400 hover:text-white font-bold text-lg cursor-pointer">✕</button>
+              <button onClick={() => setIsDealerApplyModalOpen(false)} className="text-gray-400 hover:text-white font-bold text-lg cursor-pointer">â</button>
             </div>
 
             <form
@@ -580,7 +580,7 @@ export default function WalletPage() {
                   <p className="text-xs text-gray-400">Verify farmer KCC balance, send buyer OTP, and generate branded invoice</p>
                 </div>
               </div>
-              <button onClick={resetPosModal} className="text-gray-400 hover:text-white font-bold text-lg cursor-pointer p-1">✕</button>
+              <button onClick={resetPosModal} className="text-gray-400 hover:text-white font-bold text-lg cursor-pointer p-1">â</button>
             </div>
 
             <div className="p-6 space-y-6">
@@ -621,7 +621,7 @@ export default function WalletPage() {
                 <div className="text-[11px] text-gray-400 mt-2 flex items-center gap-2">
                   <span>Demo cards:</span>
                   <button onClick={() => setSearchCardNum("KCC-BH-2026-9041")} className="text-primary hover:underline font-mono">KCC-BH-2026-9041</button>
-                  <span>•</span>
+                  <span>â¢</span>
                   <button onClick={() => setSearchCardNum("KCC-BH-2026-1002")} className="text-primary hover:underline font-mono">KCC-BH-2026-1002</button>
                 </div>
               </div>
@@ -641,7 +641,7 @@ export default function WalletPage() {
                               <div className="text-lg font-black text-white">{foundCardInfo.cardHolder}</div>
                             </div>
                             <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] font-bold">
-                              ✅ Active KCC
+                              â Active KCC
                             </Badge>
                           </div>
 
@@ -649,7 +649,7 @@ export default function WalletPage() {
                             <div>
                               <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Available KCC Credit Limit</div>
                               <div className="text-2xl font-black text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                                ₹{foundCardInfo.balance?.toLocaleString()}.00
+                                â¹{foundCardInfo.balance?.toLocaleString()}.00
                               </div>
                             </div>
                             <ShoppingBag className="h-8 w-8 text-primary/30" />
@@ -671,16 +671,16 @@ export default function WalletPage() {
                             </div>
                             <div className="flex justify-between text-xs text-gray-400">
                               <span>Subtotal</span>
-                              <span className="text-white font-semibold">₹{parseFloat(billAmount || "0").toLocaleString()}</span>
+                              <span className="text-white font-semibold">â¹{parseFloat(billAmount || "0").toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-400">
                               <span>Convenience Fee</span>
-                              <span className="text-primary font-semibold">₹0.00</span>
+                              <span className="text-primary font-semibold">â¹0.00</span>
                             </div>
                             <div className="flex justify-between text-sm font-black pt-2 border-t border-white/10 text-white">
                               <span>Total Amount</span>
                               <span className="text-primary" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                                ₹{parseFloat(billAmount || "0").toLocaleString()}
+                                â¹{parseFloat(billAmount || "0").toLocaleString()}
                               </span>
                             </div>
                           </div>
@@ -705,7 +705,7 @@ export default function WalletPage() {
                             />
                           </div>
                           <div>
-                            <Label className="text-xs text-gray-300 font-medium">Bill Amount (₹) *</Label>
+                            <Label className="text-xs text-gray-300 font-medium">Bill Amount (â¹) *</Label>
                             <Input
                               type="number"
                               placeholder="e.g. 1450"
@@ -765,7 +765,7 @@ export default function WalletPage() {
                               </div>
                               {otpStep === "verified" && (
                                 <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] font-bold">
-                                  ✓ Code Verified
+                                  â Code Verified
                                 </Badge>
                               )}
                             </div>
@@ -773,7 +773,7 @@ export default function WalletPage() {
                             <div className="space-y-1">
                               <label className="text-[11px] font-semibold text-gray-300">Buyer Email Address (Optional / Confirm)</label>
                               <Input
-                                placeholder={foundCardInfo?.phone ? `${foundCardInfo.phone}@krivexa.in` : "Enter buyer email"}
+                                placeholder={foundCardInfo?.phone ? `${foundCardInfo.phone}@krivexo.in` : "Enter buyer email"}
                                 value={buyerEmail}
                                 onChange={(e) => setBuyerEmail(e.target.value)}
                                 className="bg-black/60 border-white/20 text-white text-xs h-8"
@@ -789,7 +789,7 @@ export default function WalletPage() {
                                     return;
                                   }
                                   if (posPaymentMethod === "kcc" && parseFloat(billAmount) > (foundCardInfo?.balance || 0)) {
-                                    toast.error(`Insufficient KCC balance. Available: ₹${(foundCardInfo?.balance || 0).toLocaleString()}`);
+                                    toast.error(`Insufficient KCC balance. Available: â¹${(foundCardInfo?.balance || 0).toLocaleString()}`);
                                     return;
                                   }
                                   sendOtp();
@@ -848,7 +848,7 @@ export default function WalletPage() {
                         {posPaymentMethod === "kcc" && billAmount && parseFloat(billAmount) > (foundCardInfo?.balance || 0) && (
                           <div className="flex items-center gap-2 p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400">
                             <AlertCircle className="h-4 w-4 shrink-0" />
-                            Insufficient KCC balance. Available limit: ₹{(foundCardInfo?.balance || 0).toLocaleString()}
+                            Insufficient KCC balance. Available limit: â¹{(foundCardInfo?.balance || 0).toLocaleString()}
                           </div>
                         )}
 
@@ -866,7 +866,7 @@ export default function WalletPage() {
                               return;
                             }
                             if (posPaymentMethod === "kcc" && amt > (foundCardInfo?.balance || 0)) {
-                              toast.error(`Insufficient KCC balance. Available limit: ₹${(foundCardInfo?.balance || 0).toLocaleString()}`);
+                              toast.error(`Insufficient KCC balance. Available limit: â¹${(foundCardInfo?.balance || 0).toLocaleString()}`);
                               return;
                             }
                             if ((posPaymentMethod === "kcc" || posPaymentMethod === "wallet") && otpStep !== "verified") {
@@ -877,7 +877,7 @@ export default function WalletPage() {
                           }}
                           className="w-full bg-primary hover:bg-primary/90 text-black font-bold text-sm py-3.5 rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
                         >
-                          🧾 Preview & Generate Invoice (₹{billAmount || "0"})
+                          ð§¾ Preview & Generate Invoice (â¹{billAmount || "0"})
                         </Button>
                       </div>
                     </div>
@@ -924,9 +924,9 @@ export default function WalletPage() {
             "Customer": "Walk-in Customer",
           }),
           "Billing Item": billItem,
-          "Total Amount": `₹${billAmount}`,
+          "Total Amount": `â¹${billAmount}`,
           "Payment Method": POS_PAYMENT_METHODS.find(m => m.id === posPaymentMethod)?.label || posPaymentMethod,
-          "Processed By": user?.name || "Krivexa Dealer"
+          "Processed By": user?.name || "Krivexo Dealer"
         }}
         loading={loading}
       />

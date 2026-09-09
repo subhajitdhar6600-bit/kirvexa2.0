@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   User, Phone, MapPin, Edit3, ShieldAlert, CheckCircle2, Wallet, CreditCard,
   Calendar, TrendingUp, BookOpen, HelpCircle, FileText, LogOut, ArrowLeft,
-  Bell, Upload, Building2, CreditCard as BankIcon, ChevronRight, X, Lock, KeyRound, Clock
+  Bell, Upload, Building2, CreditCard as BankIcon, ChevronRight, X, Lock, KeyRound, Clock, Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -38,6 +38,10 @@ export default function ProfilePage() {
   // Profile Form State
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [gender, setGender] = useState(user?.gender || "");
+  const [dob, setDob] = useState(user?.dob || "");
+  const [address, setAddress] = useState(user?.address || "");
   const [village, setVillage] = useState(user?.village || "");
   const [district, setDistrict] = useState(user?.district || "");
   const [state, setState] = useState(user?.state || "");
@@ -55,9 +59,54 @@ export default function ProfilePage() {
   const [bankIfsc, setBankIfsc] = useState(user?.bankIfsc === "Not set" ? "" : user?.bankIfsc || "");
   const [bankAddress, setBankAddress] = useState(user?.bankAddress === "Not set" ? "" : user?.bankAddress || "");
 
+  // Synchronize form states when user updates or edit modals open
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setPhone(user.phone || "");
+      setEmail(user.email || "");
+      setGender(user.gender || "");
+      setDob(user.dob || "");
+      setAddress(user.address || "");
+      setVillage(user.village || "");
+      setDistrict(user.district || "");
+      setState(user.state || "");
+      setPincode(user.pincode || "");
+
+      setAadhaarNum(user.aadhaarNumber === "Not set" ? "" : user.aadhaarNumber || "");
+      setFrontCardName(user.aadhaarFront || "No file uploaded yet");
+      setBackCardName(user.aadhaarBack || "No file uploaded yet");
+
+      setBankHolder(user.bankHolder === "Not set" ? "" : user.bankHolder || "");
+      setBankName(user.bankName === "Not set" ? "" : user.bankName || "");
+      setBankAccount(user.bankAccount === "Not set" ? "" : user.bankAccount || "");
+      setBankIfsc(user.bankIfsc === "Not set" ? "" : user.bankIfsc || "");
+      setBankAddress(user.bankAddress === "Not set" ? "" : user.bankAddress || "");
+    }
+  }, [user, isEditProfileOpen, isEditAadhaarOpen, isEditBankOpen]);
+
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    updateUserProfile({ name, phone, village, district, state, pincode });
+    if (!name.trim()) {
+      toast.error("Please enter full name");
+      return;
+    }
+    if (!phone.trim() || phone.replace(/\D/g, "").length !== 10) {
+      toast.error("Please enter a valid 10-digit phone number");
+      return;
+    }
+    updateUserProfile({
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      gender,
+      dob,
+      address: address.trim(),
+      village: village.trim(),
+      district: district.trim(),
+      state: state.trim(),
+      pincode: pincode.trim(),
+    });
     setIsEditProfileOpen(false);
     toast.success("Profile basic details updated successfully!");
   };
@@ -113,13 +162,13 @@ export default function ProfilePage() {
       
       // Sync local storage registered accounts
       if (user?.phone) {
-        const savedAccounts = localStorage.getItem("krivexa_registered_accounts");
+        const savedAccounts = localStorage.getItem("krivexo_registered_accounts");
         if (savedAccounts) {
           const parsed = JSON.parse(savedAccounts);
           const updated = parsed.map((acc: any) =>
             acc.phone === user.phone ? { ...acc, password: newPass } : acc
           );
-          localStorage.setItem("krivexa_registered_accounts", JSON.stringify(updated));
+          localStorage.setItem("krivexo_registered_accounts", JSON.stringify(updated));
         }
       }
 
@@ -174,7 +223,7 @@ export default function ProfilePage() {
           
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <h2 className="text-2xl font-bold text-white">{user?.name || "User Profile"}</h2>
                 <Badge className={isKccApproved ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[11px] font-bold px-2.5 py-0.5" : hasAppliedKcc ? "bg-amber-500/20 text-amber-300 border-amber-500/40 text-[11px] font-semibold px-2.5 py-0.5" : "bg-amber-500/10 text-amber-400 border-amber-500/30 text-[11px] font-semibold px-2.5 py-0.5"}>
                   {isKccApproved ? (
@@ -187,28 +236,52 @@ export default function ProfilePage() {
                 </Badge>
               </div>
 
-              {user?.phone && (
-                <p className="text-sm font-semibold text-gray-300 flex items-center gap-2 mt-1">
-                  <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
-                  <span>+91 {user.phone}</span>
-                </p>
+              {user?.userId && (
+                <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-primary/10 border border-primary/30 text-primary text-xs font-mono font-bold mt-1 mb-2">
+                  <span>User ID: {user.userId}</span>
+                </div>
               )}
 
-              {(user?.village || user?.district || user?.state) && (
-                <p className="text-xs text-gray-400 flex items-start gap-1.5 mt-2 leading-relaxed">
-                  <MapPin className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                  <span>
-                    {[user?.village, user?.district, user?.state].filter(Boolean).join(", ")} {user?.pincode ? `- ${user.pincode}` : ""}
-                  </span>
-                </p>
-              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1.5 gap-x-4 mt-2 text-xs">
+                {user?.phone && (
+                  <p className="font-semibold text-gray-300 flex items-center gap-2">
+                    <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>+91 {user.phone}</span>
+                  </p>
+                )}
+
+                {user?.email && (
+                  <p className="text-gray-300 flex items-center gap-2">
+                    <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>{user.email}</span>
+                  </p>
+                )}
+
+                {(user?.gender || user?.dob) && (
+                  <p className="text-gray-400 flex items-center gap-2">
+                    <User className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span>
+                      {[user?.gender ? `Gender: ${user.gender}` : null, user?.dob ? `DOB: ${user.dob}` : null].filter(Boolean).join(" â¢ ")}
+                    </span>
+                  </p>
+                )}
+
+                {(user?.address || user?.village || user?.district || user?.state) && (
+                  <p className="text-xs text-gray-400 flex items-start gap-1.5 leading-relaxed sm:col-span-2">
+                    <MapPin className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                    <span>
+                      {[user?.address, user?.village, user?.district, user?.state].filter(Boolean).join(", ")} {user?.pincode ? `- ${user.pincode}` : ""}
+                    </span>
+                  </p>
+                )}
+              </div>
             </div>
 
             <Button
               size="sm"
               variant="outline"
               onClick={() => setIsEditProfileOpen(true)}
-              className="border-white/10 bg-white/5 text-gray-300 hover:text-white hover:border-primary/40 text-xs rounded-xl"
+              className="border-white/10 bg-white/5 text-gray-300 hover:text-white hover:border-primary/40 text-xs rounded-xl cursor-pointer shrink-0"
             >
               <Edit3 className="h-3.5 w-3.5 mr-1 text-primary" /> Edit
             </Button>
@@ -225,12 +298,12 @@ export default function ProfilePage() {
                   <CreditCard className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] text-amber-400 font-black uppercase tracking-wider">Krivexa Kisan Credit Card</div>
+                  <div className="text-[10px] text-amber-400 font-black uppercase tracking-wider">Krivexo Kisan Credit Card</div>
                   <div className="text-xs text-white font-bold">Allotted &amp; Verified by Admin</div>
                 </div>
               </div>
               <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px] font-black">
-                ACTIVE 💳
+                ACTIVE ð³
               </Badge>
             </div>
             <div className="my-3 bg-black/60 rounded-xl p-3 border border-white/10">
@@ -246,7 +319,7 @@ export default function ProfilePage() {
               </div>
               <div className="text-right">
                 <span className="text-gray-400 text-[11px]">Credit Limit: </span>
-                <span className="font-bold text-emerald-400">₹{(kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000).toLocaleString("en-IN")}</span>
+                <span className="font-bold text-emerald-400">â¹{(kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000).toLocaleString("en-IN")}</span>
               </div>
             </div>
             <div className="mt-3 flex items-center justify-between pt-2 border-t border-white/10 text-[11px]">
@@ -254,7 +327,7 @@ export default function ProfilePage() {
                 <CheckCircle2 className="h-3.5 w-3.5" /> All 100% Platform Features Unlocked
               </span>
               <Link to="/wallet" className="text-primary hover:underline font-bold">
-                View in Wallet →
+                View in Wallet â
               </Link>
             </div>
           </div>
@@ -287,7 +360,7 @@ export default function ProfilePage() {
                   onClick={() => setIsKccAppModalOpen(true)}
                   className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs py-3 px-6 rounded-xl shrink-0 cursor-pointer shadow-lg animate-pulse border border-amber-300"
                 >
-                  <CreditCard className="h-4 w-4 mr-2 text-black" /> Apply for KCC Now →
+                  <CreditCard className="h-4 w-4 mr-2 text-black" /> Apply for KCC Now â
                 </Button>
               ) : (
                 <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold shrink-0">
@@ -412,14 +485,14 @@ export default function ProfilePage() {
                     : "Apply for Kisan Credit Card (KCC)"}
                 </span>
                 {isKccApproved && (
-                  <span className="text-[10px] text-emerald-400">All features unlocked · 100% active</span>
+                  <span className="text-[10px] text-emerald-400">All features unlocked Â· 100% active</span>
                 )}
               </div>
             </div>
             {isKccApproved ? (
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Active 💳</Badge>
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Active ð³</Badge>
             ) : hasAppliedKcc ? (
-              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px]">Under Review ⏳</Badge>
+              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-[10px]">Under Review â³</Badge>
             ) : (
               <button
                 type="button"
@@ -429,7 +502,7 @@ export default function ProfilePage() {
                 }}
                 className="text-xs text-amber-400 hover:underline font-bold"
               >
-                Apply Now →
+                Apply Now â
               </button>
             )}
           </Link>
@@ -459,7 +532,7 @@ export default function ProfilePage() {
               <div>
                 <span className="block font-semibold">
                   {isKccApproved
-                    ? `KCC Credit Facility (₹${(kccDetails?.paymentAmount || 150000).toLocaleString("en-IN")})`
+                    ? `KCC Credit Facility (â¹${(kccDetails?.paymentAmount || 150000).toLocaleString("en-IN")})`
                     : hasAppliedKcc
                     ? "Application for Loan (Submitted)"
                     : "Application for Loan"}
@@ -470,7 +543,7 @@ export default function ProfilePage() {
               </div>
             </div>
             {isKccApproved ? (
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Approved ✅</Badge>
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px]">Approved â</Badge>
             ) : hasAppliedKcc ? (
               <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px]">Under Review</Badge>
             ) : (
@@ -482,7 +555,7 @@ export default function ProfilePage() {
                 }}
                 className="text-xs text-primary hover:underline font-bold"
               >
-                Apply Now →
+                Apply Now â
               </button>
             )}
           </Link>
@@ -602,7 +675,7 @@ export default function ProfilePage() {
                 />
               </div>
               <Button type="submit" disabled={isSubmittingPass} className="w-full bg-primary text-black font-bold py-2.5 rounded-xl cursor-pointer">
-                {isSubmittingPass ? "Updating Password..." : "Update Password →"}
+                {isSubmittingPass ? "Updating Password..." : "Update Password â"}
               </Button>
             </form>
           </div>
@@ -612,22 +685,57 @@ export default function ProfilePage() {
       {/* EDIT PROFILE MODAL */}
       {isEditProfileOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#111] border border-white/10 rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-[#111] border border-white/10 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-              <h3 className="font-bold text-lg text-white">Edit Profile Info</h3>
-              <button onClick={() => setIsEditProfileOpen(false)} className="text-gray-400 hover:text-white">
+              <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                <Edit3 className="h-5 w-5 text-primary" /> Edit Profile Info
+              </h3>
+              <button onClick={() => setIsEditProfileOpen(false)} className="text-gray-400 hover:text-white cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div>
-                <Label className="text-xs text-gray-300 mb-1 block">Full Name</Label>
-                <Input value={name} onChange={e => setName(e.target.value)} className="bg-white/5 border-white/10 text-white" required />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-gray-300 mb-1 block">Full Name <span className="text-red-400">*</span></Label>
+                  <Input value={name} onChange={e => setName(e.target.value)} className="bg-white/5 border-white/10 text-white" required />
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-300 mb-1 block">Phone Number <span className="text-red-400">*</span></Label>
+                  <Input value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit mobile number" className="bg-white/5 border-white/10 text-white font-mono" required />
+                </div>
               </div>
-              <div>
-                <Label className="text-xs text-gray-300 mb-1 block">Phone Number</Label>
-                <Input value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} type="tel" inputMode="numeric" maxLength={10} placeholder="10-digit mobile number" className="bg-white/5 border-white/10 text-white" required />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-gray-300 mb-1 block">Email Address</Label>
+                  <Input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="example@domain.com" className="bg-white/5 border-white/10 text-white" />
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-300 mb-1 block">Gender</Label>
+                  <select
+                    value={gender}
+                    onChange={e => setGender(e.target.value)}
+                    className="w-full bg-[#1c1c1c] border border-white/10 text-white text-sm rounded-md px-3 py-2 outline-none focus:border-primary"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
               </div>
+
+              <div>
+                <Label className="text-xs text-gray-300 mb-1 block">Date of Birth</Label>
+                <Input value={dob} onChange={e => setDob(e.target.value)} type="date" className="bg-white/5 border-white/10 text-white" />
+              </div>
+
+              <div>
+                <Label className="text-xs text-gray-300 mb-1 block">Address / Street / Landmark</Label>
+                <Input value={address} onChange={e => setAddress(e.target.value)} placeholder="Full street address or landmark" className="bg-white/5 border-white/10 text-white" />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs text-gray-300 mb-1 block">Village</Label>
@@ -648,7 +756,7 @@ export default function ProfilePage() {
                   <Input value={pincode} onChange={e => setPincode(e.target.value)} className="bg-white/5 border-white/10 text-white" />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-primary text-black font-bold py-2.5">Save Basic Details</Button>
+              <Button type="submit" className="w-full bg-primary text-black font-bold py-2.5 cursor-pointer">Save Profile Details</Button>
             </form>
           </div>
         </div>
@@ -765,7 +873,7 @@ export default function ProfilePage() {
             </div>
             <div className="space-y-3 text-xs text-gray-300 max-h-72 overflow-y-auto pr-2 leading-relaxed">
               <p className="font-semibold text-white">1. Service Usage & Eligibility</p>
-              <p>KRIVEXA platform provides smart agriculture services including Mandi Bhav tracking, machinery booking, labour dispatch, and KCC loan assistance for farmers and agricultural partners across Bihar and surrounding states.</p>
+              <p>KRIVEXO platform provides smart agriculture services including Mandi Bhav tracking, machinery booking, labour dispatch, and KCC loan assistance for farmers and agricultural partners across Bihar and surrounding states.</p>
               <p className="font-semibold text-white">2. User Verification & Privacy</p>
               <p>Aadhaar and Bank details submitted under User Profile are stored securely using encryption and used solely for direct payment transfers, identity verification, and government scheme processing.</p>
               <p className="font-semibold text-white">3. Machinery & Labour Booking</p>

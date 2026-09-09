@@ -118,7 +118,7 @@ export default function BenefitsOffersView() {
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[11px] font-medium text-gray-500">Total Discounts Claimed</p>
-            <p className="text-xl font-black text-blue-600 mt-0.5">₹ 45,200</p>
+            <p className="text-xl font-black text-blue-600 mt-0.5">â¹ 45,200</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
             <Percent className="h-5 w-5" />

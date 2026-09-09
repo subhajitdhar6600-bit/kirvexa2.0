@@ -56,8 +56,8 @@ router.put('/:id/approve', async (req, res) => {
         await Notification.create({
           id: `notif-${Date.now()}`,
           userId: updated.phone || 'broadcast',
-          title: 'KCC Card Approved & Allotted 💳',
-          message: `Congratulations ${updated.fullName}! Your Kisan Credit Card (KCC) has been approved. Allotted Card Number: ${cardNumber} with Credit Limit ₹${creditLimit.toLocaleString('en-IN')}. All platform features are now unlocked!`,
+          title: 'KCC Card Approved & Allotted ð³',
+          message: `Congratulations ${updated.fullName}! Your Kisan Credit Card (KCC) has been approved. Allotted Card Number: ${cardNumber} with Credit Limit â¹${creditLimit.toLocaleString('en-IN')}. All platform features are now unlocked!`,
           type: 'success',
           link: '/wallet',
           category: 'kcc',

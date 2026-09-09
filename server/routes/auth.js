@@ -12,7 +12,7 @@ const router = express.Router();
  */
 router.post('/register', async (req, res) => {
   try {
-    const { name, phone, email, password, role, businessName, dealerType, gstNumber, licenseNumber, district, state } = req.body;
+    const { name, userId, phone, email, password, role, businessName, dealerType, gstNumber, licenseNumber, district, state, gender, dob, address } = req.body;
 
     if (!name || !phone) {
       return sendError(res, 'Name and phone number are required.', 'VALIDATION_ERROR', 400);
@@ -20,6 +20,7 @@ router.post('/register', async (req, res) => {
 
     const result = await registerUser({
       name,
+      userId,
       phone,
       email,
       password,
@@ -30,6 +31,9 @@ router.post('/register', async (req, res) => {
       licenseNumber,
       district,
       state,
+      gender,
+      dob,
+      address,
     });
 
     return sendSuccess(res, result, 'Registration successful', 201);
@@ -40,19 +44,61 @@ router.post('/register', async (req, res) => {
 
 /**
  * @route POST /api/auth/login
- * @desc Login with Phone/Email + Password
+ * @desc Login with User ID / Phone / Email + Password
  */
 router.post('/login', async (req, res) => {
   try {
-    const { phone, email, password } = req.body;
-    if (!phone && !email) {
-      return sendError(res, 'Phone number or email is required.', 'VALIDATION_ERROR', 400);
+    const { userId, phone, email, password } = req.body;
+    if (!userId && !phone && !email) {
+      return sendError(res, 'User ID, phone number or email is required.', 'VALIDATION_ERROR', 400);
     }
 
-    const result = await loginUser({ phone, email, password });
+    const result = await loginUser({ userId, phone, email, password });
     return sendSuccess(res, result, 'Login successful');
   } catch (error) {
     return sendError(res, error.message, 'LOGIN_FAILED', 401);
+  }
+});
+
+/**
+ * @route GET /api/auth/check-userid/:userId
+ * @desc Check if a User ID is available
+ */
+router.get('/check-userid/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const clean = (userId || '').trim();
+    if (!clean) {
+      return sendError(res, 'User ID is required', 'VALIDATION_ERROR', 400);
+    }
+
+    const hasUpper = /[A-Z]/.test(clean);
+    const hasLower = /[a-z]/.test(clean);
+    const hasNum = /[0-9]/.test(clean);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(clean);
+
+    if (!hasUpper || !hasLower || !hasNum || !hasSpecial) {
+      return sendSuccess(
+        res,
+        { available: false, formatValid: false, userId: clean },
+        'User ID must contain uppercase, lowercase, number, and special character.'
+      );
+    }
+
+    const existing = await User.findOne({
+      $or: [
+        { userId: { $regex: new RegExp(`^${clean}$`, 'i') } },
+        { id: clean }
+      ]
+    });
+
+    return sendSuccess(
+      res,
+      { available: !existing, formatValid: true, userId: clean },
+      !existing ? 'User ID is available' : 'This User ID is already taken'
+    );
+  } catch (error) {
+    return sendError(res, error.message, 'CHECK_FAILED', 500);
   }
 });
 

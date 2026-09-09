@@ -28,7 +28,7 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
     id: o.id || `ORD${8000 + idx}`,
     itemsCount: parseInt(o.qty || "1") || 1,
     customer: o.buyer || "Customer",
-    phone: o.phone || "—",
+    phone: o.phone || "â",
     amount: o.amount || 0,
     paymentMode: o.paymentMethod || "COD",
     paymentProvider: o.paymentMethod === "kcc" ? "Kisan Credit Card" : o.paymentMethod === "upi" ? "UPI Payment" : "Cash on Delivery",
@@ -126,7 +126,7 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `krivexa_orders_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", `krivexo_orders_${new Date().toISOString().split("T")[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -168,10 +168,10 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Orders & Sales Management</h1>
-          <p className="text-xs text-gray-500 mt-0.5">Track, manage and fulfil all orders placed on Krivexa platform.</p>
+          <p className="text-xs text-gray-500 mt-0.5">Track, manage and fulfil all orders placed on Krivexo platform.</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span>›</span><span>Orders & Sales</span><span>›</span>
+          <span>Dashboard</span><span>âº</span><span>Orders & Sales</span><span>âº</span>
           <span className="text-emerald-600 font-medium">All Orders</span>
         </div>
       </div>
@@ -183,7 +183,7 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
           { label: "Delivered Orders", value: deliveredOrders.toLocaleString("en-IN"), sub: "Completed deliveries", Icon: Truck, bg: "bg-blue-50", tc: "text-blue-600" },
           { label: "Pending Orders", value: pendingOrders.toLocaleString("en-IN"), sub: "Awaiting fulfilment", Icon: Clock, bg: "bg-amber-50", tc: "text-amber-600" },
           { label: "Canceled Orders", value: canceledOrders.toLocaleString("en-IN"), sub: "Cancelled orders", Icon: XCircle, bg: "bg-purple-50", tc: "text-purple-600" },
-          { label: "Total Sales (₹)", value: `₹ ${totalSales.toLocaleString("en-IN")}`, sub: "Gross sales volume", Icon: IndianRupee, bg: "bg-pink-50", tc: "text-pink-600" },
+          { label: "Total Sales (â¹)", value: `â¹ ${totalSales.toLocaleString("en-IN")}`, sub: "Gross sales volume", Icon: IndianRupee, bg: "bg-pink-50", tc: "text-pink-600" },
         ].map((k, i) => {
           const IconComp = k.Icon;
           return (
@@ -243,7 +243,7 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
                   <th className="py-3 px-3 text-left w-6"><input type="checkbox" className="rounded border-gray-300" /></th>
                   <th className="py-3 px-4 text-left">Order Details</th>
                   <th className="py-3 px-4 text-left">Customer</th>
-                  <th className="py-3 px-4 text-left">Amount (₹)</th>
+                  <th className="py-3 px-4 text-left">Amount (â¹)</th>
                   <th className="py-3 px-4 text-left">Payment Mode</th>
                   <th className="py-3 px-4 text-left">Order Status</th>
                   <th className="py-3 px-4 text-left">Delivery Status</th>
@@ -263,7 +263,7 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
                       <p className="font-semibold text-gray-800">{o.customer}</p>
                       <p className="text-[10px] text-gray-400">{o.phone}</p>
                     </td>
-                    <td className="py-3 px-4 font-bold text-gray-900 whitespace-nowrap">₹ {o.amount.toLocaleString()}</td>
+                    <td className="py-3 px-4 font-bold text-gray-900 whitespace-nowrap">â¹ {o.amount.toLocaleString()}</td>
                     <td className="py-3 px-4">
                       <p className="font-semibold text-gray-800 text-[11px]">{o.paymentMode}</p>
                       <p className="text-[9px] text-gray-400">{o.paymentProvider}</p>
@@ -328,7 +328,7 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
               <p className="text-xs font-bold text-gray-800">Order Summary (This Month)</p>
               <button className="text-[10px] text-emerald-600 font-semibold hover:underline">View Report</button>
             </div>
-            <p className="text-xl font-black text-gray-900 mb-1">₹ {totalSales.toLocaleString("en-IN")}</p>
+            <p className="text-xl font-black text-gray-900 mb-1">â¹ {totalSales.toLocaleString("en-IN")}</p>
             <p className="text-[10px] text-emerald-600 font-medium mb-3">From {totalOrders} real orders</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="p-2 rounded-xl bg-gray-50 border border-gray-100">
@@ -376,15 +376,15 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
                 <circle cx="47.5" cy="47.5" r="35" fill="none" stroke="#059669" strokeWidth="13" strokeDasharray={`${Number(pctU)*2.2} 220`} strokeLinecap="round" transform="rotate(-90 47.5 47.5)" />
                 <circle cx="47.5" cy="47.5" r="35" fill="none" stroke="#f59e0b" strokeWidth="13" strokeDasharray={`${Number(pctC)*2.2} 220`} strokeLinecap="round" transform={`rotate(${Number(pctU)*3.6-90} 47.5 47.5)`} strokeDashoffset="-2" />
                 <circle cx="47.5" cy="47.5" r="35" fill="none" stroke="#6366f1" strokeWidth="13" strokeDasharray={`${Number(pctK)*2.2} 220`} strokeLinecap="round" transform={`rotate(${(Number(pctU)+Number(pctC))*3.6-90} 47.5 47.5)`} strokeDashoffset="-2" />
-                <text x="47.5" y="44" textAnchor="middle" fontSize="9" fontWeight="bold" fill="#111">₹{totalSales.toLocaleString("en-IN")}</text>
+                <text x="47.5" y="44" textAnchor="middle" fontSize="9" fontWeight="bold" fill="#111">â¹{totalSales.toLocaleString("en-IN")}</text>
                 <text x="47.5" y="55" textAnchor="middle" fontSize="8" fill="#9ca3af">Total</text>
               </svg>
             </div>
             <div className="space-y-1 text-[10px]">
-              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /><span>UPI</span></div><span className="font-bold text-gray-800">₹{upiSales.toLocaleString("en-IN")} ({pctU}%)</span></div>
-              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400" /><span>COD</span></div><span className="font-bold text-gray-800">₹{codSales.toLocaleString("en-IN")} ({pctC}%)</span></div>
-              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-500" /><span>KCC</span></div><span className="font-bold text-gray-800">₹{kccSales.toLocaleString("en-IN")} ({pctK}%)</span></div>
-              {otherSales > 0 && <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-pink-500" /><span>Others</span></div><span className="font-bold text-gray-800">₹{otherSales.toLocaleString("en-IN")} ({pctO}%)</span></div>}
+              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" /><span>UPI</span></div><span className="font-bold text-gray-800">â¹{upiSales.toLocaleString("en-IN")} ({pctU}%)</span></div>
+              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400" /><span>COD</span></div><span className="font-bold text-gray-800">â¹{codSales.toLocaleString("en-IN")} ({pctC}%)</span></div>
+              <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-indigo-500" /><span>KCC</span></div><span className="font-bold text-gray-800">â¹{kccSales.toLocaleString("en-IN")} ({pctK}%)</span></div>
+              {otherSales > 0 && <div className="flex justify-between items-center"><div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-pink-500" /><span>Others</span></div><span className="font-bold text-gray-800">â¹{otherSales.toLocaleString("en-IN")} ({pctO}%)</span></div>}
             </div>
           </div>
             );
@@ -530,7 +530,7 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
               </div>
 
               <div>
-                <label className="block text-gray-700 font-semibold mb-1">Total Amount (₹)</label>
+                <label className="block text-gray-700 font-semibold mb-1">Total Amount (â¹)</label>
                 <Input
                   type="number"
                   value={editForm.amount}
@@ -605,7 +605,7 @@ export default function OrdersView({ orders: propOrders = [], setOrders, onViewI
         </div>
       )}
 
-      <div className="text-center text-[11px] text-gray-400">© {new Date().getFullYear()} Krivexa. All rights reserved.</div>
+      <div className="text-center text-[11px] text-gray-400">Â© {new Date().getFullYear()} Krivexo. All rights reserved.</div>
     </div>
   );
 }

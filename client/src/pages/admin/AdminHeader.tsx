@@ -173,7 +173,7 @@ export default function AdminHeader({
               <div className="py-2 max-h-72 overflow-y-auto space-y-2">
                 {notifications.length === 0 ? (
                   <div className="py-8 text-center text-gray-400 text-xs">
-                    <div className="text-2xl mb-1.5">🔔</div>
+                    <div className="text-2xl mb-1.5">ð</div>
                     No notifications yet. You're all caught up!
                   </div>
                 ) : (

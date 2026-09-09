@@ -94,7 +94,7 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
         setSelectedDealer(prev => prev ? { ...prev, status: "active", verified: "verified", loginId: allottedId, password: allottedPass } : null);
       }
 
-      toast.success(`Dealer "${allotCredDealer.businessName}" approved! Dealer ID: ${allottedId}${credSendEmail ? ` • Credentials dispatched via email to ${allotCredDealer.email}` : ""}`);
+      toast.success(`Dealer "${allotCredDealer.businessName}" approved! Dealer ID: ${allottedId}${credSendEmail ? ` â¢ Credentials dispatched via email to ${allotCredDealer.email}` : ""}`);
     } catch (err: any) {
       toast.error(`Failed to allot dealer credentials: ${err.message || err}`);
     } finally {
@@ -123,12 +123,6 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
   const inactiveRetailers = dealers.filter(d => d.status !== "active").length;
   const verifiedRetailers = dealers.filter(d => d.verified === "verified").length;
 
-  const getKycBadge = (verified: string) => {
-    if (verified === "verified") return <span className="inline-flex items-center gap-1 text-emerald-600 text-[11px] font-semibold"><CheckCircle className="h-3.5 w-3.5" />Verified</span>;
-    if (verified === "pending") return <span className="inline-flex items-center gap-1 text-amber-600 text-[11px] font-semibold"><Clock className="h-3.5 w-3.5" />Pending</span>;
-    return <span className="inline-flex items-center gap-1 text-red-500 text-[11px] font-semibold"><XCircle className="h-3.5 w-3.5" />Rejected</span>;
-  };
-
   const getStatusBadge = (status: string) => {
     if (status === "active") return <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold">Active</span>;
     if (status === "pending") return <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-semibold">Pending</span>;
@@ -144,18 +138,17 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
           <p className="text-xs text-gray-500 mt-0.5">Manage all registered retailers, dealers and inspect GST & license verification details</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span>›</span><span>Users Management</span><span>›</span>
+          <span>Dashboard</span><span>âº</span><span>Users Management</span><span>âº</span>
           <span className="text-emerald-600 font-medium">All Retailers</span>
         </div>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Total Retailers", value: totalRetailers.toString(), sub: "Registered dealers in database", Icon: Store, bg: "bg-emerald-50", color: "text-emerald-600" },
           { label: "Active Retailers", value: activeRetailers.toString(), sub: `${totalRetailers > 0 ? Math.round((activeRetailers / totalRetailers) * 100) : 0}% active merchant accounts`, Icon: CheckCircle2, bg: "bg-blue-50", color: "text-blue-600" },
           { label: "Inactive Retailers", value: inactiveRetailers.toString(), sub: "Pending or suspended accounts", Icon: XCircle, bg: "bg-red-50", color: "text-red-500" },
-          { label: "KYC Verified", value: verifiedRetailers.toString(), sub: `${totalRetailers > 0 ? Math.round((verifiedRetailers / totalRetailers) * 100) : 0}% verified merchants`, Icon: ShieldCheck, bg: "bg-violet-50", color: "text-violet-600" },
         ].map((s, i) => {
           const IconComp = s.Icon;
           return (
@@ -212,14 +205,13 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                   <th className="py-3 px-4 text-left">Mobile / Email</th>
                   <th className="py-3 px-4 text-left">State & District</th>
                   <th className="py-3 px-4 text-left">Status</th>
-                  <th className="py-3 px-4 text-left">KYC</th>
                   <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {paged.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-gray-400">
+                    <td colSpan={8} className="py-12 text-center text-gray-400">
                       <Users className="h-8 w-8 mx-auto mb-2 opacity-30" />
                       <p className="font-semibold text-gray-600">No retailers found</p>
                       <p className="text-[11px] text-gray-400">Try changing your search or filters</p>
@@ -251,18 +243,17 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                       <td className="py-3.5 px-4 text-gray-800 font-medium">{d.owner}</td>
                       <td className="py-3.5 px-4">
                         <p className="font-mono text-emerald-800 font-bold text-[11px]">{d.gstin || d.gstNumber || "Not provided"}</p>
-                        <p className="font-mono text-[10px] text-gray-400">{d.licenseNumber || "—"}</p>
+                        <p className="font-mono text-[10px] text-gray-400">{d.licenseNumber || "â"}</p>
                       </td>
                       <td className="py-3.5 px-4">
                         <p className="text-gray-800 font-medium">{d.phone}</p>
-                        <p className="text-[10px] text-gray-400 truncate max-w-[140px]">{d.email || "—"}</p>
+                        <p className="text-[10px] text-gray-400 truncate max-w-[140px]">{d.email || "â"}</p>
                       </td>
                       <td className="py-3.5 px-4">
                         <p className="text-gray-800 font-medium">{d.district || "Patna"}</p>
                         <p className="text-[10px] text-gray-400">{d.state || "Bihar"}</p>
                       </td>
                       <td className="py-3.5 px-4">{getStatusBadge(d.status)}</td>
-                      <td className="py-3.5 px-4">{getKycBadge(d.verified)}</td>
                       <td className="py-3.5 px-4 text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           <button
@@ -375,11 +366,11 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                   <p className="text-[10px] font-bold text-orange-800 uppercase tracking-wider">Contact & Shop Address</p>
                   {[
                     { label: "Mobile Number", value: selectedDealer.phone },
-                    { label: "Email Address", value: selectedDealer.email || "—" },
+                    { label: "Email Address", value: selectedDealer.email || "â" },
                     { label: "State", value: selectedDealer.state || "Bihar" },
                     { label: "District", value: selectedDealer.district || "Patna" },
-                    { label: "Village / City", value: selectedDealer.village || "—" },
-                    { label: "Shop Address", value: selectedDealer.address || "—" },
+                    { label: "Village / City", value: selectedDealer.village || "â" },
+                    { label: "Shop Address", value: selectedDealer.address || "â" },
                   ].map((row, i) => (
                     <div key={i} className="flex items-start justify-between gap-2">
                       <span className="text-gray-400 shrink-0">{row.label}</span>
@@ -397,10 +388,10 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                 </button>
               </div>
 
-              {/* Admin Dealer Approval Action — Point 7 */}
+              {/* Admin Dealer Approval Action â Point 7 */}
               {selectedDealer.status === "pending" ? (
                 <div className="p-3 bg-amber-50 border-t border-amber-100 space-y-2">
-                  <p className="text-[11px] text-amber-800 font-semibold">⚠️ Pending Registration Approval</p>
+                  <p className="text-[11px] text-amber-800 font-semibold">â ï¸ Pending Registration Approval</p>
                   <p className="text-[10px] text-gray-600">Review GST and License details before allotting credentials.</p>
                   <div className="flex gap-2 pt-1">
                     <Button
@@ -458,7 +449,7 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                 )}
                 <div>
                   <h2 className="text-lg font-bold leading-tight">{viewingModalDealer.businessName}</h2>
-                  <p className="text-xs text-orange-200">Dealer Account Profile • #{viewingModalDealer.id}</p>
+                  <p className="text-xs text-orange-200">Dealer Account Profile â¢ #{viewingModalDealer.id}</p>
                 </div>
               </div>
               <button
@@ -533,7 +524,7 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Village / City</span>
-                    <span className="font-bold text-gray-800 text-xs">{viewingModalDealer.village || "—"}</span>
+                    <span className="font-bold text-gray-800 text-xs">{viewingModalDealer.village || "â"}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 block text-[10.5px]">Registration Date</span>
@@ -541,7 +532,7 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
                   </div>
                   <div className="col-span-2 sm:col-span-3">
                     <span className="text-gray-400 block text-[10.5px]">Shop / Business Address</span>
-                    <span className="font-medium text-gray-800 text-xs">{viewingModalDealer.address || "—"}</span>
+                    <span className="font-medium text-gray-800 text-xs">{viewingModalDealer.address || "â"}</span>
                   </div>
                 </div>
               </div>
@@ -561,7 +552,7 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
         </div>
       )}
 
-      {/* ─── DEALER CREDENTIAL ALLOTMENT MODAL (Point 7) ─── */}
+      {/* âââ DEALER CREDENTIAL ALLOTMENT MODAL (Point 7) âââ */}
       {allotCredDealer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative animate-in fade-in zoom-in-95">
@@ -693,7 +684,7 @@ export default function DealersView({ dealers: propDealers, setDealers }: Dealer
       )}
 
       <div className="text-center text-[11px] text-gray-400">
-        © 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Retailers & Dealers Database
+        Â© 2026 Farma. All rights reserved. &nbsp; Real-time Bihar Retailers & Dealers Database
       </div>
     </div>
   );

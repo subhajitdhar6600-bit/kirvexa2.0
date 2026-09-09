@@ -111,7 +111,7 @@ export default function InvoiceDetailsView({ invoiceId, orders: propOrders, onBa
           <p className="text-xs text-gray-500 mt-0.5">View, print and manage official tax invoice</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span>Dashboard</span><span>›</span><span>Orders & Sales</span><span>›</span><span>Invoices</span><span>›</span>
+          <span>Dashboard</span><span>âº</span><span>Orders & Sales</span><span>âº</span><span>Invoices</span><span>âº</span>
           <span className="text-emerald-600 font-medium">{displayInvId}</span>
         </div>
       </div>
@@ -148,9 +148,9 @@ export default function InvoiceDetailsView({ invoiceId, orders: propOrders, onBa
                 <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
                   <Sprout className="w-5 h-5" />
                 </div>
-                <span className="text-lg font-black text-gray-900 tracking-tight">Krivexa</span>
+                <span className="text-lg font-black text-gray-900 tracking-tight">Krivexo</span>
               </div>
-              <p className="font-bold text-gray-900 text-xs">Krivexa Agritech Private Limited</p>
+              <p className="font-bold text-gray-900 text-xs">Krivexo Agritech Private Limited</p>
               <p className="text-[11px] text-gray-500">1st Floor, Arkipire Technology Pvt Ltd,</p>
               <p className="text-[11px] text-gray-500">Mukatapur Station Road, Samastipur, Bihar - 848101, India</p>
               <p className="text-[11px] text-gray-600 font-semibold mt-1">GSTIN: <span className="font-mono text-gray-800">10ABCDE1234F1Z5</span></p>
@@ -166,7 +166,7 @@ export default function InvoiceDetailsView({ invoiceId, orders: propOrders, onBa
               <div className="w-20 h-20 border-2 border-gray-800 rounded-lg p-1 bg-white flex items-center justify-center">
                 <QrCode className="w-16 h-16 text-gray-900" />
               </div>
-              <p className="text-[9px] text-gray-400 mt-1">Thank you for choosing Krivexa</p>
+              <p className="text-[9px] text-gray-400 mt-1">Thank you for choosing Krivexo</p>
             </div>
 
             {/* Right Invoice Info */}
@@ -197,7 +197,7 @@ export default function InvoiceDetailsView({ invoiceId, orders: propOrders, onBa
               <p className="font-bold text-gray-900">{buyerName}</p>
               <p className="text-gray-500 text-[11px]">{buyerAddress}</p>
               <p className="text-gray-500 text-[11px] mt-1">Mobile: {buyerPhone}</p>
-              <p className="text-gray-500 text-[11px]">Transport: Krivexa Express Logistics</p>
+              <p className="text-gray-500 text-[11px]">Transport: Krivexo Express Logistics</p>
             </div>
           </div>
 
@@ -211,11 +211,11 @@ export default function InvoiceDetailsView({ invoiceId, orders: propOrders, onBa
                   <th className="py-2.5 px-3 text-left">HSN Code</th>
                   <th className="py-2.5 px-3 text-center">Qty</th>
                   <th className="py-2.5 px-3 text-left">Unit</th>
-                  <th className="py-2.5 px-3 text-right">Rate (₹)</th>
-                  <th className="py-2.5 px-3 text-right">Taxable Value (₹)</th>
+                  <th className="py-2.5 px-3 text-right">Rate (â¹)</th>
+                  <th className="py-2.5 px-3 text-right">Taxable Value (â¹)</th>
                   <th className="py-2.5 px-3 text-right">GST %</th>
-                  <th className="py-2.5 px-3 text-right">GST Amount (₹)</th>
-                  <th className="py-2.5 px-3 text-right">Total (₹)</th>
+                  <th className="py-2.5 px-3 text-right">GST Amount (â¹)</th>
+                  <th className="py-2.5 px-3 text-right">Total (â¹)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -254,12 +254,12 @@ export default function InvoiceDetailsView({ invoiceId, orders: propOrders, onBa
               <p className="font-bold text-emerald-700 text-xs mt-0.5">Paid via {paymentMethod}</p>
             </div>
             <div className="w-64 space-y-1.5 text-right text-xs">
-              <div className="flex justify-between"><span className="text-gray-500">Total Taxable Value</span><span className="font-semibold text-gray-800">₹ {taxableValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">CGST (2.5%)</span><span className="font-semibold text-gray-800">₹ {cgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">SGST (2.5%)</span><span className="font-semibold text-gray-800">₹ {sgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Total Taxable Value</span><span className="font-semibold text-gray-800">â¹ {taxableValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">CGST (2.5%)</span><span className="font-semibold text-gray-800">â¹ {cgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">SGST (2.5%)</span><span className="font-semibold text-gray-800">â¹ {sgst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
               <div className="flex justify-between"><span className="text-gray-500">Shipping Charges</span><span className="font-semibold text-emerald-600">FREE</span></div>
               <div className="flex justify-between text-sm font-black text-emerald-700 pt-2 border-t border-gray-200">
-                <span>Grand Total</span><span>₹ {orderAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                <span>Grand Total</span><span>â¹ {orderAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
               </div>
             </div>
           </div>
@@ -286,7 +286,7 @@ export default function InvoiceDetailsView({ invoiceId, orders: propOrders, onBa
                 Rajesh Kumar
               </div>
               <div className="w-14 h-14 rounded-full border-2 border-emerald-600/40 text-emerald-800 flex flex-col items-center justify-center text-[7px] font-bold p-1 leading-tight text-center">
-                <span>KRIVEXA</span>
+                <span>KRIVEXO</span>
                 <span>AGRITECH</span>
                 <span>PVT. LTD.</span>
               </div>
@@ -328,24 +328,24 @@ export default function InvoiceDetailsView({ invoiceId, orders: propOrders, onBa
             <div className="flex justify-between"><span className="text-gray-400">Payment Mode</span><span className="font-semibold text-gray-800">{paymentMethod}</span></div>
             <div className="flex justify-between"><span className="text-gray-400">Transaction ID</span><span className="font-mono text-gray-700 text-[10px]">TXN-{currentOrder?.id || "001"}</span></div>
             <div className="flex justify-between"><span className="text-gray-400">Payment Date</span><span className="text-gray-700">{orderDate}</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">Paid Amount</span><span className="font-bold text-emerald-600">₹ {orderAmount.toLocaleString("en-IN")}</span></div>
+            <div className="flex justify-between"><span className="text-gray-400">Paid Amount</span><span className="font-bold text-emerald-600">â¹ {orderAmount.toLocaleString("en-IN")}</span></div>
           </div>
 
           {/* Invoice Summary */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-2 text-xs">
             <p className="font-bold text-gray-800 mb-2">Invoice Summary</p>
             <div className="flex justify-between"><span className="text-gray-400">Total Items</span><span className="font-semibold text-gray-800">{items.length}</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">Total Taxable Value</span><span className="font-semibold text-gray-800">₹ {taxableValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">Total GST</span><span className="font-semibold text-gray-800">₹ {totalGst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">Shipping Charges</span><span className="font-semibold text-emerald-600">₹ 0.00</span></div>
+            <div className="flex justify-between"><span className="text-gray-400">Total Taxable Value</span><span className="font-semibold text-gray-800">â¹ {taxableValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
+            <div className="flex justify-between"><span className="text-gray-400">Total GST</span><span className="font-semibold text-gray-800">â¹ {totalGst.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span></div>
+            <div className="flex justify-between"><span className="text-gray-400">Shipping Charges</span><span className="font-semibold text-emerald-600">â¹ 0.00</span></div>
             <div className="flex justify-between pt-2 border-t border-gray-100 text-sm font-bold text-emerald-700">
-              <span>Grand Total</span><span>₹ {orderAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+              <span>Grand Total</span><span>â¹ {orderAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="text-center text-[11px] text-gray-400">© {new Date().getFullYear()} Krivexa Agritech Private Limited. All rights reserved.</div>
+      <div className="text-center text-[11px] text-gray-400">Â© {new Date().getFullYear()} Krivexo Agritech Private Limited. All rights reserved.</div>
     </div>
   );
 }

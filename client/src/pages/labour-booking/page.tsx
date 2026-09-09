@@ -77,7 +77,7 @@ export default function LabourBookingPage() {
 
       // Send notification with PDF receipt
       addNotification(
-        "Labour Booking Requested 👷‍♂️",
+        "Labour Booking Requested ð·ââï¸",
         `Booking request for ${form.count} ${form.labourType} workers has been submitted (Ref: ${refId}). Download PDF receipt.`,
         "success",
         "/labour-booking",
@@ -240,7 +240,7 @@ export default function LabourBookingPage() {
                     <p className="font-semibold text-sm">{b.labourType}</p>
                     <span className="text-xs bg-primary/10 text-primary border border-primary/20 rounded-full px-2 py-0.5">Assigned</span>
                   </div>
-                  <p className="text-xs text-gray-400 mb-3">{b.count} workers · {b.days} days · {b.location}</p>
+                  <p className="text-xs text-gray-400 mb-3">{b.count} workers Â· {b.days} days Â· {b.location}</p>
                   {b.assignedLabours && b.assignedLabours.map((l, i) => (
                     <div key={i} className="flex items-center justify-between bg-white/5 rounded-lg p-3 mb-2">
                       <div>

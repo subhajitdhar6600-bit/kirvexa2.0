@@ -12,9 +12,9 @@ import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
 
 const PACKAGES = [
-  { name: "Basic Soil Test", price: "₹299", tests: ["pH Level", "Nitrogen (N)", "Phosphorus (P)", "Potassium (K)"], popular: false },
-  { name: "Standard Soil Test", price: "₹599", tests: ["pH Level", "N-P-K", "Organic Carbon", "Sulphur", "Zinc", "Iron"], popular: true },
-  { name: "Premium Soil Test", price: "₹999", tests: ["All Standard Tests", "Boron", "Manganese", "Copper", "Micro-nutrients", "Fertilizer Recommendation"], popular: false },
+  { name: "Basic Soil Test", price: "â¹299", tests: ["pH Level", "Nitrogen (N)", "Phosphorus (P)", "Potassium (K)"], popular: false },
+  { name: "Standard Soil Test", price: "â¹599", tests: ["pH Level", "N-P-K", "Organic Carbon", "Sulphur", "Zinc", "Iron"], popular: true },
+  { name: "Premium Soil Test", price: "â¹999", tests: ["All Standard Tests", "Boron", "Manganese", "Copper", "Micro-nutrients", "Fertilizer Recommendation"], popular: false },
 ];
 
 const PROCESS = [
@@ -77,7 +77,7 @@ export default function SoilTestingPage() {
 
       // Send notification with PDF receipt
       addNotification(
-        "Soil Test Scheduled 🔬",
+        "Soil Test Scheduled ð¬",
         `Your booking for ${selected} has been registered (Ref: ${refId}). Download PDF receipt.`,
         "success",
         "/soil-testing",
@@ -211,7 +211,7 @@ export default function SoilTestingPage() {
               </div>
             </div>
             <Button type="submit" disabled={loading} className="w-full bg-primary text-black font-bold py-5 text-base hover:bg-primary/90 rounded-xl">
-              {loading ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Submitting...</> : "Book Soil Test →"}
+              {loading ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Submitting...</> : "Book Soil Test â"}
             </Button>
           </form>
         </div>

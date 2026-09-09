@@ -41,9 +41,9 @@ export default function Navbar() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const LANG_OPTIONS: { code: Language; label: string; flag: string }[] = [
-    { code: "en", label: "English", flag: "🇬🇧" },
-    { code: "hi", label: "हिंदी", flag: "🇮🇳" },
-    { code: "bn", label: "বাংলা", flag: "🇧🇩" },
+    { code: "en", label: "English", flag: "ð¬ð§" },
+    { code: "hi", label: "à¤¹à¤¿à¤à¤¦à¥", flag: "ð®ð³" },
+    { code: "bn", label: "à¦¬à¦¾à¦à¦²à¦¾", flag: "ð§ð©" },
   ];
 
   const SERVICES_LINKS = [
@@ -91,13 +91,13 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <img 
-              src="/krivexa-logo.jpg" 
-              alt="KRIVEXA Logo" 
+              src="/krivexo-logo.jpg" 
+              alt="KRIVEXO Logo" 
               className="h-10 w-10 object-cover rounded-xl border border-primary/40 group-hover:scale-105 transition-transform" 
             />
             <div>
               <span className="text-xl font-black tracking-wider text-white group-hover:text-primary transition-colors" style={{ fontFamily: "Rajdhani, sans-serif" }}>
-                KRIVEXA
+                KRIVEXO
               </span>
               <span className="block text-[9px] text-gray-400 font-medium tracking-widest -mt-1 uppercase">
                 Smart Agriculture
@@ -297,7 +297,7 @@ export default function Navbar() {
                             onClick={() => setShowNotifMenu(false)}
                             className="text-xs text-primary hover:underline font-semibold flex items-center justify-center gap-1"
                           >
-                            View All Notifications →
+                            View All Notifications â
                           </Link>
                         </div>
                       )}
@@ -371,7 +371,7 @@ export default function Navbar() {
                             }}
                             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-black text-black bg-amber-400 hover:bg-amber-300 transition-colors shadow-md cursor-pointer border border-amber-300"
                           >
-                            <CreditCard className="h-4 w-4 text-black" /> Apply for KCC Now →
+                            <CreditCard className="h-4 w-4 text-black" /> Apply for KCC Now â
                           </button>
                         )}
                         <Link
@@ -547,7 +547,7 @@ export default function Navbar() {
                         onClick={() => setShowNotifMenu(false)}
                         className="text-xs text-primary hover:underline font-semibold flex items-center justify-center gap-1"
                       >
-                        View All Notifications →
+                        View All Notifications â
                       </Link>
                     </div>
                   </div>
