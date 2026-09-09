@@ -67,23 +67,6 @@ export function KccAlertModal() {
 
 const KCC_TIERS = [
   {
-    id: "standard" as const,
-    name: "Govt Certified KCC (Free)",
-    price: 0,
-    color: "border-emerald-500/60 bg-emerald-500/10",
-    activeColor: "border-emerald-400 bg-emerald-500/20 shadow-emerald-500/20",
-    badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    icon: Star,
-    iconColor: "text-emerald-400",
-    limit: "₹1,60,000",
-    features: [
-      "Zero application & processing fee",
-      "Credit limit up to ₹1,60,000 collateral-free",
-      "4% Subsidised interest rate under Govt. scheme",
-      "Unlocks 100% platform services upon approval",
-    ],
-  },
-  {
     id: "nex" as const,
     name: "Krivexo Nex Card",
     price: 299,
@@ -92,12 +75,11 @@ const KCC_TIERS = [
     badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
     icon: Star,
     iconColor: "text-blue-400",
-    limit: "₹1,00,000",
     features: [
       "Annual membership at ₹299 only",
-      "Credit limit up to ₹1,00,000",
       "Valid at all Krivexo partner stores",
       "Digital e-Card instantly issued upon review",
+      "Unlocks 100% agricultural services",
     ],
   },
   {
@@ -109,12 +91,11 @@ const KCC_TIERS = [
     badge: "bg-amber-500/20 text-amber-300 border-amber-500/30",
     icon: Crown,
     iconColor: "text-amber-400",
-    limit: "₹3,00,000",
     features: [
       "Premium membership at ₹999/year",
-      "Credit limit up to ₹3,00,000",
-      "Priority processing & approvals",
+      "Priority processing & rapid approvals",
       "Physical gold-plated card issued",
+      "Dedicated agriculture advisory & support",
     ],
   },
 ];
@@ -139,7 +120,7 @@ export function KccApplicationModal() {
   } = useApp();
 
   const [step, setStep] = useState<Step>("tier");
-  const [selectedTier, setSelectedTier] = useState<"standard" | "nex" | "prime">("standard");
+  const [selectedTier, setSelectedTier] = useState<"nex" | "prime">("nex");
   const [paymentMethod, setPaymentMethod] = useState<"wallet" | "upi">("wallet");
 
   // UPI payment state
@@ -243,7 +224,7 @@ export function KccApplicationModal() {
     );
   }
 
-  const tier = KCC_TIERS.find(t => t.id === selectedTier)!;
+  const tier = KCC_TIERS.find(t => t.id === selectedTier) || KCC_TIERS[0];
 
   // Complete KCC Submission after successful payment
   const completeKccSubmission = (payMethodName: string) => {
@@ -265,7 +246,6 @@ export function KccApplicationModal() {
           "Permanent Address": form.address || "Not Specified",
           "Card Type Selected": tier.name,
           "Subscription Amount Paid": `₹${tier.price} (${payMethodName})`,
-          "Credit Limit": tier.limit,
         },
       });
 
@@ -368,7 +348,7 @@ export function KccApplicationModal() {
   const handleClose = () => {
     setIsKccAppModalOpen(false);
     setStep("tier");
-    setSelectedTier("standard");
+    setSelectedTier("nex");
     setPaymentMethod("wallet");
     setUpiId("");
     setUpiEmail("");
@@ -387,10 +367,8 @@ export function KccApplicationModal() {
     });
   };
 
-  const STEP_LABELS = tier.price === 0
-    ? ["Choose Plan", "Fill Form", "Done"]
-    : ["Choose Plan", "Fill Form", "Pay Fee", "Done"];
-  const STEP_INDEX: Record<Step, number> = { tier: 0, form: 1, pay: 2, done: tier.price === 0 ? 2 : 3 };
+  const STEP_LABELS = ["Choose Plan", "Fill Form", "Pay Fee", "Done"];
+  const STEP_INDEX: Record<Step, number> = { tier: 0, form: 1, pay: 2, done: 3 };
 
   return (
     <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
@@ -443,7 +421,7 @@ export function KccApplicationModal() {
           {step === "tier" && (
             <div className="space-y-4">
               <p className="text-sm text-gray-300">Select your Kisan Credit Card plan to apply and unlock all platform features:</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {KCC_TIERS.map(t => {
                   const Icon = t.icon;
                   const isSelected = selectedTier === t.id;
@@ -451,7 +429,7 @@ export function KccApplicationModal() {
                     <button
                       key={t.id}
                       onClick={() => setSelectedTier(t.id)}
-                      className={`text-left rounded-2xl p-4 border-2 transition-all cursor-pointer shadow-lg flex flex-col justify-between ${isSelected ? t.activeColor : t.color} hover:scale-[1.02]`}
+                      className={`text-left rounded-2xl p-4 border-2 transition-all cursor-pointer shadow-lg flex flex-col justify-between ${isSelected ? t.activeColor : t.color} hover:scale-[1.01]`}
                     >
                       <div>
                         <div className="flex items-center gap-1.5 mb-2">
@@ -460,10 +438,9 @@ export function KccApplicationModal() {
                           {isSelected && <Check className="h-3.5 w-3.5 text-primary ml-auto" />}
                         </div>
                         <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black border mb-2 ${t.badge}`}>
-                          {t.price === 0 ? "FREE / ₹0" : `₹${t.price}/year`}
+                          ₹{t.price}/year
                         </div>
-                        <div className="text-[11px] text-gray-300 font-semibold mb-2">Limit: <span className="text-white font-black">{t.limit}</span></div>
-                        <ul className="space-y-1">
+                        <ul className="space-y-1 mt-1">
                           {t.features.map((f, i) => (
                             <li key={i} className="flex items-start gap-1 text-[10px] text-gray-400 leading-snug">
                               <Check className="h-2.5 w-2.5 text-primary shrink-0 mt-0.5" /> {f}
@@ -477,9 +454,10 @@ export function KccApplicationModal() {
               </div>
               <Button
                 onClick={() => setStep("form")}
-                className="w-full bg-primary text-black font-extrabold py-5 text-base hover:bg-primary/90 cursor-pointer shadow-lg"
+                className="w-full bg-primary text-black font-extrabold py-3.5 px-3 text-xs sm:text-sm hover:bg-primary/90 cursor-pointer shadow-lg rounded-xl flex items-center justify-center gap-1.5 leading-snug whitespace-normal text-center min-h-[44px]"
               >
-                Continue with {tier.name} – {tier.price === 0 ? "Free Application" : `₹${tier.price}`} <ArrowRight className="h-5 w-5 ml-2" />
+                <span>Continue with {tier.name} — ₹{tier.price}</span>
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </Button>
             </div>
           )}
@@ -724,7 +702,6 @@ export function KccApplicationModal() {
           title={`KCC Application Preview — ${tier.name}`}
           data={{
             "Card Plan Selected": `${tier.name} (₹${tier.price}/year)`,
-            "Credit Limit": tier.limit,
             "Applicant Full Name": form.fullName,
             "Contact Phone": form.phone,
             "Aadhaar UIDAI Number": form.aadhaar,
