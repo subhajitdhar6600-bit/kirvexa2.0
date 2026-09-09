@@ -176,17 +176,6 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Prominent Apply for KCC Button (Shown only when user has NO active card number) */}
-            {!isKccIssued && (
-              <Button
-                size="sm"
-                onClick={() => setIsKccAppModalOpen(true)}
-                className="bg-linear-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-black font-extrabold text-xs h-8.5 px-3.5 rounded-xl border border-amber-300 shadow-md shadow-amber-500/20 cursor-pointer flex items-center gap-1.5 animate-pulse"
-              >
-                <CreditCard className="h-4 w-4 text-black" />
-                <span>Apply for KCC</span>
-              </Button>
-            )}
 
             {/* LOGGED IN VIEW vs GUEST VIEW */}
             {user ? (
@@ -432,17 +421,6 @@ export default function Navbar() {
           {/* Mobile Right Controls: Cart + Notification Bell (beside 3 dots) + 3-Dots Menu */}
           <div className="flex lg:hidden items-center gap-2">
             
-            {/* Mobile Apply KCC Button (Shown only when NO active KCC) */}
-            {!isKccIssued && (
-              <Button
-                size="sm"
-                onClick={() => setIsKccAppModalOpen(true)}
-                className="bg-linear-to-r from-amber-500 to-amber-400 text-black font-extrabold text-[11px] h-8 px-2.5 rounded-xl border border-amber-300 shadow-sm cursor-pointer flex items-center gap-1 shrink-0"
-              >
-                <CreditCard className="h-3.5 w-3.5" />
-                <span>Apply KCC</span>
-              </Button>
-            )}
 
             {/* Functional Cart Icon */}
             <Link

@@ -108,6 +108,7 @@ export interface KccApplication {
   paymentStatus?: "pending" | "paid";
   paymentAmount?: number;
   creditLimit?: number;
+  creditBalance?: number;
   createdAt: string;
 }
 
@@ -289,6 +290,7 @@ export interface WalletTransaction {
   amount: number;
   date: string;
   category: string;
+  source?: "wallet" | "kcc";
 }
 
 interface AppContextType {
@@ -305,7 +307,8 @@ interface AppContextType {
   isKccIssued: boolean;
   hasAppliedKcc: boolean;
   kccApplicationStatus: "none" | "pending" | "approved" | "rejected";
-  kccDetails: KccApplication | null;
+  kccDetails: (KccApplication & { creditBalance?: number }) | null;
+  kccAvailableBalance: number;
   isKccAlertOpen: boolean;
   setIsKccAlertOpen: (open: boolean) => void;
   isKccAppModalOpen: boolean;
@@ -1170,9 +1173,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setWalletTransactions((prev) => [newTxn, ...prev]);
   };
 
-  const walletBalance = walletTransactions.reduce((acc, t) => {
-    return t.type === "credit" ? acc + t.amount : acc - t.amount;
-  }, 0);
+  // Deposit Wallet balance excludes KCC card debits (which are drawn from KCC credit line, not cash deposits)
+  const walletBalance = walletTransactions
+    .filter((t) => t.source !== "kcc" && t.category !== "KCC Order Payment" && !t.title.toLowerCase().startsWith("kcc"))
+    .reduce((acc, t) => {
+      return t.type === "credit" ? acc + t.amount : acc - t.amount;
+    }, 0);
 
   const registerNewAccount = (accountData: Omit<RegisteredAccount, "id" | "createdAt">): RegisteredAccount => {
     const accountName = accountData.fullName || (accountData as any).name || "User";
@@ -1396,6 +1402,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Farmer Card Store for KCC Live Balances & POS Transactions (Persisted in localStorage)
+  const [farmerCardStore, setFarmerCardStore] = useState<Record<string, { cardHolder: string; balance: number; status: string }>>(() => {
+    try {
+      const saved = localStorage.getItem("krivexo_farmer_cards");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("krivexo_farmer_cards", JSON.stringify(farmerCardStore));
+  }, [farmerCardStore]);
+
   // User-specific KCC Application Lookup
   const cleanPhone = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
 
@@ -1409,6 +1429,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return matchPhone || matchName || matchCard;
       }) || null
     : null;
+
+  // Track KCC Credit Limits and Live Available Balance
+  const userCardNumber = user?.kccCardNumber || currentUserKccApp?.cardNumber || "";
+  const totalKccCreditLimit = currentUserKccApp?.creditLimit || currentUserKccApp?.paymentAmount || user?.kccCreditLimit || 50000;
+  
+  // Total KCC debits made by this user:
+  const userKccSpent = walletTransactions
+    .filter((t) => t.source === "kcc" || t.category === "KCC Order Payment" || t.title.toLowerCase().startsWith("kcc"))
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const cleanUserCard = userCardNumber.replace(/\s+/g, "").toUpperCase();
+  const cardStoreEntry = Object.entries(farmerCardStore).find(
+    ([k]) => k.replace(/\s+/g, "").toUpperCase() === cleanUserCard
+  )?.[1];
+
+  const kccAvailableBalance = cardStoreEntry?.balance !== undefined
+    ? cardStoreEntry.balance
+    : Math.max(0, totalKccCreditLimit - userKccSpent);
 
   // isKccIssued: true if admin OR if logged-in user has KCC approved with an actual allotted card number
   const isKccIssued = Boolean(
@@ -1436,12 +1474,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ? (currentUserKccApp.status as any)
       : "none";
 
-  const kccDetails: KccApplication | null = currentUserKccApp
+  const kccDetails: (KccApplication & { creditBalance?: number }) | null = currentUserKccApp
     ? {
         ...currentUserKccApp,
         cardNumber: currentUserKccApp.cardNumber || user?.kccCardNumber,
-        creditLimit: currentUserKccApp.creditLimit || currentUserKccApp.paymentAmount || user?.kccCreditLimit || 50000,
-        paymentAmount: currentUserKccApp.creditLimit || currentUserKccApp.paymentAmount || user?.kccCreditLimit || 50000,
+        creditLimit: totalKccCreditLimit,
+        paymentAmount: totalKccCreditLimit,
+        creditBalance: kccAvailableBalance,
         status: (isKccIssued || currentUserKccApp.status === "approved") ? "approved" : currentUserKccApp.status,
       }
     : (user && user.kccCardNumber)
@@ -1455,8 +1494,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         landSize: user.landSize || "2.5 Acres",
         status: "approved",
         cardNumber: user.kccCardNumber,
-        creditLimit: user.kccCreditLimit || 50000,
-        paymentAmount: user.kccCreditLimit || 50000,
+        creditLimit: totalKccCreditLimit,
+        paymentAmount: totalKccCreditLimit,
+        creditBalance: kccAvailableBalance,
         issueDate: new Date().toISOString().split("T")[0],
         createdAt: new Date().toISOString(),
       }
@@ -1502,8 +1542,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Dealer Features Implementation
-  const [farmerCardStore, setFarmerCardStore] = useState<Record<string, { cardHolder: string; balance: number; status: string }>>({});
-
   const dealerApplyFarmerKcc = (appData: Omit<KccApplication, "id" | "status" | "createdAt">) => {
     const newApp: KccApplication = {
       ...appData,
@@ -1523,45 +1561,88 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const checkFarmerCardBalance = (cardNumber: string) => {
-    const cleaned = cardNumber.trim();
-    if (farmerCardStore[cleaned]) {
-      return { exists: true, ...farmerCardStore[cleaned] };
+    const cleaned = (cardNumber || "").trim();
+    const cleanNorm = cleaned.replace(/\s+/g, "").toUpperCase();
+    if (!cleanNorm) return { exists: false };
+
+    // 1. Check in farmerCardStore
+    for (const [key, val] of Object.entries(farmerCardStore)) {
+      if (key.replace(/\s+/g, "").toUpperCase() === cleanNorm) {
+        return { exists: true, ...val };
+      }
     }
-    // Check in kccApplications list if verified
-    const matchedApp = kccApplications.find(a => a.cardNumber === cleaned && a.status === "approved");
+
+    // 2. Check if it matches the current user's card
+    if (userCardNumber && cleanUserCard === cleanNorm) {
+      return {
+        exists: true,
+        cardHolder: user?.name || "Farmer",
+        balance: kccAvailableBalance,
+        status: "active",
+      };
+    }
+
+    // 3. Check in kccApplications list if verified
+    const matchedApp = kccApplications.find(
+      (a) => a.cardNumber && a.cardNumber.replace(/\s+/g, "").toUpperCase() === cleanNorm && a.status === "approved"
+    );
     if (matchedApp) {
-      return { exists: true, cardHolder: matchedApp.fullName, balance: matchedApp.creditLimit || matchedApp.paymentAmount || 50000, status: "active" };
+      const appLimit = matchedApp.creditLimit || matchedApp.paymentAmount || 50000;
+      return {
+        exists: true,
+        cardHolder: matchedApp.fullName,
+        balance: matchedApp.creditBalance !== undefined ? matchedApp.creditBalance : appLimit,
+        status: "active",
+      };
     }
     return { exists: false };
   };
 
   const chargeFarmerCard = (cardNumber: string, amount: number, itemDesc: string) => {
-    const cleaned = cardNumber.trim();
+    const cleaned = (cardNumber || "").trim();
+    const cleanNorm = cleaned.replace(/\s+/g, "").toUpperCase();
     const info = checkFarmerCardBalance(cleaned);
     if (!info || !info.exists || !("balance" in info)) {
       return { success: false, message: "Kishan Credit Card not found or not active." };
     }
     const currentBalance = info.balance ?? 0;
-    const holderName = info.cardHolder ?? "Farmer";
+    const holderName = info.cardHolder ?? (user?.name || "Farmer");
 
     if (currentBalance < amount) {
-      return { success: false, message: `Insufficient balance on KCC. Current available limit: ₹${currentBalance}` };
+      return {
+        success: false,
+        message: `Insufficient balance on KCC. Current available limit: ₹${currentBalance.toLocaleString("en-IN")}, Required: ₹${amount.toLocaleString("en-IN")}`,
+      };
     }
 
     const newBalance = currentBalance - amount;
-    setFarmerCardStore(prev => ({
-      ...prev,
-      [cleaned]: {
-        cardHolder: holderName,
-        balance: newBalance,
-        status: "active"
-      }
-    }));
-    api.chargeFarmerCard(cleaned, amount);
+    setFarmerCardStore((prev) => {
+      const next = {
+        ...prev,
+        [cleaned]: {
+          cardHolder: holderName,
+          balance: newBalance,
+          status: "active",
+        },
+      };
+      localStorage.setItem("krivexo_farmer_cards", JSON.stringify(next));
+      return next;
+    });
+
+    if (user && user.kccCardNumber && user.kccCardNumber.replace(/\s+/g, "").toUpperCase() === cleanNorm) {
+      setUser((prev) => {
+        if (!prev) return null;
+        const next = { ...prev, kccCreditBalance: newBalance };
+        localStorage.setItem("krivexo_user_profile", JSON.stringify(next));
+        return next;
+      });
+    }
+
+    api.chargeFarmerCard(cleaned, amount).catch((err) => console.warn("Backend charge card error:", err));
 
     addNotification(
-      "KCC Payment Debited",
-      `₹${amount} debited for "${itemDesc}" from Card ${cleaned} (${holderName}).`,
+      "KCC Payment Debited 💳",
+      `₹${amount.toLocaleString("en-IN")} debited from KCC limit for "${itemDesc}". Available KCC limit: ₹${newBalance.toLocaleString("en-IN")}.`,
       "success",
       "/wallet",
       "wallet"
@@ -1569,8 +1650,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return {
       success: true,
-      message: `Payment of ₹${amount} debited successfully!`,
-      remainingBalance: newBalance
+      message: `Payment of ₹${amount.toLocaleString("en-IN")} debited from KCC successfully!`,
+      remainingBalance: newBalance,
     };
   };
 
@@ -1880,7 +1961,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    // ── KCC payment: check credit limit ──
+    // ── KCC payment: check credit limit & debit from KCC only ──
     if (paymentMethod === "kcc") {
       const kccCard = kccDetails?.cardNumber || user?.kccCardNumber || "";
       if (!kccCard) {
@@ -1890,22 +1971,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!chargeRes.success) {
         return chargeRes;
       }
-      // Record KCC debit as wallet transaction so it appears in user, admin, dealer panels
+      // Record transaction with source: "kcc" so it shows in Transaction History without deducting from Deposit Wallet!
       addWalletTransaction({
         title: `KCC Payment – ${cart.length} item(s)`,
         type: "debit",
         amount: totalAmount,
         category: "KCC Order Payment",
+        source: "kcc",
       });
     }
 
-    // ── Wallet: record the debit transaction ──
+    // ── Wallet: check deposit wallet balance and record debit ──
     if (paymentMethod === "wallet") {
+      if (walletBalance < totalAmount) {
+        return {
+          success: false,
+          message: `Insufficient wallet balance! Available: ₹${walletBalance.toLocaleString("en-IN")}, Required: ₹${totalAmount.toLocaleString("en-IN")}. Please add money to your wallet.`,
+        };
+      }
       addWalletTransaction({
         title: `Wallet Payment – ${cart.length} item(s)`,
         type: "debit",
         amount: totalAmount,
         category: "Wallet Order Payment",
+        source: "wallet",
       });
     }
 
@@ -1979,6 +2068,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         hasAppliedKcc,
         kccApplicationStatus,
         kccDetails,
+        kccAvailableBalance,
         isKccAlertOpen,
         setIsKccAlertOpen,
         isKccAppModalOpen,

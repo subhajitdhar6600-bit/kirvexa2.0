@@ -27,6 +27,7 @@ export default function WalletPage() {
     addNotification,
     walletTransactions,
     walletBalance,
+    kccAvailableBalance,
   } = useApp();
   const [showBalance, setShowBalance] = useState(true);
   const [addAmount, setAddAmount] = useState("");
@@ -255,9 +256,22 @@ export default function WalletPage() {
 
   // KCC card number & wallet balances logic
   const isKccApproved = Boolean(isKccIssued || (user && user.kccCardNumber) || (kccDetails && kccDetails.status === "approved" && kccDetails.cardNumber));
-  const kccCreditBalance = isKccApproved ? (kccDetails?.creditLimit || kccDetails?.paymentAmount || user?.kccCreditLimit || 50000) : 0;
-  const totalIn = walletTransactions.filter((t) => t.type === "credit").reduce((s, t) => s + t.amount, 0);
-  const totalOut = walletTransactions.filter((t) => t.type === "debit").reduce((s, t) => s + t.amount, 0);
+  const kccTotalLimit = isKccApproved ? (kccDetails?.creditLimit || user?.kccCreditLimit || 50000) : 0;
+  
+  // Total KCC debits
+  const kccSpent = walletTransactions
+    .filter((t) => t.source === "kcc" || t.category === "KCC Order Payment" || t.title.toLowerCase().startsWith("kcc"))
+    .reduce((s, t) => s + t.amount, 0);
+
+  // Available KCC Credit Balance (deducted from KCC limit)
+  const kccCreditBalance = isKccApproved ? Math.max(0, kccAvailableBalance ?? (kccTotalLimit - kccSpent)) : 0;
+
+  // Deposit wallet cash totals (exclude KCC credit card charges)
+  const depositTxns = walletTransactions.filter(
+    (t) => t.source !== "kcc" && t.category !== "KCC Order Payment" && !t.title.toLowerCase().startsWith("kcc")
+  );
+  const totalIn = depositTxns.filter((t) => t.type === "credit").reduce((s, t) => s + t.amount, 0);
+  const totalOut = depositTxns.filter((t) => t.type === "debit").reduce((s, t) => s + t.amount, 0);
 
   const kccCardNumber = isKccApproved
     ? (user?.kccCardNumber || kccDetails?.cardNumber || "KCC ALLOTTED")
@@ -369,7 +383,7 @@ export default function WalletPage() {
               />
               {/* Balance overlay */}
               <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md border border-amber-500/40 rounded-xl px-3 py-1.5">
-                <div className="text-[9px] text-gray-400 font-bold uppercase">KCC Credit</div>
+                <div className="text-[9px] text-gray-400 font-bold uppercase">KCC Available</div>
                 <div className="text-sm font-black text-amber-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>
                   {showBalance ? (isKccApproved ? `₹${kccCreditBalance.toLocaleString()}.00` : "Not Issued") : "₹ ****"}
                 </div>
@@ -405,8 +419,10 @@ export default function WalletPage() {
                   </div>
                 </div>
                 <div className="text-[10px] text-gray-500 text-right">
-                  {isKccApproved ? "Credit Limit" : ""}
-                  <div className="text-amber-400 font-black text-sm">{isKccApproved ? `₹${kccCreditBalance.toLocaleString("en-IN")}` : ""}</div>
+                  {isKccApproved ? "Available / Limit" : ""}
+                  <div className="text-amber-400 font-black text-sm">
+                    {isKccApproved ? `₹${kccCreditBalance.toLocaleString("en-IN")} / ₹${kccTotalLimit.toLocaleString("en-IN")}` : ""}
+                  </div>
                 </div>
               </div>
             </div>
@@ -437,7 +453,13 @@ export default function WalletPage() {
                       <div className="text-sm font-semibold">{t.title}</div>
                       <div className="text-xs text-gray-500">{t.date} • {t.id}</div>
                     </div>
-                    <Badge className={`text-[10px] ${t.type === "credit" ? "bg-primary/20 text-primary border-primary/30" : "bg-red-500/20 text-red-400 border-red-500/30"}`}>
+                    <Badge className={`text-[10px] ${
+                      (t.source === "kcc" || t.category === "KCC Order Payment" || t.title.toLowerCase().startsWith("kcc"))
+                        ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                        : t.type === "credit"
+                        ? "bg-primary/20 text-primary border-primary/30"
+                        : "bg-red-500/20 text-red-400 border-red-500/30"
+                    }`}>
                       {t.category}
                     </Badge>
                     <div className={`text-sm font-bold shrink-0 ${t.type === "credit" ? "text-primary" : "text-red-400"}`}>

@@ -12,7 +12,7 @@ import { api } from "@/services/api.ts";
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { cart, removeFromCart, updateCartQuantity, clearCart, checkoutCart, orders, user, kccDetails, checkKccPermission, isKccIssued, setIsKccAppModalOpen, walletBalance } = useApp();
+  const { cart, removeFromCart, updateCartQuantity, clearCart, checkoutCart, orders, user, kccDetails, kccAvailableBalance, checkKccPermission, isKccIssued, setIsKccAppModalOpen, walletBalance } = useApp();
 
   const [activeTab, setActiveTab] = useState<"cart" | "orders">("cart");
   const [paymentMethod, setPaymentMethod] = useState<"kcc" | "upi" | "cod" | "wallet">("kcc");
@@ -55,6 +55,15 @@ export default function CartPage() {
     }
     if (!deliveryAddress.trim()) {
       toast.error("Please enter a delivery address");
+      return;
+    }
+
+    if (paymentMethod === "wallet" && walletBalance < grandTotal) {
+      toast.error(`Insufficient wallet balance! Available: ₹${walletBalance.toLocaleString("en-IN")}, Required: ₹${grandTotal.toLocaleString("en-IN")}. Please add money to your wallet.`);
+      return;
+    }
+    if (paymentMethod === "kcc" && kccAvailableBalance < grandTotal) {
+      toast.error(`Insufficient KCC credit limit! Available: ₹${kccAvailableBalance.toLocaleString("en-IN")}, Required: ₹${grandTotal.toLocaleString("en-IN")}.`);
       return;
     }
 
@@ -340,8 +349,13 @@ export default function CartPage() {
                               <span>Kisan Credit Card (KCC)</span>
                               <Badge className="bg-primary/20 text-primary border-primary/30 text-[9px]">Recommended</Badge>
                             </div>
-                            <div className="text-[10px] text-gray-400 mt-0.5">
-                              Card: {kccDetails?.cardNumber || "KCC-BH-2026-9041"}
+                            <div className="text-[10px] mt-0.5 flex items-center justify-between">
+                              <span className="text-gray-400">Card: {kccDetails?.cardNumber || user?.kccCardNumber || "KCC-BH-2026-9041"}</span>
+                              <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded ${
+                                kccAvailableBalance >= grandTotal ? "bg-emerald-500/20 text-emerald-400 font-semibold" : "bg-red-500/20 text-red-400 font-semibold"
+                              }`}>
+                                Limit: ₹{kccAvailableBalance.toLocaleString("en-IN")}
+                              </span>
                             </div>
                           </div>
                         </div>
