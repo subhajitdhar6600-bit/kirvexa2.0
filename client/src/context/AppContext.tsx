@@ -54,6 +54,7 @@ export interface CropListing {
 
 export interface LabourBookingRequest {
   id: string;
+  userId?: string;
   userName: string;
   phone: string;
   labourType: string;
@@ -62,8 +63,13 @@ export interface LabourBookingRequest {
   startDate: string;
   endDate: string;
   location: string;
-  status: "pending" | "assigned" | "completed";
-  assignedLabours?: Array<{ name: string; phone: string; charges: string }>;
+  status: "pending" | "pending_rate" | "rate_quoted" | "rate_accepted" | "cancelled" | "assigned" | "allotted" | "completed";
+  rateQuote?: string;
+  rateQuoteAmount?: number;
+  rateNotes?: string;
+  userResponse?: "" | "accepted" | "cancelled";
+  userResponseAt?: string;
+  assignedLabours?: Array<{ name: string; phone: string; charges?: string }>;
   adminNotes?: string;
   createdAt: string;
 }
@@ -190,16 +196,43 @@ export interface RegisteredAccount {
 
 export interface MachineryBookingRequest {
   id: string;
+  userId?: string;
   userName: string;
   phone: string;
   machineryType: string;
   bookingDate: string;
   durationHours: string | number;
   location: string;
-  status: "pending" | "allotted" | "rejected";
+  status: "pending" | "pending_rate" | "rate_quoted" | "rate_accepted" | "cancelled" | "allotted" | "rejected" | "completed";
+  rateQuote?: string;
+  rateQuoteAmount?: number;
+  rateNotes?: string;
+  userResponse?: "" | "accepted" | "cancelled";
+  userResponseAt?: string;
+  allottedMachine?: {
+    machineName?: string;
+    numberPlate?: string;
+    operatorName?: string;
+    operatorPhone?: string;
+    detailsText?: string;
+  };
   allottedMachineDetails?: string;
   adminNotes?: string;
   createdAt: string;
+}
+
+export interface ActiveReviewBooking {
+  id: string;
+  serviceType: string;
+  bookingType: "machinery" | "labour";
+  userName: string;
+  phone: string;
+  date: string;
+  duration: string;
+  location: string;
+  rateQuote: string;
+  rateQuoteAmount?: number;
+  rateNotes?: string;
 }
 
 export interface CartItem {
@@ -280,6 +313,7 @@ export interface UserNotification {
   category?: "crops" | "labour" | "expert" | "wallet" | "kcc" | "account" | "mandi" | "machinery" | "orders" | "soil" | "services" | "system" | "finance" | "promotion";
   pdfDataUrl?: string;
   pdfFileName?: string;
+  data?: any;
   createdAt?: string;
 }
 
@@ -341,6 +375,9 @@ interface AppContextType {
   // Machinery Booking
   machineryBookings: MachineryBookingRequest[];
   addMachineryBooking: (booking: Omit<MachineryBookingRequest, "id" | "status" | "createdAt">) => void;
+  quoteMachineryRate: (id: string, rateQuote: string, rateQuoteAmount?: number, notes?: string) => Promise<void>;
+  respondMachineryBooking: (id: string, response: "accepted" | "cancelled") => Promise<void>;
+  allotMachineryBookingWithResources: (id: string, data: { machineName?: string; numberPlate?: string; operatorName?: string; operatorPhone?: string; detailsText?: string; adminNotes?: string }) => Promise<void>;
   allotMachineryBooking: (id: string, machineDetails: string, notes?: string) => void;
   rejectMachineryBooking: (id: string) => void;
 
@@ -350,7 +387,16 @@ interface AppContextType {
   removeLabourType: (type: string) => void;
   labourBookings: LabourBookingRequest[];
   addLabourBooking: (booking: Omit<LabourBookingRequest, "id" | "status" | "createdAt">) => void;
-  assignLaboursToBooking: (id: string, assigned: Array<{ name: string; phone: string; charges: string }>, notes?: string) => void;
+  quoteLabourRate: (id: string, rateQuote: string, rateQuoteAmount?: number, notes?: string) => Promise<void>;
+  respondLabourBooking: (id: string, response: "accepted" | "cancelled") => Promise<void>;
+  allotLabourBookingWithResources: (id: string, data: { assignedLabours?: any[]; workerNames?: string; leadPhone?: string; adminNotes?: string }) => Promise<void>;
+  assignLaboursToBooking: (id: string, assigned: Array<{ name: string; phone: string; charges?: string }>, notes?: string) => void;
+
+  // Rate Review Modal
+  activeReviewBooking: ActiveReviewBooking | null;
+  openRateReviewModal: (booking: ActiveReviewBooking) => void;
+  closeRateReviewModal: () => void;
+  refreshBookings: () => Promise<void>;
   // Expert Advice
   expertAdviceQueries: ExpertAdviceQuery[];
   addExpertQuery: (query: Omit<ExpertAdviceQuery, "id" | "status" | "createdAt">) => void;
@@ -913,6 +959,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.rejectCrop(id);
   };
 
+  // Active Rate Review Modal State
+  const [activeReviewBooking, setActiveReviewBooking] = useState<ActiveReviewBooking | null>(null);
+
+  const openRateReviewModal = (booking: ActiveReviewBooking) => {
+    setActiveReviewBooking(booking);
+  };
+
+  const closeRateReviewModal = () => {
+    setActiveReviewBooking(null);
+  };
+
   // Machinery Booking State
   const [machineryBookings, setMachineryBookings] = useState<MachineryBookingRequest[]>(() => {
     return safeJsonParse("krivexo_machinery_bookings", []);
@@ -922,41 +979,117 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem("krivexo_machinery_bookings", JSON.stringify(machineryBookings));
   }, [machineryBookings]);
 
+  // Labour Booking State
+  const [labourBookings, setLabourBookings] = useState<LabourBookingRequest[]>(() => {
+    return safeJsonParse("krivexo_labour_bookings", []);
+  });
+
+  useEffect(() => {
+    localStorage.setItem("krivexo_labour_bookings", JSON.stringify(labourBookings));
+  }, [labourBookings]);
+
+  // Live Refresh Bookings from MongoDB
+  const refreshBookings = async () => {
+    try {
+      const [machRes, labRes] = await Promise.allSettled([
+        api.getMachineryBookings(),
+        api.getLabourBookings(),
+      ]);
+
+      if (machRes.status === "fulfilled" && Array.isArray(machRes.value)) {
+        setMachineryBookings(machRes.value);
+      }
+      if (labRes.status === "fulfilled" && Array.isArray(labRes.value)) {
+        setLabourBookings(labRes.value);
+      }
+    } catch (err) {
+      console.warn("[AppContext] Failed to refresh bookings from API:", err);
+    }
+  };
+
+  useEffect(() => {
+    refreshBookings();
+  }, []);
+
   const addMachineryBooking = (booking: Omit<MachineryBookingRequest, "id" | "status" | "createdAt">) => {
     const newBooking: MachineryBookingRequest = {
       ...booking,
       id: `mach-${Date.now()}`,
-      status: "pending",
+      status: "pending_rate",
       createdAt: new Date().toISOString(),
     };
     setMachineryBookings((prev) => [newBooking, ...prev]);
-    api.addMachineryBooking(newBooking);
+    api.addMachineryBooking(newBooking).catch(() => {});
     addNotification(
       "Machinery Booking Request Sent 🚜",
-      `Your booking request for ${booking.machineryType} on ${booking.bookingDate} has been sent to admin for allotment.`,
+      `Your booking request for ${booking.machineryType} on ${booking.bookingDate} has been sent to admin for rate quote.`,
       "info",
       "/machinery-booking",
       "machinery"
     );
   };
 
-  const allotMachineryBooking = (id: string, machineDetails: string, notes?: string) => {
-    const target = machineryBookings.find(m => m.id === id);
+  // Step 1: Admin quotes rate for Machinery
+  const quoteMachineryRate = async (id: string, rateQuote: string, rateQuoteAmount?: number, notes?: string) => {
     setMachineryBookings((prev) =>
       prev.map((item) =>
         item.id === id
-          ? { ...item, status: "allotted", allottedMachineDetails: machineDetails, adminNotes: notes }
+          ? { ...item, status: "rate_quoted", rateQuote, rateQuoteAmount: Number(rateQuoteAmount) || 0, rateNotes: notes || "" }
           : item
       )
     );
-    api.allotMachinery(id, machineDetails, notes);
-    addNotification(
-      "Machinery Allotted! 🚜",
-      `Your requested machine (${target?.machineryType || "Machinery"}) has been allotted by Admin: ${machineDetails}.`,
-      "success",
-      "/machinery-booking",
-      "machinery"
+    await api.quoteMachineryRate(id, rateQuote, rateQuoteAmount, notes).catch(() => {});
+    refreshBookings();
+    refreshNotifications();
+  };
+
+  // Step 2: User responds (Accept or Cancel) for Machinery
+  const respondMachineryBooking = async (id: string, response: "accepted" | "cancelled") => {
+    const newStatus = response === "accepted" ? "rate_accepted" : "cancelled";
+    setMachineryBookings((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, status: newStatus, userResponse: response, userResponseAt: new Date().toISOString() }
+          : item
+      )
     );
+    await api.respondMachineryRate(id, response).catch(() => {});
+    if (response === "accepted") {
+      toast.success("Rate accepted! Admin will now allot machinery resources.");
+    } else {
+      toast.info("Booking cancelled.");
+    }
+    refreshBookings();
+  };
+
+  // Step 3: Admin allots resources for Machinery
+  const allotMachineryBookingWithResources = async (
+    id: string,
+    data: { machineName?: string; numberPlate?: string; operatorName?: string; operatorPhone?: string; detailsText?: string; adminNotes?: string }
+  ) => {
+    const detailsSummary = data.detailsText ||
+      `Machine: ${data.machineName || ""}${data.numberPlate ? ` (${data.numberPlate})` : ""} | Operator: ${data.operatorName || ""} (${data.operatorPhone || ""})`;
+
+    setMachineryBookings((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              status: "allotted",
+              allottedMachine: data,
+              allottedMachineDetails: detailsSummary,
+              adminNotes: data.adminNotes || "",
+            }
+          : item
+      )
+    );
+    await api.allotMachineryResources(id, data).catch(() => {});
+    refreshBookings();
+    refreshNotifications();
+  };
+
+  const allotMachineryBooking = (id: string, machineDetails: string, notes?: string) => {
+    allotMachineryBookingWithResources(id, { detailsText: machineDetails, adminNotes: notes });
   };
 
   const rejectMachineryBooking = (id: string) => {
@@ -964,7 +1097,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMachineryBookings((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status: "rejected" } : item))
     );
-    api.rejectMachinery(id);
+    api.rejectMachinery(id).catch(() => {});
     addNotification(
       "Machinery Request Declined ❌",
       `Your booking request for ${target?.machineryType || "Machinery"} could not be fulfilled at this time.`,
@@ -986,60 +1119,102 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addLabourType = (type: string) => {
     if (!type.trim() || labourTypes.includes(type)) return;
     setLabourTypes((prev) => [...prev, type.trim()]);
-    api.addLabourType(type.trim());
+    api.addLabourType(type.trim()).catch(() => {});
   };
 
   const removeLabourType = (type: string) => {
     setLabourTypes((prev) => prev.filter((t) => t !== type));
-    api.removeLabourType(type);
+    api.removeLabourType(type).catch(() => {});
   };
-
-  const [labourBookings, setLabourBookings] = useState<LabourBookingRequest[]>(() => {
-    return safeJsonParse("krivexo_labour_bookings", []);
-  });
-
-  useEffect(() => {
-    localStorage.setItem("krivexo_labour_bookings", JSON.stringify(labourBookings));
-  }, [labourBookings]);
 
   const addLabourBooking = (booking: Omit<LabourBookingRequest, "id" | "status" | "createdAt">) => {
     const newBooking: LabourBookingRequest = {
       ...booking,
       id: `labour-req-${Date.now()}`,
-      status: "pending",
+      status: "pending_rate",
       createdAt: new Date().toISOString(),
     };
     setLabourBookings((prev) => [newBooking, ...prev]);
-    api.addLabourBooking(newBooking);
+    api.addLabourBooking(newBooking).catch(() => {});
     addNotification(
       "Labour Booking Request Sent 👷",
-      `Your request for ${booking.count} ${booking.labourType}(s) starting ${booking.startDate} has been submitted.`,
+      `Your request for ${booking.count} ${booking.labourType}(s) starting ${booking.startDate} has been submitted for rate quote.`,
       "info",
       "/labour-booking",
       "labour"
     );
   };
 
-  const assignLaboursToBooking = (
-    id: string,
-    assigned: Array<{ name: string; phone: string; charges: string }>,
-    notes?: string
-  ) => {
+  // Step 1: Admin quotes rate for Labour
+  const quoteLabourRate = async (id: string, rateQuote: string, rateQuoteAmount?: number, notes?: string) => {
     setLabourBookings((prev) =>
       prev.map((item) =>
         item.id === id
-          ? { ...item, status: "assigned", assignedLabours: assigned, adminNotes: notes }
+          ? { ...item, status: "rate_quoted", rateQuote, rateQuoteAmount: Number(rateQuoteAmount) || 0, rateNotes: notes || "" }
           : item
       )
     );
-    api.assignLabours(id, assigned, notes);
-    addNotification(
-      "Labour Assigned to You! ✅",
-      `${assigned.length} labourer(s) have been assigned to your booking. Check your booking page for details.`,
-      "success",
-      "/labour-booking",
-      "labour"
+    await api.quoteLabourRate(id, rateQuote, rateQuoteAmount, notes).catch(() => {});
+    refreshBookings();
+    refreshNotifications();
+  };
+
+  // Step 2: User responds (Accept or Cancel) for Labour
+  const respondLabourBooking = async (id: string, response: "accepted" | "cancelled") => {
+    const newStatus = response === "accepted" ? "rate_accepted" : "cancelled";
+    setLabourBookings((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, status: newStatus, userResponse: response, userResponseAt: new Date().toISOString() }
+          : item
+      )
     );
+    await api.respondLabourRate(id, response).catch(() => {});
+    if (response === "accepted") {
+      toast.success("Rate accepted! Admin will now allot labour resources.");
+    } else {
+      toast.info("Booking cancelled.");
+    }
+    refreshBookings();
+  };
+
+  // Step 3: Admin allots resources for Labour
+  const allotLabourBookingWithResources = async (
+    id: string,
+    data: { assignedLabours?: any[]; workerNames?: string; leadPhone?: string; adminNotes?: string }
+  ) => {
+    let assigned = data.assignedLabours || [];
+    if (!assigned.length && data.workerNames) {
+      assigned = data.workerNames.split(",").map((name) => ({
+        name: name.trim(),
+        phone: data.leadPhone || "",
+        charges: "",
+      }));
+    }
+
+    setLabourBookings((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              status: "allotted",
+              assignedLabours: assigned,
+              adminNotes: data.adminNotes || "",
+            }
+          : item
+      )
+    );
+    await api.allotLabourResources(id, data).catch(() => {});
+    refreshBookings();
+    refreshNotifications();
+  };
+
+  const assignLaboursToBooking = (
+    id: string,
+    assigned: Array<{ name: string; phone: string; charges?: string }>,
+    notes?: string
+  ) => {
+    allotLabourBookingWithResources(id, { assignedLabours: assigned, adminNotes: notes });
   };
 
   // Expert Advice State
@@ -2097,6 +2272,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         machineryBookings,
         addMachineryBooking,
+        quoteMachineryRate,
+        respondMachineryBooking,
+        allotMachineryBookingWithResources,
         allotMachineryBooking,
         rejectMachineryBooking,
 
@@ -2105,7 +2283,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         removeLabourType,
         labourBookings,
         addLabourBooking,
+        quoteLabourRate,
+        respondLabourBooking,
+        allotLabourBookingWithResources,
         assignLaboursToBooking,
+
+        activeReviewBooking,
+        openRateReviewModal,
+        closeRateReviewModal,
+        refreshBookings,
 
         expertAdviceQueries,
         addExpertQuery,

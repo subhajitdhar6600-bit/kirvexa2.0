@@ -12,7 +12,7 @@ import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
 
 export default function LabourBookingPage() {
-  const { labourTypes, addLabourBooking, labourBookings, checkKccPermission, isKccIssued, setIsKccAppModalOpen, addNotification, user, t } = useApp();
+  const { labourTypes, addLabourBooking, labourBookings, checkKccPermission, isKccIssued, setIsKccAppModalOpen, addNotification, user, t, openRateReviewModal } = useApp();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [numDays, setNumDays] = useState<string>("");
@@ -65,6 +65,7 @@ export default function LabourBookingPage() {
       });
 
       addLabourBooking({
+        userId: user?.id || user?.userId || user?.phone || "",
         userName: form.userName,
         phone: form.phone,
         labourType: form.labourType,
@@ -92,7 +93,11 @@ export default function LabourBookingPage() {
     }, 1000);
   };
 
-  const userBookings = labourBookings.slice(0, 3); // show recent
+  const currentUserId = user?.id || user?.userId || user?.phone || "";
+  const userBookings = labourBookings.filter(b => {
+    if (!currentUserId) return true;
+    return b.userId === currentUserId || b.phone === user?.phone;
+  });
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -221,37 +226,111 @@ export default function LabourBookingPage() {
           )}
         </div>
 
-        {/* Assigned Labour Notifications */}
+        {/* Labour Bookings & Allotments */}
         <div className="bg-[#111] border border-white/10 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <Bell className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-bold">{t.labourBooking.assignedTitle}</h2>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-bold">My Labour Bookings & Allotments</h2>
+            </div>
+            <span className="text-xs text-gray-500">{userBookings.length} total</span>
           </div>
-          {userBookings.filter(b => b.status === "assigned").length === 0 ? (
+          {userBookings.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Bell className="h-10 w-10 mx-auto mb-3 opacity-20" />
               <p className="text-sm">{t.labourBooking.noAssigned}</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {userBookings.filter(b => b.status === "assigned").map(b => (
-                <div key={b.id} className="bg-white/5 border border-primary/20 rounded-xl p-4">
+              {userBookings.map(b => (
+                <div key={b.id} className="bg-white/5 border border-white/10 hover:border-white/20 transition-all rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-sm">{b.labourType}</p>
-                    <span className="text-xs bg-primary/10 text-primary border border-primary/20 rounded-full px-2 py-0.5">Assigned</span>
+                    <p className="font-semibold text-sm text-white">{b.labourType} Workers</p>
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                      b.status === "assigned" || b.status === "allotted"
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        : b.status === "rate_accepted"
+                        ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                        : b.status === "rate_quoted"
+                        ? "bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse"
+                        : b.status === "cancelled"
+                        ? "bg-red-500/10 text-red-400 border-red-500/20"
+                        : "bg-gray-500/10 text-gray-400 border-gray-500/20"
+                    }`}>
+                      {b.status === "assigned" || b.status === "allotted"
+                        ? "✓ Workers Allotted"
+                        : b.status === "rate_accepted"
+                        ? "Rate Accepted"
+                        : b.status === "rate_quoted"
+                        ? "Rate Quoted"
+                        : b.status === "cancelled"
+                        ? "Cancelled"
+                        : "Pending Rate Quote"}
+                    </span>
                   </div>
-                  <p className="text-xs text-gray-400 mb-3">{b.count} workers · {b.days} days · {b.location}</p>
-                  {b.assignedLabours && b.assignedLabours.map((l, i) => (
-                    <div key={i} className="flex items-center justify-between bg-white/5 rounded-lg p-3 mb-2">
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-300 bg-black/20 p-2.5 rounded-lg mb-3">
+                    <div><span className="text-gray-500">Count:</span> {b.count} Workers</div>
+                    <div><span className="text-gray-500">Duration:</span> {b.days} Days</div>
+                    <div className="col-span-2"><span className="text-gray-500">Location:</span> {b.location}</div>
+                  </div>
+
+                  {/* If Rate Quoted -> User review action button */}
+                  {b.status === "rate_quoted" && (
+                    <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-3 flex items-center justify-between gap-2 flex-wrap">
                       <div>
-                        <p className="text-sm font-semibold">{l.name}</p>
-                        <p className="text-xs text-gray-400">{l.charges}</p>
+                        <span className="text-[10px] text-amber-400 font-bold block uppercase tracking-wider">Admin Quoted Rate:</span>
+                        <span className="text-base font-black text-amber-300 font-mono">{b.rateQuote || `₹${b.rateQuoteAmount}`}</span>
                       </div>
-                      <a href={`tel:${l.phone}`} className="flex items-center gap-1 text-xs text-primary hover:underline">
-                        <Phone className="h-3 w-3" />{l.phone}
-                      </a>
+                      <Button
+                        onClick={() => openRateReviewModal({
+                          id: b.id,
+                          serviceType: b.labourType,
+                          bookingType: "labour",
+                          userName: b.userName,
+                          phone: b.phone,
+                          date: b.startDate,
+                          duration: `${b.days} Days (${b.count} Workers)`,
+                          location: b.location,
+                          rateQuote: b.rateQuote || `₹${b.rateQuoteAmount}`,
+                          rateQuoteAmount: b.rateQuoteAmount,
+                          rateNotes: b.rateNotes,
+                        })}
+                        className="bg-amber-400 hover:bg-amber-500 text-black font-black text-xs px-3 py-1.5 h-8 rounded-lg cursor-pointer"
+                      >
+                        Review & Respond →
+                      </Button>
                     </div>
-                  ))}
+                  )}
+
+                  {/* If Rate Accepted */}
+                  {b.status === "rate_accepted" && (
+                    <p className="text-[11px] text-emerald-400/90 flex items-center gap-1.5 mb-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                      You accepted the rate ({b.rateQuote}). Admin will assign worker details shortly.
+                    </p>
+                  )}
+
+                  {/* If Allotted/Assigned Workers */}
+                  {(b.status === "assigned" || b.status === "allotted") && b.assignedLabours && b.assignedLabours.length > 0 && (
+                    <div className="space-y-2 mt-2">
+                      <p className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Assigned Labourers:
+                      </p>
+                      {b.assignedLabours.map((l, i) => (
+                        <div key={i} className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-lg p-3">
+                          <div>
+                            <p className="text-sm font-semibold text-white">{l.name}</p>
+                            <p className="text-xs text-gray-400">{l.charges || b.rateQuote}</p>
+                          </div>
+                          {l.phone && (
+                            <a href={`tel:${l.phone}`} className="flex items-center gap-1 text-xs text-primary hover:underline font-bold">
+                              <Phone className="h-3.5 w-3.5" />{l.phone}
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {b.adminNotes && <p className="text-xs text-amber-400 mt-2">Admin note: {b.adminNotes}</p>}
                 </div>
               ))}

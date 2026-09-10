@@ -3,7 +3,7 @@ import {
   Search, Eye, Filter, Download, ChevronLeft, ChevronRight,
   Plus, Calendar, Clock, RotateCcw, MoreHorizontal,
   ArrowRight, Tractor, Users, Stethoscope, FlaskConical,
-  Warehouse, Truck, Pencil, Trash2, X, AlertCircle, CheckCircle2
+  Warehouse, Truck, Pencil, Trash2, X, AlertCircle, CheckCircle2, IndianRupee, Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -20,8 +20,18 @@ export interface BookingRow {
   date: string;
   time: string;
   status: "Confirmed" | "Ongoing" | "Completed" | "Cancelled";
+  bookingStatus?: "pending_rate" | "rate_quoted" | "rate_accepted" | "allotted" | "cancelled" | "pending" | string;
   amount: number;
   rawType?: string;
+  rateQuote?: string;
+  rateQuoteAmount?: number;
+  rateNotes?: string;
+  duration?: string;
+  location?: string;
+  allottedMachine?: any;
+  allottedMachineDetails?: string;
+  assignedLabours?: any[];
+  userResponse?: string;
 }
 
 interface BookingsManagementViewProps {
@@ -60,95 +70,148 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
   const [editStatus, setEditStatus] = useState<"Confirmed" | "Ongoing" | "Completed" | "Cancelled">("Confirmed");
   const [editAmount, setEditAmount] = useState(0);
 
-  const { addNotification } = useApp();
+  const {
+    addNotification,
+    quoteMachineryRate,
+    quoteLabourRate,
+    allotMachineryBookingWithResources,
+    allotLabourBookingWithResources,
+  } = useApp();
 
-  // Review & Allotment Modal State (Point 6)
-  const [allottingBooking, setAllottingBooking] = useState<BookingRow | null>(null);
-  const [isAllotOpen, setIsAllotOpen] = useState(false);
-  const [allotNotes, setAllotNotes] = useState("");
+  // Rate Allotment Modal State (Step 1)
+  const [rateBooking, setRateBooking] = useState<BookingRow | null>(null);
+  const [isRateOpen, setIsRateOpen] = useState(false);
+  const [rateQuoteInput, setRateQuoteInput] = useState("");
+  const [rateQuoteAmountInput, setRateQuoteAmountInput] = useState<number>(0);
+  const [rateNotesInput, setRateNotesInput] = useState("");
 
-  // Labour allotment fields
-  const [workerNames, setWorkerNames] = useState("");
-  const [leadWorkerPhone, setLeadWorkerPhone] = useState("");
-  const [labourDailyRate, setLabourDailyRate] = useState("₹450 / day");
+  // Resource Allotment Modal State (Step 2: after User Accepts)
+  const [resourceBooking, setResourceBooking] = useState<BookingRow | null>(null);
+  const [isResourceOpen, setIsResourceOpen] = useState(false);
+  const [resWorkerNames, setResWorkerNames] = useState("");
+  const [resLeadPhone, setResLeadPhone] = useState("");
+  const [resMachineName, setResMachineName] = useState("");
+  const [resNumberPlate, setResNumberPlate] = useState("");
+  const [resOperatorName, setResOperatorName] = useState("");
+  const [resOperatorPhone, setResOperatorPhone] = useState("");
+  const [resNotes, setResNotes] = useState("");
 
-  // Machine allotment fields
-  const [machineRegNo, setMachineRegNo] = useState("");
-  const [operatorName, setOperatorName] = useState("");
-  const [operatorPhone, setOperatorPhone] = useState("");
-  const [hourlyRate, setHourlyRate] = useState("₹350 / hr");
+  // Details View Modal State
+  const [detailsBooking, setDetailsBooking] = useState<BookingRow | null>(null);
 
-  // Soil / Doctor allotment fields
-  const [technicianName, setTechnicianName] = useState("");
-  const [technicianPhone, setTechnicianPhone] = useState("");
-  const [visitSchedule, setVisitSchedule] = useState("");
-  const [testLabRemarks, setTestLabRemarks] = useState("");
-
-  const handleOpenAllot = (b: BookingRow) => {
-    setAllottingBooking(b);
-    setAllotNotes("");
-    const typeLower = (b.rawType || b.serviceType || "").toLowerCase();
-    if (typeLower.includes("labour")) {
-      setWorkerNames("Ramesh Yadav, Mukesh Kumar, Sunita Devi");
-      setLeadWorkerPhone(b.phone || "9876543210");
-      setLabourDailyRate("₹450 / day per worker");
-    } else if (typeLower.includes("machin") || typeLower.includes("tractor")) {
-      setMachineRegNo("BR-01-AX-4892");
-      setOperatorName("Vikram Singh (Certified Operator)");
-      setOperatorPhone("9812345678");
-      setHourlyRate("₹350 / hr (Fuel included)");
+  // Open Rate Allotment Modal
+  const handleOpenRateModal = (b: BookingRow) => {
+    setRateBooking(b);
+    const isMach = (b.rawType || "").includes("machin") || b.serviceType.toLowerCase().includes("tractor");
+    if (isMach) {
+      setRateQuoteInput(b.rateQuote || "₹400 / hour (Driver & Fuel included)");
+      setRateQuoteAmountInput(b.rateQuoteAmount || b.amount || 1600);
     } else {
-      setTechnicianName("Dr. R. K. Sharma (Senior Soil Analyst)");
-      setTechnicianPhone("9431012345");
-      setVisitSchedule("Tomorrow at 10:30 AM");
-      setTestLabRemarks("Soil sample collection kit dispatched.");
+      setRateQuoteInput(b.rateQuote || "₹450 / day per worker");
+      setRateQuoteAmountInput(b.rateQuoteAmount || b.amount || 1350);
     }
-    setIsAllotOpen(true);
+    setRateNotesInput(b.rateNotes || "Standard day shift terms applicable.");
+    setIsRateOpen(true);
   };
 
-  const handleConfirmAllotment = async (e: React.FormEvent) => {
+  // Submit Rate Quote to Customer
+  const handleSubmitRate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!allottingBooking) return;
+    if (!rateBooking) return;
     setIsSubmitting(true);
-
-    const typeLower = (allottingBooking.rawType || allottingBooking.serviceType || "").toLowerCase();
-    let allotmentSummary = "";
-
     try {
-      if (typeLower.includes("labour")) {
-        const assigned = workerNames.split(",").map(w => ({
-          name: w.trim(),
-          phone: leadWorkerPhone,
-          charges: labourDailyRate,
-        }));
-        await api.assignLabours(allottingBooking.id, assigned, allotNotes).catch(() => {});
-        allotmentSummary = `Workers: ${workerNames} | Lead Phone: ${leadWorkerPhone} | Rate: ${labourDailyRate}`;
-      } else if (typeLower.includes("machin") || typeLower.includes("tractor")) {
-        const details = `Machine Reg: ${machineRegNo} | Operator: ${operatorName} (${operatorPhone}) | Rate: ${hourlyRate}`;
-        await api.allotMachinery(allottingBooking.id, details, allotNotes).catch(() => {});
-        allotmentSummary = details;
+      const isMach = (rateBooking.rawType || "").includes("machin") || rateBooking.serviceType.toLowerCase().includes("tractor");
+      if (isMach) {
+        await quoteMachineryRate(rateBooking.id, rateQuoteInput, rateQuoteAmountInput, rateNotesInput);
       } else {
-        const reply = `Assigned Technician: ${technicianName} (${technicianPhone}) | Visit: ${visitSchedule} | Remarks: ${testLabRemarks}`;
-        await api.updateExpertQuery(allottingBooking.id, "resolved", reply).catch(() => {});
-        allotmentSummary = reply;
+        await quoteLabourRate(rateBooking.id, rateQuoteInput, rateQuoteAmountInput, rateNotesInput);
       }
 
-      // Send in-app notification to the customer
-      addNotification(
-        `Service Allotted! (#${allottingBooking.id})`,
-        `Your ${allottingBooking.serviceType} booking has been confirmed with allotted details: ${allotmentSummary}`,
-        "success",
-        "/services",
-        "services"
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === rateBooking.id
+            ? {
+                ...b,
+                bookingStatus: "rate_quoted",
+                status: "Ongoing",
+                rateQuote: rateQuoteInput,
+                rateQuoteAmount: rateQuoteAmountInput,
+                rateNotes: rateNotesInput,
+                amount: rateQuoteAmountInput || b.amount,
+              }
+            : b
+        )
       );
 
-      // Update in table
-      setBookings(prev => prev.map(item => item.id === allottingBooking.id ? { ...item, status: "Confirmed" } : item));
-      toast.success(`Service allotted for #${allottingBooking.id}! Customer notified.`);
-      setIsAllotOpen(false);
-      setAllottingBooking(null);
+      toast.success(`Rate quoted for #${rateBooking.id}! Customer has been notified in their profile.`);
+      setIsRateOpen(false);
+      setRateBooking(null);
     } catch (err: any) {
-      toast.error("Failed to update allotment: " + (err?.message || "Unknown error"));
+      toast.error("Failed to quote rate: " + (err?.message || "Unknown error"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Open Resource Allotment Modal (when status is rate_accepted)
+  const handleOpenResourceModal = (b: BookingRow) => {
+    setResourceBooking(b);
+    const isMach = (b.rawType || "").includes("machin") || b.serviceType.toLowerCase().includes("tractor");
+    if (isMach) {
+      setResMachineName(b.allottedMachine?.machineName || "Mahindra 575 DI (45 HP)");
+      setResNumberPlate(b.allottedMachine?.numberPlate || "BR-01-AX-4892");
+      setResOperatorName(b.allottedMachine?.operatorName || "Vikram Singh (Certified Operator)");
+      setResOperatorPhone(b.allottedMachine?.operatorPhone || b.phone || "9812345678");
+    } else {
+      setResWorkerNames(b.assignedLabours?.map(l => l.name).join(", ") || "Ramesh Yadav, Mukesh Kumar, Sunita Devi");
+      setResLeadPhone(b.assignedLabours?.[0]?.phone || b.phone || "9876543210");
+    }
+    setResNotes("");
+    setIsResourceOpen(true);
+  };
+
+  // Submit Resource Allotment
+  const handleSubmitResources = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resourceBooking) return;
+    setIsSubmitting(true);
+    try {
+      const isMach = (resourceBooking.rawType || "").includes("machin") || resourceBooking.serviceType.toLowerCase().includes("tractor");
+      if (isMach) {
+        await allotMachineryBookingWithResources(resourceBooking.id, {
+          machineName: resMachineName,
+          numberPlate: resNumberPlate,
+          operatorName: resOperatorName,
+          operatorPhone: resOperatorPhone,
+          detailsText: `Machine: ${resMachineName} (${resNumberPlate}) | Operator: ${resOperatorName} (${resOperatorPhone})`,
+          adminNotes: resNotes,
+        });
+      } else {
+        await allotLabourBookingWithResources(resourceBooking.id, {
+          workerNames: resWorkerNames,
+          leadPhone: resLeadPhone,
+          adminNotes: resNotes,
+        });
+      }
+
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === resourceBooking.id
+            ? {
+                ...b,
+                bookingStatus: "allotted",
+                status: "Confirmed",
+                allottedMachineDetails: `Machine: ${resMachineName} (${resNumberPlate}) | Operator: ${resOperatorName} (${resOperatorPhone})`,
+              }
+            : b
+        )
+      );
+
+      toast.success(`Resources allotted for #${resourceBooking.id}! Final confirmation sent to customer.`);
+      setIsResourceOpen(false);
+      setResourceBooking(null);
+    } catch (err: any) {
+      toast.error("Failed to allot resources: " + (err?.message || "Unknown error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -178,17 +241,26 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
       // 1. Labour Bookings
       if (labourRes.status === "fulfilled" && Array.isArray(labourRes.value)) {
         labourRes.value.forEach((l: any, idx: number) => {
+          const bStatus = l.status || "pending_rate";
           combined.push({
             id: l.id || `LAB${100 + idx}`,
-            serviceType: "Labour Booking",
+            serviceType: l.labourType ? `${l.labourType} Booking` : "Labour Booking",
             icon: "👥",
             customer: l.userName || "Farmer Customer",
             phone: l.phone || "—",
             date: l.startDate || (l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "Today"),
             time: "09:00 AM",
-            status: l.status === "assigned" || l.status === "completed" ? "Confirmed" : l.status === "pending" ? "Ongoing" : "Confirmed",
-            amount: (Number(l.count) || 1) * 450,
+            status: bStatus === "allotted" || bStatus === "assigned" || bStatus === "completed" ? "Confirmed" : bStatus === "cancelled" ? "Cancelled" : "Ongoing",
+            bookingStatus: bStatus,
+            amount: l.rateQuoteAmount || (Number(l.count) || 1) * (Number(l.days) || 1) * 450,
             rawType: "labour",
+            rateQuote: l.rateQuote || "",
+            rateQuoteAmount: l.rateQuoteAmount || 0,
+            rateNotes: l.rateNotes || "",
+            duration: `${l.days || 1} Day(s), ${l.count || 1} Worker(s)`,
+            location: l.location || "",
+            assignedLabours: l.assignedLabours || [],
+            userResponse: l.userResponse || "",
           });
         });
       }
@@ -196,6 +268,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
       // 2. Machinery Bookings
       if (machineryRes.status === "fulfilled" && Array.isArray(machineryRes.value)) {
         machineryRes.value.forEach((m: any, idx: number) => {
+          const bStatus = m.status || "pending_rate";
           combined.push({
             id: m.id || `MAC${100 + idx}`,
             serviceType: m.machineryType || "Tractor Booking",
@@ -204,9 +277,18 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
             phone: m.phone || "—",
             date: m.bookingDate || (m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "Today"),
             time: "10:30 AM",
-            status: m.status === "allotted" ? "Confirmed" : m.status === "rejected" ? "Cancelled" : "Ongoing",
-            amount: (Number(m.durationHours) || 1) * 350,
+            status: bStatus === "allotted" || bStatus === "completed" ? "Confirmed" : (bStatus === "rejected" || bStatus === "cancelled") ? "Cancelled" : "Ongoing",
+            bookingStatus: bStatus,
+            amount: m.rateQuoteAmount || (Number(m.durationHours) || 1) * 350,
             rawType: "machinery",
+            rateQuote: m.rateQuote || "",
+            rateQuoteAmount: m.rateQuoteAmount || 0,
+            rateNotes: m.rateNotes || "",
+            duration: `${m.durationHours || 4} Hour(s)`,
+            location: m.location || "",
+            allottedMachine: m.allottedMachine || null,
+            allottedMachineDetails: m.allottedMachineDetails || "",
+            userResponse: m.userResponse || "",
           });
         });
       }
@@ -260,11 +342,41 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
     return matchSearch && matchTab && matchService && matchStatus;
   });
 
-  const getStatusBadge = (s: string) => {
-    if (s === "Confirmed") return <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">Confirmed</span>;
-    if (s === "Ongoing") return <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">Ongoing</span>;
-    if (s === "Completed") return <span className="px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">Completed</span>;
-    return <span className="px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold">Cancelled</span>;
+  const getStatusBadge = (b: BookingRow) => {
+    const s = String(b.bookingStatus || b.status);
+    if (s === "pending_rate" || s === "pending") {
+      return (
+        <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">
+          Pending Rate
+        </span>
+      );
+    }
+    if (s === "rate_quoted") {
+      return (
+        <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold">
+          Rate Quoted
+        </span>
+      );
+    }
+    if (s === "rate_accepted") {
+      return (
+        <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 text-[10px] font-bold animate-pulse">
+          ✓ Rate Accepted
+        </span>
+      );
+    }
+    if (s === "allotted" || s === "assigned" || s === "Confirmed" || s === "completed" || s === "Completed") {
+      return (
+        <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-bold">
+          ✓ Allotted
+        </span>
+      );
+    }
+    return (
+      <span className="px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold">
+        Cancelled
+      </span>
+    );
   };
 
   // Create Booking Submission
@@ -595,18 +707,48 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                     <td className="py-3.5 px-4 font-semibold text-gray-800">{b.customer}</td>
                     <td className="py-3.5 px-4 text-gray-600">{b.phone}</td>
                     <td className="py-3.5 px-4 text-gray-500">{b.date}</td>
-                    <td className="py-3.5 px-4">{getStatusBadge(b.status)}</td>
+                    <td className="py-3.5 px-4">{getStatusBadge(b)}</td>
                     <td className="py-3.5 px-4 font-bold text-gray-900">₹ {b.amount.toLocaleString("en-IN")}</td>
                     <td className="py-3.5 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1.5">
-                        {/* View & Allot */}
+                      <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                        {/* Step 1: Allot Rate button when pending */}
+                        {(b.bookingStatus === "pending_rate" || b.bookingStatus === "pending") && (b.rawType === "machinery" || b.rawType === "labour") && (
+                          <button
+                            onClick={() => handleOpenRateModal(b)}
+                            title="Allot Rate & Charges"
+                            className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-bold text-[11px] flex items-center gap-1 shadow-xs cursor-pointer transition-all"
+                          >
+                            <IndianRupee className="h-3 w-3" /> Allot Rate
+                          </button>
+                        )}
+
+                        {/* Step 2: Allot Resources button when rate accepted */}
+                        {b.bookingStatus === "rate_accepted" && (
+                          <button
+                            onClick={() => handleOpenResourceModal(b)}
+                            title="Allot Resources (Machine / Labour details)"
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs animate-pulse cursor-pointer transition-all"
+                          >
+                            {b.rawType === "labour" ? <Users className="h-3 w-3" /> : <Tractor className="h-3 w-3" />} Allot Resources
+                          </button>
+                        )}
+
+                        {/* If Rate Quoted */}
+                        {b.bookingStatus === "rate_quoted" && (
+                          <span className="text-[10px] text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full font-medium">
+                            Awaiting User
+                          </span>
+                        )}
+
+                        {/* View Details */}
                         <button
-                          onClick={() => handleOpenAllot(b)}
-                          title="Review & Allot Service"
-                          className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 flex items-center justify-center transition-colors cursor-pointer"
+                          onClick={() => setDetailsBooking(b)}
+                          title="View Full Booking Details"
+                          className="w-7 h-7 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 flex items-center justify-center transition-colors cursor-pointer"
                         >
                           <Eye className="h-3.5 w-3.5" />
                         </button>
+
                         {/* Edit */}
                         <button
                           onClick={() => handleOpenEdit(b)}
@@ -615,6 +757,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
+
                         {/* Delete */}
                         <button
                           onClick={() => setDeletingBookingId(b.id)}
@@ -773,211 +916,92 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
         </div>
       )}
 
-      {/* ─── REVIEW & ALLOT SERVICE MODAL (Point 6) ─── */}
-      {isAllotOpen && allottingBooking && (
+      {/* ─── MODAL 1: STEP 1 - ALLOT RATE & CHARGES MODAL ─── */}
+      {isRateOpen && rateBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white border border-gray-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white border border-gray-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 relative">
             <button
-              onClick={() => { setIsAllotOpen(false); setAllottingBooking(null); }}
+              onClick={() => { setIsRateOpen(false); setRateBooking(null); }}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1.5 rounded-full bg-gray-100 cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
 
             <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 text-xl font-bold shrink-0">
-                {allottingBooking.icon || "🚜"}
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 text-xl font-bold shrink-0">
+                <IndianRupee className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-gray-900">Review & Allot Service Details</h3>
-                <p className="text-xs text-gray-500">Booking #{allottingBooking.id} • {allottingBooking.serviceType}</p>
+                <h3 className="text-base font-bold text-gray-900">Step 1: Allot Rate & Booking Charges</h3>
+                <p className="text-xs text-gray-500">Booking #{rateBooking.id} • {rateBooking.serviceType}</p>
               </div>
             </div>
 
-            {/* Customer & Booking Summary */}
-            <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3.5 space-y-1.5 text-xs">
+            {/* Request Summary */}
+            <div className="bg-amber-50/50 border border-amber-200/60 rounded-2xl p-3.5 space-y-1.5 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-gray-500">Customer Name:</span>
-                <span className="font-bold text-gray-900">{allottingBooking.customer}</span>
+                <span className="font-bold text-gray-900">{rateBooking.customer} ({rateBooking.phone})</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Contact Phone:</span>
-                <span className="font-semibold text-gray-800">{allottingBooking.phone}</span>
+                <span className="text-gray-500">Requested Service:</span>
+                <span className="font-semibold text-gray-800">{rateBooking.serviceType}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Scheduled Date:</span>
-                <span className="font-semibold text-gray-800">{allottingBooking.date}</span>
+                <span className="text-gray-500">Scheduled Date & Time:</span>
+                <span className="font-semibold text-gray-800">{rateBooking.date} • {rateBooking.duration || "Standard"}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Booking Amount:</span>
-                <span className="font-bold text-emerald-700">₹ {allottingBooking.amount.toLocaleString("en-IN")}</span>
+                <span className="text-gray-500">Location:</span>
+                <span className="font-medium text-gray-800">{rateBooking.location || "On site"}</span>
               </div>
             </div>
 
-            <form onSubmit={handleConfirmAllotment} className="space-y-3.5 text-xs">
-              {/* If Labour Booking */}
-              {(allottingBooking.rawType === "labour" || allottingBooking.serviceType.toLowerCase().includes("labour")) && (
-                <>
-                  <div className="p-2.5 bg-blue-50/50 border border-blue-100 rounded-xl">
-                    <p className="text-[11px] font-bold text-blue-900 mb-1">Labour Team Allotment</p>
-                    <p className="text-[10px] text-gray-500">Assign verified workers, rates, and supervisor phone</p>
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-1">Assigned Worker Names (Comma separated) *</label>
-                    <Input
-                      value={workerNames}
-                      onChange={e => setWorkerNames(e.target.value)}
-                      placeholder="e.g. Ramesh Yadav, Sunita Devi, Mukesh Kumar"
-                      className="text-xs bg-gray-50 rounded-xl"
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block font-semibold text-gray-700 mb-1">Lead Supervisor Phone *</label>
-                      <Input
-                        value={leadWorkerPhone}
-                        onChange={e => setLeadWorkerPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                        maxLength={10}
-                        placeholder="10-digit mobile"
-                        className="text-xs bg-gray-50 rounded-xl"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-semibold text-gray-700 mb-1">Agreed Daily Wage Rate *</label>
-                      <Input
-                        value={labourDailyRate}
-                        onChange={e => setLabourDailyRate(e.target.value)}
-                        placeholder="e.g. ₹450 / day per worker"
-                        className="text-xs bg-gray-50 rounded-xl"
-                        required
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* If Machinery Booking */}
-              {(allottingBooking.rawType === "machinery" || allottingBooking.serviceType.toLowerCase().includes("tractor") || allottingBooking.serviceType.toLowerCase().includes("machine")) && (
-                <>
-                  <div className="p-2.5 bg-amber-50/50 border border-amber-100 rounded-xl">
-                    <p className="text-[11px] font-bold text-amber-900 mb-1">Machinery Fleet Allotment</p>
-                    <p className="text-[10px] text-gray-500">Assign machine registration plate, driver details and hourly terms</p>
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-1">Machine Registration Number *</label>
-                    <Input
-                      value={machineRegNo}
-                      onChange={e => setMachineRegNo(e.target.value.toUpperCase())}
-                      placeholder="e.g. BR-01-AX-4892"
-                      className="text-xs font-mono font-bold bg-gray-50 rounded-xl"
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block font-semibold text-gray-700 mb-1">Operator Name *</label>
-                      <Input
-                        value={operatorName}
-                        onChange={e => setOperatorName(e.target.value)}
-                        placeholder="e.g. Vikram Singh"
-                        className="text-xs bg-gray-50 rounded-xl"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-semibold text-gray-700 mb-1">Operator Phone *</label>
-                      <Input
-                        value={operatorPhone}
-                        onChange={e => setOperatorPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                        maxLength={10}
-                        placeholder="10-digit phone"
-                        className="text-xs bg-gray-50 rounded-xl"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-1">Hourly Rate & Fuel Terms *</label>
-                    <Input
-                      value={hourlyRate}
-                      onChange={e => setHourlyRate(e.target.value)}
-                      placeholder="e.g. ₹350 / hour (with fuel and driver)"
-                      className="text-xs bg-gray-50 rounded-xl"
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* If Soil / Doctor / Other Booking */}
-              {allottingBooking.rawType !== "labour" && allottingBooking.rawType !== "machinery" && !allottingBooking.serviceType.toLowerCase().includes("labour") && !allottingBooking.serviceType.toLowerCase().includes("tractor") && (
-                <>
-                  <div className="p-2.5 bg-purple-50/50 border border-purple-100 rounded-xl">
-                    <p className="text-[11px] font-bold text-purple-900 mb-1">Specialist & Soil Technician Allotment</p>
-                    <p className="text-[10px] text-gray-500">Assign authorized field agronomist or technician for visit</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block font-semibold text-gray-700 mb-1">Technician / Specialist *</label>
-                      <Input
-                        value={technicianName}
-                        onChange={e => setTechnicianName(e.target.value)}
-                        placeholder="e.g. Dr. R. K. Sharma"
-                        className="text-xs bg-gray-50 rounded-xl"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-semibold text-gray-700 mb-1">Technician Contact *</label>
-                      <Input
-                        value={technicianPhone}
-                        onChange={e => setTechnicianPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                        maxLength={10}
-                        placeholder="10-digit phone"
-                        className="text-xs bg-gray-50 rounded-xl"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-1">Field Visit Schedule *</label>
-                    <Input
-                      value={visitSchedule}
-                      onChange={e => setVisitSchedule(e.target.value)}
-                      placeholder="e.g. Tomorrow at 10:30 AM"
-                      className="text-xs bg-gray-50 rounded-xl"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-gray-700 mb-1">Kit / Report Remarks</label>
-                    <Input
-                      value={testLabRemarks}
-                      onChange={e => setTestLabRemarks(e.target.value)}
-                      placeholder="e.g. Soil sampling kit dispatched. Lab testing turnaround 24 hrs."
-                      className="text-xs bg-gray-50 rounded-xl"
-                    />
-                  </div>
-                </>
-              )}
+            <form onSubmit={handleSubmitRate} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">
+                  Rate / Price Quote Terms (Visible to user) <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  value={rateQuoteInput}
+                  onChange={(e) => setRateQuoteInput(e.target.value)}
+                  placeholder="e.g. ₹400 / hr (Fuel and driver included)"
+                  className="text-xs bg-gray-50 rounded-xl font-medium"
+                  required
+                />
+              </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1">Admin Notes & Instructions</label>
+                <label className="block font-semibold text-gray-700 mb-1">Total Estimated / Payable Amount (₹) <span className="text-red-500">*</span></label>
                 <Input
-                  value={allotNotes}
-                  onChange={e => setAllotNotes(e.target.value)}
-                  placeholder="e.g. Call farmer 30 mins before arrival at village site"
+                  type="number"
+                  value={rateQuoteAmountInput || ""}
+                  onChange={(e) => setRateQuoteAmountInput(Number(e.target.value))}
+                  placeholder="e.g. 1600"
+                  className="text-xs bg-gray-50 rounded-xl font-bold text-gray-900"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Admin Notes / Remarks for Farmer</label>
+                <Input
+                  value={rateNotesInput}
+                  onChange={(e) => setRateNotesInput(e.target.value)}
+                  placeholder="e.g. Standard day shift. Please keep field clear."
                   className="text-xs bg-gray-50 rounded-xl"
                 />
+              </div>
+
+              <div className="p-2.5 bg-blue-50 border border-blue-100 rounded-xl text-[11px] text-blue-800">
+                ℹ️ Once submitted, this rate quote will be directly sent to <strong>{rateBooking.customer}</strong>'s profile as a notification. The user will be given <strong>Accept</strong> or <strong>Cancel</strong> options.
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
                 <Button
                   type="button"
                   variant="ghost"
-                  onClick={() => { setIsAllotOpen(false); setAllottingBooking(null); }}
+                  onClick={() => { setIsRateOpen(false); setRateBooking(null); }}
                   className="text-xs text-gray-600 cursor-pointer"
                 >
                   Cancel
@@ -985,12 +1009,260 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2 rounded-xl cursor-pointer"
+                  className="bg-amber-500 hover:bg-amber-600 text-black text-xs font-black px-5 py-2.5 rounded-xl cursor-pointer shadow-md"
                 >
-                  {isSubmitting ? "Allotting..." : "Confirm Allotment & Notify Customer"}
+                  {isSubmitting ? "Submitting Quote..." : "Submit Rate & Notify User →"}
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 2: STEP 2 - ALLOT RESOURCES MODAL (After User Accepts) ─── */}
+      {isResourceOpen && resourceBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white border border-gray-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 relative">
+            <button
+              onClick={() => { setIsResourceOpen(false); setResourceBooking(null); }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1.5 rounded-full bg-gray-100 cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 text-xl font-bold shrink-0">
+                {resourceBooking.rawType === "labour" ? <Users className="h-6 w-6" /> : <Tractor className="h-6 w-6" />}
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Step 2: Allot Resources</h3>
+                <p className="text-xs text-gray-500">Booking #{resourceBooking.id} • Rate Accepted by {resourceBooking.customer}</p>
+              </div>
+            </div>
+
+            {/* Accepted Rate Banner */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 text-xs flex items-center justify-between">
+              <div>
+                <span className="text-gray-500 block text-[11px]">Agreed & Accepted Rate:</span>
+                <span className="font-bold text-emerald-800 text-sm">{resourceBooking.rateQuote || `₹${resourceBooking.amount}`}</span>
+              </div>
+              <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-[10px] font-black border border-emerald-300">
+                ✓ User Accepted
+              </span>
+            </div>
+
+            <form onSubmit={handleSubmitResources} className="space-y-3.5 text-xs">
+              {/* If Labour Booking */}
+              {resourceBooking.rawType === "labour" ? (
+                <>
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-1">
+                      Labour / Worker Names (Comma-separated) <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      value={resWorkerNames}
+                      onChange={(e) => setResWorkerNames(e.target.value)}
+                      placeholder="e.g. Ramesh Yadav, Mukesh Kumar, Sunita Devi"
+                      className="text-xs bg-gray-50 rounded-xl"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-gray-700 mb-1">
+                      Lead Worker / Supervisor Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      value={resLeadPhone}
+                      onChange={(e) => setResLeadPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      maxLength={10}
+                      placeholder="10-digit mobile number"
+                      className="text-xs bg-gray-50 rounded-xl"
+                      required
+                    />
+                  </div>
+                </>
+              ) : (
+                /* Machinery Booking */
+                <>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">
+                        Machine Name / Model <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        value={resMachineName}
+                        onChange={(e) => setResMachineName(e.target.value)}
+                        placeholder="e.g. John Deere 5050D"
+                        className="text-xs bg-gray-50 rounded-xl"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">
+                        Number Plate / Reg No. <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        value={resNumberPlate}
+                        onChange={(e) => setResNumberPlate(e.target.value.toUpperCase())}
+                        placeholder="e.g. BR-01-AX-4892"
+                        className="text-xs font-mono font-bold bg-gray-50 rounded-xl uppercase"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">
+                        Operator / Driver Name <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        value={resOperatorName}
+                        onChange={(e) => setResOperatorName(e.target.value)}
+                        placeholder="e.g. Vikram Singh"
+                        className="text-xs bg-gray-50 rounded-xl"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-gray-700 mb-1">
+                        Operator Phone Number <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        value={resOperatorPhone}
+                        onChange={(e) => setResOperatorPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                        maxLength={10}
+                        placeholder="10-digit phone"
+                        className="text-xs bg-gray-50 rounded-xl"
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Additional Notes / Instructions</label>
+                <Input
+                  value={resNotes}
+                  onChange={(e) => setResNotes(e.target.value)}
+                  placeholder="e.g. Operator will reach 15 mins before start time"
+                  className="text-xs bg-gray-50 rounded-xl"
+                />
+              </div>
+
+              <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-800">
+                ✅ Submitting this will allot the resources and automatically send the <strong>Final Confirmation Notification</strong> with all details (Time, Duration, Address, Rate, Machine/Labour details) directly to the user profile.
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => { setIsResourceOpen(false); setResourceBooking(null); }}
+                  className="text-xs text-gray-600 cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl cursor-pointer shadow-md"
+                >
+                  {isSubmitting ? "Allotting Resources..." : "Confirm & Send Final Notification →"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 3: VIEW BOOKING DETAILS MODAL ─── */}
+      {detailsBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white border border-gray-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150 relative">
+            <button
+              onClick={() => setDetailsBooking(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1.5 rounded-full bg-gray-100 cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
+              <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-2xl font-bold shrink-0">
+                {detailsBooking.icon}
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-gray-900">{detailsBooking.serviceType}</h3>
+                <p className="text-xs text-gray-500">Booking ID #{detailsBooking.id}</p>
+              </div>
+            </div>
+
+            <div className="space-y-2.5 text-xs text-gray-700">
+              <div className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl">
+                <span className="text-gray-500">Current Status:</span>
+                <div>{getStatusBadge(detailsBooking)}</div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 bg-gray-50 rounded-xl">
+                  <span className="text-gray-400 block text-[10px]">Customer:</span>
+                  <span className="font-bold text-gray-900">{detailsBooking.customer}</span>
+                </div>
+                <div className="p-2.5 bg-gray-50 rounded-xl">
+                  <span className="text-gray-400 block text-[10px]">Phone:</span>
+                  <span className="font-bold text-gray-900">{detailsBooking.phone}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 bg-gray-50 rounded-xl">
+                  <span className="text-gray-400 block text-[10px]">Date:</span>
+                  <span className="font-medium text-gray-800">{detailsBooking.date}</span>
+                </div>
+                <div className="p-2.5 bg-gray-50 rounded-xl">
+                  <span className="text-gray-400 block text-[10px]">Duration / Workers:</span>
+                  <span className="font-medium text-gray-800">{detailsBooking.duration || "N/A"}</span>
+                </div>
+              </div>
+
+              {detailsBooking.location && (
+                <div className="p-2.5 bg-gray-50 rounded-xl">
+                  <span className="text-gray-400 block text-[10px]">Location:</span>
+                  <span className="font-medium text-gray-800">{detailsBooking.location}</span>
+                </div>
+              )}
+
+              {detailsBooking.rateQuote && (
+                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl">
+                  <span className="text-amber-800 font-bold block text-[11px]">Quoted Rate:</span>
+                  <span className="font-bold text-gray-900 text-sm">{detailsBooking.rateQuote}</span>
+                  {detailsBooking.rateNotes && <p className="text-[11px] text-gray-500 mt-0.5 italic">"{detailsBooking.rateNotes}"</p>}
+                </div>
+              )}
+
+              {detailsBooking.allottedMachineDetails && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                  <span className="text-emerald-800 font-bold block text-[11px]">Allotted Resources:</span>
+                  <span className="font-bold text-gray-900">{detailsBooking.allottedMachineDetails}</span>
+                </div>
+              )}
+
+              {detailsBooking.assignedLabours && detailsBooking.assignedLabours.length > 0 && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                  <span className="text-blue-800 font-bold block text-[11px]">Assigned Labours:</span>
+                  <span className="font-bold text-gray-900">
+                    {detailsBooking.assignedLabours.map((l: any) => `${l.name} (${l.phone || "N/A"})`).join(", ")}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-gray-100">
+              <Button onClick={() => setDetailsBooking(null)} className="bg-gray-900 text-white text-xs font-bold px-4 py-2 rounded-xl">
+                Close
+              </Button>
+            </div>
           </div>
         </div>
       )}

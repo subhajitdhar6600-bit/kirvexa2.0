@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   User, Phone, MapPin, Edit3, ShieldAlert, CheckCircle2, Wallet, CreditCard,
   Calendar, TrendingUp, BookOpen, HelpCircle, FileText, LogOut, ArrowLeft,
-  Bell, Upload, Building2, CreditCard as BankIcon, ChevronRight, X, Lock, KeyRound, Clock, Mail
+  Bell, Upload, Building2, CreditCard as BankIcon, ChevronRight, X, Lock, KeyRound, Clock, Mail,
+  Tractor, Users, IndianRupee, AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -17,7 +18,20 @@ import { toast } from "sonner";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { user, updateUserProfile, logoutUser, setIsKccAppModalOpen, notifications, hasAppliedKcc, isKccIssued, kccDetails, kccApplicationStatus } = useApp();
+  const {
+    user,
+    updateUserProfile,
+    logoutUser,
+    setIsKccAppModalOpen,
+    notifications,
+    hasAppliedKcc,
+    isKccIssued,
+    kccDetails,
+    kccApplicationStatus,
+    machineryBookings,
+    labourBookings,
+    openRateReviewModal,
+  } = useApp();
   const isKccApproved = Boolean(isKccIssued || kccApplicationStatus === "approved" || user?.isKccIssued || user?.kccCardNumber);
 
   const unreadNotifs = notifications.filter(n => !n.read).length;
@@ -190,6 +204,71 @@ export default function ProfilePage() {
     navigate("/");
   };
 
+  const cleanPhone = (p?: string) => (p || "").replace(/\D/g, "").slice(-10);
+  const userPhoneClean = cleanPhone(user?.phone);
+
+  const myMachinery = machineryBookings.filter((b) => {
+    if (user?.id && b.userId && b.userId === user.id) return true;
+    if (userPhoneClean && cleanPhone(b.phone) === userPhoneClean) return true;
+    return false;
+  });
+
+  const myLabour = labourBookings.filter((b) => {
+    if (user?.id && b.userId && b.userId === user.id) return true;
+    if (userPhoneClean && cleanPhone(b.phone) === userPhoneClean) return true;
+    return false;
+  });
+
+  const pendingQuotes = [
+    ...myMachinery
+      .filter((b) => b.status === "rate_quoted")
+      .map((b) => ({
+        id: b.id,
+        title: `${b.machineryType} Booking`,
+        rateQuote: b.rateQuote || `₹${b.rateQuoteAmount}`,
+        isMach: true,
+        booking: {
+          id: b.id,
+          serviceType: b.machineryType,
+          bookingType: "machinery" as const,
+          userName: b.userName,
+          phone: b.phone,
+          date: b.bookingDate,
+          duration: `${b.durationHours} Hours`,
+          location: b.location,
+          rateQuote: b.rateQuote || `₹${b.rateQuoteAmount}`,
+          rateQuoteAmount: b.rateQuoteAmount,
+          rateNotes: b.rateNotes,
+        },
+      })),
+    ...myLabour
+      .filter((b) => b.status === "rate_quoted")
+      .map((b) => ({
+        id: b.id,
+        title: `${b.count} ${b.labourType} Workers`,
+        rateQuote: b.rateQuote || `₹${b.rateQuoteAmount}`,
+        isMach: false,
+        booking: {
+          id: b.id,
+          serviceType: `${b.count} ${b.labourType} Workers`,
+          bookingType: "labour" as const,
+          userName: b.userName,
+          phone: b.phone,
+          date: b.startDate || "Immediate",
+          duration: `${b.days} Days`,
+          location: b.location,
+          rateQuote: b.rateQuote || `₹${b.rateQuoteAmount}`,
+          rateQuoteAmount: b.rateQuoteAmount,
+          rateNotes: b.rateNotes,
+        },
+      })),
+  ];
+
+  const allMyBookings = [
+    ...myMachinery.map((m) => ({ ...m, isMach: true, serviceName: m.machineryType })),
+    ...myLabour.map((l) => ({ ...l, isMach: false, serviceName: `${l.count} ${l.labourType} Workers` })),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar />
@@ -216,6 +295,50 @@ export default function ProfilePage() {
             )}
           </Link>
         </div>
+
+        {/* Action Required: Rate Quote Notifications Banner */}
+        {pendingQuotes.length > 0 && (
+          <div className="space-y-3 mb-6">
+            {pendingQuotes.map((q) => (
+              <div
+                key={q.id}
+                className="bg-amber-500/10 border-2 border-amber-500/40 rounded-2xl p-5 shadow-lg relative overflow-hidden animate-in fade-in duration-200"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+                      {q.isMach ? <Tractor className="h-5 w-5" /> : <Users className="h-5 w-5" />}
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold">
+                        Rate Quoted by Admin • Action Required
+                      </span>
+                      <h3 className="text-base font-bold text-white leading-tight">{q.title}</h3>
+                    </div>
+                  </div>
+                  <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold px-2.5 py-0.5 rounded-full animate-pulse">
+                    Action Required
+                  </span>
+                </div>
+
+                <div className="mt-3.5 p-3.5 bg-black/40 rounded-xl border border-white/5 flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <span className="text-[11px] text-gray-400 block">Admin Quoted Rate / Price:</span>
+                    <span className="text-lg sm:text-xl font-black text-amber-400 font-mono">
+                      {q.rateQuote}
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => openRateReviewModal(q.booking)}
+                    className="bg-amber-400 hover:bg-amber-500 text-black font-black text-xs px-4 py-2.5 rounded-xl shadow-md cursor-pointer transition-all"
+                  >
+                    Review Rate & Respond (Accept / Cancel) →
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Profile Card - Omit user image as instructed: "please don't add the user image section" */}
         <div className="bg-[#111] border border-white/10 rounded-2xl p-6 mb-6 shadow-xl relative overflow-hidden">
@@ -449,6 +572,174 @@ export default function ProfilePage() {
               <span className="text-white font-semibold">{user?.bankAddress || "Not set"}</span>
             </div>
           </div>
+        </div>
+
+        {/* Section 3: My Service Bookings & Resource Allotments */}
+        <div className="bg-[#111] border border-white/10 rounded-2xl p-5 mb-6 hover:border-white/20 transition-colors">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+            <div>
+              <h3 className="font-bold text-base text-white flex items-center gap-2">
+                <Tractor className="h-4 w-4 text-primary" /> My Bookings & Allotments
+              </h3>
+              <p className="text-[11px] text-gray-400">Track rates, acceptance, and allotted machine / labour details</p>
+            </div>
+            <span className="text-xs bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full text-gray-300 font-mono">
+              {allMyBookings.length} Total
+            </span>
+          </div>
+
+          {allMyBookings.length === 0 ? (
+            <div className="py-8 text-center text-gray-500 space-y-2">
+              <Clock className="h-8 w-8 text-gray-600 mx-auto opacity-40" />
+              <p className="text-xs">No active service bookings requested yet.</p>
+              <div className="flex justify-center gap-2 pt-2">
+                <Link to="/machinery-booking" className="text-xs text-primary underline">Book Machine</Link>
+                <span className="text-gray-600">•</span>
+                <Link to="/labour-booking" className="text-xs text-primary underline">Book Labour</Link>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {allMyBookings.map((b: any) => {
+                const isMach = b.isMach;
+                const status = b.status;
+                const isRateQuoted = status === "rate_quoted";
+                const isRateAccepted = status === "rate_accepted";
+                const isAllotted = status === "allotted" || status === "assigned";
+                const isCancelled = status === "cancelled" || status === "rejected";
+
+                return (
+                  <div
+                    key={b.id}
+                    className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-2.5 hover:border-primary/30 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary shrink-0">
+                          {isMach ? <Tractor className="h-4 w-4" /> : <Users className="h-4 w-4" />}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-white">{b.serviceName}</h4>
+                          <span className="text-[10px] font-mono text-gray-400">ID: #{b.id}</span>
+                        </div>
+                      </div>
+
+                      {/* Status Badge */}
+                      <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold border ${
+                        isAllotted
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                          : isRateAccepted
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 animate-pulse"
+                          : isRateQuoted
+                          ? "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse font-black"
+                          : isCancelled
+                          ? "bg-red-500/10 text-red-400 border-red-500/30"
+                          : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                      }`}>
+                        {isAllotted ? "✓ Allotted & Confirmed" : isRateAccepted ? "✓ Rate Accepted" : isRateQuoted ? "Rate Quoted" : isCancelled ? "Cancelled" : "Pending Rate"}
+                      </span>
+                    </div>
+
+                    {/* Schedule & Location details */}
+                    <div className="grid grid-cols-2 gap-2 text-[11px] bg-black/30 p-2.5 rounded-lg text-gray-300">
+                      <div><span className="text-gray-500">Date:</span> {b.bookingDate || b.startDate || "Scheduled"}</div>
+                      <div><span className="text-gray-500">Duration:</span> {isMach ? `${b.durationHours} Hours` : `${b.days} Days (${b.count} Workers)`}</div>
+                      <div className="col-span-2 truncate"><span className="text-gray-500">Location:</span> {b.location}</div>
+                    </div>
+
+                    {/* If Rate Quoted -> Show review button */}
+                    {isRateQuoted && (
+                      <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-between gap-2 flex-wrap">
+                        <div>
+                          <span className="text-[10px] text-amber-400/90 font-bold block uppercase">Admin Quoted Rate:</span>
+                          <span className="text-base font-black text-amber-300 font-mono">{b.rateQuote || `₹${b.rateQuoteAmount}`}</span>
+                        </div>
+                        <Button
+                          onClick={() => openRateReviewModal({
+                            id: b.id,
+                            serviceType: b.serviceName,
+                            bookingType: isMach ? "machinery" : "labour",
+                            userName: b.userName,
+                            phone: b.phone,
+                            date: b.bookingDate || b.startDate,
+                            duration: isMach ? `${b.durationHours} Hours` : `${b.days} Days`,
+                            location: b.location,
+                            rateQuote: b.rateQuote || `₹${b.rateQuoteAmount}`,
+                            rateQuoteAmount: b.rateQuoteAmount,
+                            rateNotes: b.rateNotes,
+                          })}
+                          className="bg-amber-400 hover:bg-amber-500 text-black font-black text-xs px-3 py-1.5 h-8 rounded-lg cursor-pointer shadow-xs"
+                        >
+                          Review & Respond →
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* If Rate Accepted */}
+                    {isRateAccepted && (
+                      <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs text-emerald-300 flex items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                        <span>You agreed to <strong>{b.rateQuote}</strong>. Admin is allotting the nearest resources now.</span>
+                      </div>
+                    )}
+
+                    {/* If Allotted -> Show Allotted Resource Details */}
+                    {isAllotted && (
+                      <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-xs space-y-2 text-emerald-300">
+                        <div className="flex items-center gap-1 font-bold text-emerald-400">
+                          <CheckCircle2 className="h-4 w-4" /> Allotted Resource Details:
+                        </div>
+                        
+                        {isMach && (
+                          <div className="bg-black/40 p-2.5 rounded-lg space-y-1 text-[11px] text-gray-200">
+                            {b.allottedMachine?.machineName && (
+                              <div><span className="text-gray-400">Machine:</span> <strong>{b.allottedMachine.machineName}</strong></div>
+                            )}
+                            {b.allottedMachine?.numberPlate && (
+                              <div><span className="text-gray-400">Plate No:</span> <strong className="font-mono text-primary">{b.allottedMachine.numberPlate}</strong></div>
+                            )}
+                            {b.allottedMachine?.operatorName && (
+                              <div><span className="text-gray-400">Operator:</span> {b.allottedMachine.operatorName}</div>
+                            )}
+                            {b.allottedMachine?.operatorPhone && (
+                              <div className="pt-1">
+                                <a href={`tel:${b.allottedMachine.operatorPhone}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-bold">
+                                  <Phone className="h-3 w-3" /> Call Operator: {b.allottedMachine.operatorPhone}
+                                </a>
+                              </div>
+                            )}
+                            {!b.allottedMachine?.machineName && b.allottedMachineDetails && (
+                              <div>{b.allottedMachineDetails}</div>
+                            )}
+                          </div>
+                        )}
+
+                        {!isMach && b.assignedLabours && b.assignedLabours.length > 0 && (
+                          <div className="bg-black/40 p-2.5 rounded-lg space-y-1.5 text-[11px] text-gray-200">
+                            <span className="text-gray-400 block">Assigned Workers:</span>
+                            {b.assignedLabours.map((lab: any, i: number) => (
+                              <div key={i} className="flex items-center justify-between border-b border-white/5 pb-1">
+                                <span className="font-medium text-white">{lab.name}</span>
+                                {lab.phone && (
+                                  <a href={`tel:${lab.phone}`} className="text-primary hover:underline flex items-center gap-1">
+                                    <Phone className="h-3 w-3" /> {lab.phone}
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="text-[10px] text-gray-400 pt-0.5">
+                          Agreed Rate: <span className="font-mono text-emerald-400 font-bold">{b.rateQuote || `₹${b.amount}`}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Menu Navigation Options (Matching Image 5) */}

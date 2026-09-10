@@ -21,7 +21,7 @@ const MACHINERY_OPTIONS = [
 ];
 
 export default function MachineryBookingPage() {
-  const { user, machineryBookings, addMachineryBooking, addNotification, checkKccPermission, isKccIssued, setIsKccAppModalOpen } = useApp();
+  const { user, machineryBookings, addMachineryBooking, addNotification, checkKccPermission, isKccIssued, setIsKccAppModalOpen, openRateReviewModal } = useApp();
 
   const [selectedMachine, setSelectedMachine] = useState<string>("Tractor (45 HP)");
   const [userName, setUserName] = useState(user?.name || "");
@@ -75,6 +75,7 @@ export default function MachineryBookingPage() {
       });
 
       addMachineryBooking({
+        userId: user?.id || user?.userId || user?.phone || "",
         userName,
         phone,
         machineryType: selectedMachine,
@@ -86,8 +87,8 @@ export default function MachineryBookingPage() {
       // Send notification with PDF receipt
       addNotification(
         "Machinery Booking Request Submitted 🚜",
-        `Your request for booking ${selectedMachine} has been registered (Ref: ${refId}). Download PDF receipt.`,
-        "success",
+        `Your request for booking ${selectedMachine} has been registered (Ref: ${refId}). Admin will review and quote rate.`,
+        "info",
         "/machinery-booking",
         "machinery",
         dataUrl,
@@ -95,7 +96,7 @@ export default function MachineryBookingPage() {
       );
 
       setLoading(false);
-      toast.success("Machinery booking request submitted! Admin will allot machine soon.");
+      toast.success("Machinery booking submitted! Admin will quote the rate shortly.");
     }, 1000);
   };
 
@@ -254,11 +255,23 @@ export default function MachineryBookingPage() {
                       <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${
                         b.status === "allotted"
                           ? "bg-primary/10 text-primary border-primary/30"
-                          : b.status === "rejected"
+                          : b.status === "rate_accepted"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 animate-pulse"
+                          : b.status === "rate_quoted"
+                          ? "bg-amber-500/10 text-amber-400 border-amber-500/30 font-black animate-pulse"
+                          : b.status === "rejected" || b.status === "cancelled"
                           ? "bg-red-500/10 text-red-400 border-red-500/30"
-                          : "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse"
+                          : "bg-blue-500/10 text-blue-400 border-blue-500/30"
                       }`}>
-                        {b.status === "allotted" ? "✓ Machine Allotted" : b.status === "rejected" ? "Cancelled" : "Pending Allotment"}
+                        {b.status === "allotted"
+                          ? "✓ Machine Allotted"
+                          : b.status === "rate_accepted"
+                          ? "✓ Rate Accepted"
+                          : b.status === "rate_quoted"
+                          ? "Rate Quoted"
+                          : b.status === "rejected" || b.status === "cancelled"
+                          ? "Cancelled"
+                          : "Pending Rate Quote"}
                       </span>
                     </div>
 
@@ -268,19 +281,73 @@ export default function MachineryBookingPage() {
                       <div className="col-span-2"><span className="text-gray-500">Location:</span> {b.location}</div>
                     </div>
 
-                    {b.status === "allotted" && b.allottedMachineDetails && (
-                      <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs text-primary flex items-start gap-2">
-                        <CheckCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                    {/* If Rate Quoted -> User review action button */}
+                    {b.status === "rate_quoted" && (
+                      <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-3 flex items-center justify-between gap-2 flex-wrap">
                         <div>
-                          <p className="font-bold">Allotment Details from Admin:</p>
-                          <p className="text-white font-medium mt-0.5">{b.allottedMachineDetails}</p>
+                          <span className="text-[10px] text-amber-400 font-bold block uppercase">Admin Quoted Rate:</span>
+                          <span className="text-base font-black text-amber-300 font-mono">{b.rateQuote || `₹${b.rateQuoteAmount}`}</span>
                         </div>
+                        <Button
+                          onClick={() => openRateReviewModal({
+                            id: b.id,
+                            serviceType: b.machineryType,
+                            bookingType: "machinery",
+                            userName: b.userName,
+                            phone: b.phone,
+                            date: b.bookingDate,
+                            duration: `${b.durationHours} Hours`,
+                            location: b.location,
+                            rateQuote: b.rateQuote || `₹${b.rateQuoteAmount}`,
+                            rateQuoteAmount: b.rateQuoteAmount,
+                            rateNotes: b.rateNotes,
+                          })}
+                          className="bg-amber-400 hover:bg-amber-500 text-black font-black text-xs px-3 py-1.5 h-8 rounded-lg cursor-pointer"
+                        >
+                          Review & Respond →
+                        </Button>
                       </div>
                     )}
 
-                    {b.status === "pending" && (
+                    {/* If Rate Accepted */}
+                    {b.status === "rate_accepted" && (
+                      <p className="text-[11px] text-emerald-400/90 flex items-center gap-1.5 mb-2">
+                        <CheckCircle className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                        You accepted the rate ({b.rateQuote}). Admin will allot the machinery resources shortly.
+                      </p>
+                    )}
+
+                    {/* If Allotted -> Machine & Driver Details */}
+                    {b.status === "allotted" && (
+                      <div className="p-3 bg-primary/10 border border-primary/30 rounded-xl text-xs text-primary space-y-1">
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <CheckCircle className="h-4 w-4 shrink-0" />
+                          <span>Allotted Machine & Operator Details:</span>
+                        </div>
+                        <div className="text-white font-medium pl-5 space-y-0.5">
+                          {b.allottedMachine?.machineName && <div>Machine: <strong>{b.allottedMachine.machineName}</strong></div>}
+                          {b.allottedMachine?.numberPlate && <div>Plate No: <strong className="font-mono text-primary">{b.allottedMachine.numberPlate}</strong></div>}
+                          {b.allottedMachine?.operatorName && <div>Operator: {b.allottedMachine.operatorName}</div>}
+                          {b.allottedMachine?.operatorPhone && (
+                            <div className="pt-1">
+                              <a href={`tel:${b.allottedMachine.operatorPhone}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-bold">
+                                <Phone className="h-3 w-3" /> Call Operator: {b.allottedMachine.operatorPhone}
+                              </a>
+                            </div>
+                          )}
+                          {!b.allottedMachine?.machineName && b.allottedMachineDetails && <div>{b.allottedMachineDetails}</div>}
+                        </div>
+                        {b.rateQuote && (
+                          <div className="text-[10px] text-gray-400 pl-5 pt-1">
+                            Agreed Rate: <strong className="text-white">{b.rateQuote}</strong>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {(b.status === "pending" || b.status === "pending_rate") && (
                       <p className="text-[11px] text-amber-400/80 flex items-center gap-1">
-                        <AlertCircle className="h-3.5 w-3.5 shrink-0" /> Your request is in queue. Admin will assign a machine and notify you shortly.
+                        <AlertCircle className="h-3.5 w-3.5 shrink-0" /> Request received! Admin will review details and provide a rate quote shortly.
                       </p>
                     )}
                   </div>

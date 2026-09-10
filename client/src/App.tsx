@@ -33,6 +33,7 @@ import KisanPathshalaPage from "./pages/kisan-pathshala/page.tsx";
 import ServicesPage from "./pages/services/page.tsx";
 import SoilTestingPage from "./pages/soil-testing/page.tsx";
 import AuthGate from "./components/AuthGate.tsx";
+import RateReviewModal from "./components/RateReviewModal.tsx";
 
 function AppInner() {
   useServiceWorker();
@@ -41,6 +42,7 @@ function AppInner() {
       <ScrollToTop />
       <KccAlertModal />
       <KccApplicationModal />
+      <RateReviewModal />
       <Routes>
           {/* Public Auth Routes */}
           <Route path="/login" element={<LoginPage />} />

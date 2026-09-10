@@ -163,7 +163,14 @@ export const api = {
   // Labour
   getLabourBookings: () => apiFetch<any[]>('/labour/bookings'),
   addLabourBooking: (booking: any) => apiFetch<any>('/labour/bookings', { method: 'POST', body: JSON.stringify(booking) }),
-  assignLabours: (id: string, assignedLabours: any[], adminNotes?: string) => apiFetch<any>(`/labour/bookings/${id}/assign`, { method: 'PUT', body: JSON.stringify({ assignedLabours, adminNotes }) }),
+  quoteLabourRate: (id: string, rateQuote: string, rateQuoteAmount?: number, rateNotes?: string) =>
+    apiFetch<any>(`/labour/bookings/${encodeURIComponent(id)}/rate`, { method: 'PUT', body: JSON.stringify({ rateQuote, rateQuoteAmount, rateNotes }) }),
+  respondLabourRate: (id: string, response: 'accepted' | 'cancelled') =>
+    apiFetch<any>(`/labour/bookings/${encodeURIComponent(id)}/respond`, { method: 'PUT', body: JSON.stringify({ response }) }),
+  allotLabourResources: (id: string, data: { assignedLabours?: any[]; workerNames?: string; leadPhone?: string; adminNotes?: string }) =>
+    apiFetch<any>(`/labour/bookings/${encodeURIComponent(id)}/allot-resources`, { method: 'PUT', body: JSON.stringify(data) }),
+  assignLabours: (id: string, assignedLabours: any[], adminNotes?: string) =>
+    apiFetch<any>(`/labour/bookings/${encodeURIComponent(id)}/allot-resources`, { method: 'PUT', body: JSON.stringify({ assignedLabours, adminNotes }) }),
   updateLabourBooking: (id: string, updated: any) => apiFetch<any>(`/labour/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(updated) }),
   deleteLabourBooking: (id: string) => apiFetch<any>(`/labour/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   getLabourTypes: () => apiFetch<string[]>('/labour/types'),
@@ -173,8 +180,15 @@ export const api = {
   // Machinery
   getMachineryBookings: () => apiFetch<any[]>('/machinery'),
   addMachineryBooking: (booking: any) => apiFetch<any>('/machinery', { method: 'POST', body: JSON.stringify(booking) }),
-  allotMachinery: (id: string, machineDetails: string, adminNotes?: string) => apiFetch<any>(`/machinery/${id}/allot`, { method: 'PUT', body: JSON.stringify({ machineDetails, adminNotes }) }),
-  rejectMachinery: (id: string) => apiFetch<any>(`/machinery/${id}/reject`, { method: 'PUT' }),
+  quoteMachineryRate: (id: string, rateQuote: string, rateQuoteAmount?: number, rateNotes?: string) =>
+    apiFetch<any>(`/machinery/${encodeURIComponent(id)}/rate`, { method: 'PUT', body: JSON.stringify({ rateQuote, rateQuoteAmount, rateNotes }) }),
+  respondMachineryRate: (id: string, response: 'accepted' | 'cancelled') =>
+    apiFetch<any>(`/machinery/${encodeURIComponent(id)}/respond`, { method: 'PUT', body: JSON.stringify({ response }) }),
+  allotMachineryResources: (id: string, data: { machineName?: string; numberPlate?: string; operatorName?: string; operatorPhone?: string; detailsText?: string; adminNotes?: string }) =>
+    apiFetch<any>(`/machinery/${encodeURIComponent(id)}/allot-resources`, { method: 'PUT', body: JSON.stringify(data) }),
+  allotMachinery: (id: string, machineDetails: string, adminNotes?: string) =>
+    apiFetch<any>(`/machinery/${encodeURIComponent(id)}/allot-resources`, { method: 'PUT', body: JSON.stringify({ machineDetails, adminNotes }) }),
+  rejectMachinery: (id: string) => apiFetch<any>(`/machinery/${encodeURIComponent(id)}/reject`, { method: 'PUT' }),
   updateMachineryBooking: (id: string, updated: any) => apiFetch<any>(`/machinery/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(updated) }),
   deleteMachineryBooking: (id: string) => apiFetch<any>(`/machinery/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Bell, Trash2, CheckCheck, Filter, X, ChevronRight,
   Sprout, Users, BookOpen, Wallet, CreditCard, TrendingUp, UserCheck,
-  BellOff, ArrowLeft, FileDown
+  BellOff, ArrowLeft, FileDown, Tractor
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import Navbar from "@/components/Navbar.tsx";
@@ -13,16 +13,17 @@ import type { UserNotification } from "@/context/AppContext.tsx";
 import { cn } from "@/lib/utils.ts";
 import { toast } from "sonner";
 
-type FilterType = "all" | "unread" | "crops" | "labour" | "expert" | "wallet" | "kcc" | "account" | "mandi";
+type FilterType = "all" | "unread" | "crops" | "machinery" | "labour" | "expert" | "wallet" | "kcc" | "account" | "mandi";
 
 const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string; bg: string }> = {
-  crops:   { label: "Sell Crops",     icon: Sprout,    color: "text-green-400",  bg: "bg-green-500/10 border-green-500/20" },
-  labour:  { label: "Labour",         icon: Users,     color: "text-blue-400",   bg: "bg-blue-500/10 border-blue-500/20"  },
-  expert:  { label: "Expert Advice",  icon: BookOpen,  color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
-  wallet:  { label: "Wallet",         icon: Wallet,    color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" },
-  kcc:     { label: "KCC",            icon: CreditCard,color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20" },
-  mandi:   { label: "Mandi",          icon: TrendingUp,color: "text-cyan-400",   bg: "bg-cyan-500/10 border-cyan-500/20"  },
-  account: { label: "Account",        icon: UserCheck, color: "text-primary",    bg: "bg-primary/10 border-primary/20"    },
+  crops:     { label: "Sell Crops",     icon: Sprout,    color: "text-green-400",  bg: "bg-green-500/10 border-green-500/20" },
+  machinery: { label: "Machinery",      icon: Tractor,   color: "text-amber-400",  bg: "bg-amber-500/10 border-amber-500/20" },
+  labour:    { label: "Labour",         icon: Users,     color: "text-blue-400",   bg: "bg-blue-500/10 border-blue-500/20"  },
+  expert:    { label: "Expert Advice",  icon: BookOpen,  color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
+  wallet:    { label: "Wallet",         icon: Wallet,    color: "text-yellow-400", bg: "bg-yellow-500/10 border-yellow-500/20" },
+  kcc:       { label: "KCC",            icon: CreditCard,color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20" },
+  mandi:     { label: "Mandi",          icon: TrendingUp,color: "text-cyan-400",   bg: "bg-cyan-500/10 border-cyan-500/20"  },
+  account:   { label: "Account",        icon: UserCheck, color: "text-primary",    bg: "bg-primary/10 border-primary/20"    },
 };
 
 const TYPE_DOT: Record<string, string> = {
@@ -32,30 +33,41 @@ const TYPE_DOT: Record<string, string> = {
 };
 
 const NAV_LINK: Record<string, string> = {
-  crops:   "/sell-crops",
-  labour:  "/labour-booking",
-  expert:  "/expert-advice",
-  wallet:  "/wallet",
-  kcc:     "/dashboard",
-  mandi:   "/mandi-bhav",
-  account: "/",
+  crops:     "/sell-crops",
+  machinery: "/machinery-booking",
+  labour:    "/labour-booking",
+  expert:    "/expert-advice",
+  wallet:    "/wallet",
+  kcc:       "/dashboard",
+  mandi:     "/mandi-bhav",
+  account:   "/",
 };
 
 const FILTER_OPTIONS: { value: FilterType; label: string }[] = [
-  { value: "all",     label: "All" },
-  { value: "unread",  label: "Unread" },
-  { value: "crops",   label: "Crops" },
-  { value: "labour",  label: "Labour" },
-  { value: "expert",  label: "Expert" },
-  { value: "wallet",  label: "Wallet" },
-  { value: "kcc",     label: "KCC" },
-  { value: "mandi",   label: "Mandi" },
-  { value: "account", label: "Account" },
+  { value: "all",       label: "All" },
+  { value: "unread",    label: "Unread" },
+  { value: "crops",     label: "Crops" },
+  { value: "machinery", label: "Machinery" },
+  { value: "labour",    label: "Labour" },
+  { value: "expert",    label: "Expert" },
+  { value: "wallet",    label: "Wallet" },
+  { value: "kcc",       label: "KCC" },
+  { value: "mandi",     label: "Mandi" },
+  { value: "account",   label: "Account" },
 ];
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const { notifications, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification, clearAllNotifications } = useApp();
+  const {
+    notifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    deleteNotification,
+    clearAllNotifications,
+    openRateReviewModal,
+    machineryBookings,
+    labourBookings,
+  } = useApp();
   const [filter, setFilter] = useState<FilterType>("all");
 
   const filtered = notifications.filter((n) => {
@@ -68,6 +80,48 @@ export default function NotificationsPage() {
 
   const handleClickNotification = (n: UserNotification) => {
     markNotificationAsRead(n.id);
+
+    // If rate quote notification, directly open the 2-option Accept/Cancel review modal!
+    const isRateQuote = n.data?.action === "rate_quote" || n.title.includes("Rate Quoted") || n.message.includes("Rate Quoted");
+    if (isRateQuote) {
+      const isMachinery = n.category === "machinery" || n.data?.bookingType === "machinery" || n.title.toLowerCase().includes("machinery");
+      const bookingId = n.data?.bookingId || n.data?.id;
+
+      if (isMachinery) {
+        const matched = machineryBookings.find(b => b.id === bookingId || b.id === n.link?.split("/").pop());
+        openRateReviewModal({
+          id: bookingId || matched?.id || "",
+          serviceType: n.data?.machineryType || matched?.machineryType || "Machinery Booking",
+          bookingType: "machinery",
+          userName: n.data?.userName || matched?.userName || "",
+          phone: n.data?.phone || matched?.phone || "",
+          date: n.data?.bookingDate || matched?.bookingDate || "",
+          duration: `${n.data?.durationHours || matched?.durationHours || ""} Hours`,
+          location: n.data?.location || matched?.location || "",
+          rateQuote: n.data?.rateQuote || matched?.rateQuote || `₹${matched?.rateQuoteAmount || ""}`,
+          rateQuoteAmount: n.data?.rateQuoteAmount || matched?.rateQuoteAmount,
+          rateNotes: n.data?.rateNotes || matched?.rateNotes,
+        });
+        return;
+      } else {
+        const matched = labourBookings.find(b => b.id === bookingId || b.id === n.link?.split("/").pop());
+        openRateReviewModal({
+          id: bookingId || matched?.id || "",
+          serviceType: n.data?.labourType || matched?.labourType || "Labour Booking",
+          bookingType: "labour",
+          userName: n.data?.userName || matched?.userName || "",
+          phone: n.data?.phone || matched?.phone || "",
+          date: n.data?.startDate || matched?.startDate || "",
+          duration: `${n.data?.days || matched?.days || ""} Days (${n.data?.count || matched?.count || ""} Workers)`,
+          location: n.data?.location || matched?.location || "",
+          rateQuote: n.data?.rateQuote || matched?.rateQuote || `₹${matched?.rateQuoteAmount || ""}`,
+          rateQuoteAmount: n.data?.rateQuoteAmount || matched?.rateQuoteAmount,
+          rateNotes: n.data?.rateNotes || matched?.rateNotes,
+        });
+        return;
+      }
+    }
+
     const dest = n.link || (n.category ? NAV_LINK[n.category] : null) || "/";
     navigate(dest);
   };
@@ -229,13 +283,19 @@ export default function NotificationsPage() {
                           {cat.label}
                         </span>
                       )}
-                      <Link
-                        to={dest}
-                        onClick={(e) => { e.stopPropagation(); markNotificationAsRead(n.id); }}
-                        className="text-[10px] text-primary/70 hover:text-primary flex items-center gap-0.5 font-medium transition-colors mr-2"
-                      >
-                        View details <ChevronRight className="h-3 w-3" />
-                      </Link>
+                      {/* Review Rate Button if this notification is a Rate Quote */}
+                      {(n.data?.action === "rate_quote" || n.title.includes("Rate Quoted") || n.message.includes("Rate Quoted")) && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleClickNotification(n);
+                          }}
+                          className="flex items-center gap-1 bg-amber-400 hover:bg-amber-500 text-black text-[11px] font-black py-1 px-3 rounded-lg shadow-sm transition-all cursor-pointer mr-2"
+                        >
+                          Review Rate & Respond →
+                        </button>
+                      )}
 
                       {n.pdfDataUrl && (
                         <button
