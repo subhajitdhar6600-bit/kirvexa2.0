@@ -34,7 +34,17 @@ export default function Navbar() {
     cart,
     mongoConnected,
     mongoDatabase,
+    isAdminLoggedIn,
   } = useApp();
+
+  const handleServiceNav = (href: string) => {
+    if (!user && !isAdminLoggedIn) {
+      toast.info("Please register or login to access Krivexo services.");
+      navigate("/register", { state: { from: href } });
+      return;
+    }
+    navigate(href);
+  };
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
 
@@ -47,13 +57,11 @@ export default function Navbar() {
   ];
 
   const SERVICES_LINKS = [
-    { label: "All Services Hub", href: "/services" },
     { label: t.nav.mandiBhav, href: "/mandi-bhav" },
     { label: t.nav.buyInputs, href: "/agri-market" },
     { label: t.nav.sellCrops, href: "/sell-crops" },
     { label: "Machinery Booking", href: "/machinery-booking" },
     { label: t.nav.labourBooking, href: "/labour-booking" },
-    { label: "Soil Testing Lab", href: "/soil-testing" },
     { label: t.nav.expertAdvice, href: "/expert-advice" },
     { label: t.nav.weather, href: "/weather" },
     { label: t.nav.wallet, href: "/wallet" },
@@ -122,13 +130,21 @@ export default function Navbar() {
                   {openDropdown === link.label && (
                     <div className="absolute top-full left-0 w-48 bg-[#111] border border-white/10 rounded-xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                       {link.children.map((child) => (
-                        <Link
+                        <button
                           key={child.label}
-                          to={child.href}
-                          className="block px-4 py-2 text-xs text-gray-300 hover:text-primary hover:bg-white/5 transition-colors"
+                          type="button"
+                          onClick={() => {
+                            setOpenDropdown(null);
+                            if (link.label === t.nav.services) {
+                              handleServiceNav(child.href);
+                            } else {
+                              navigate(child.href);
+                            }
+                          }}
+                          className="w-full text-left block px-4 py-2 text-xs text-gray-300 hover:text-primary hover:bg-white/5 transition-colors cursor-pointer"
                         >
                           {child.label}
-                        </Link>
+                        </button>
                       ))}
                     </div>
                   )}
@@ -423,8 +439,9 @@ export default function Navbar() {
             
 
             {/* Functional Cart Icon */}
-            <Link
-              to="/cart"
+            <button
+              type="button"
+              onClick={() => handleServiceNav("/cart")}
               className="relative p-2 rounded-xl bg-white/5 border border-white/10 text-gray-300 hover:text-primary hover:border-primary/40 transition-colors cursor-pointer"
               aria-label="My Cart"
             >
@@ -434,7 +451,7 @@ export default function Navbar() {
                   {cartCount}
                 </span>
               )}
-            </Link>
+            </button>
 
             {/* Functional Notification Bell Beside 3 Dots */}
             {user && (
@@ -533,13 +550,13 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* 3-Dots Mobile Menu Button */}
+            {/* 3-Lines Mobile Menu Button */}
             <button
               className="text-gray-300 cursor-pointer p-2 rounded-xl bg-white/5 border border-white/10 hover:text-primary transition-colors"
               onClick={() => { setMenuOpen(!menuOpen); setShowNotifMenu(false); }}
-              aria-label="3 Dots Menu"
+              aria-label="3 Lines Menu"
             >
-              {menuOpen ? <X className="h-5 w-5" /> : <MoreVertical className="h-5 w-5 text-primary" />}
+              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5 text-primary" />}
             </button>
           </div>
 
@@ -606,7 +623,15 @@ export default function Navbar() {
               <div className="mb-3">
                 <button
                   type="button"
-                  onClick={() => { setMenuOpen(false); setIsKccAppModalOpen(true); }}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    if (!user && !isAdminLoggedIn) {
+                      toast.info("Please register or login first to apply for Kisan Credit Card.");
+                      navigate("/register", { state: { from: "/" } });
+                      return;
+                    }
+                    setIsKccAppModalOpen(true);
+                  }}
                   className="w-full flex items-center gap-3 p-3 bg-linear-to-r from-amber-500/20 via-amber-500/10 to-transparent border-2 border-amber-500/50 rounded-2xl text-left cursor-pointer hover:border-amber-400 transition-all"
                 >
                   <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
@@ -626,14 +651,21 @@ export default function Navbar() {
                 <div key={link.label}>
                   <div className="text-xs font-semibold text-gray-500 py-2 uppercase tracking-wider">{link.label}</div>
                   {link.children.map((child) => (
-                    <Link
+                    <button
                       key={child.label}
-                      to={child.href}
-                      onClick={() => setMenuOpen(false)}
-                      className="block pl-3 py-1.5 text-sm text-gray-300 hover:text-primary border-l border-white/10 hover:border-primary/40 transition-colors"
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        if (link.label === t.nav.services) {
+                          handleServiceNav(child.href);
+                        } else {
+                          navigate(child.href);
+                        }
+                      }}
+                      className="w-full text-left block pl-3 py-2 text-sm text-gray-300 hover:text-primary border-l border-white/10 hover:border-primary/40 transition-colors cursor-pointer"
                     >
                       {child.label}
-                    </Link>
+                    </button>
                   ))}
                 </div>
               ) : (

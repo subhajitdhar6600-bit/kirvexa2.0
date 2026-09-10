@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, RefreshCw, Phone, Lock, Shield, Headphones, Zap, User, Store } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -24,6 +24,7 @@ const generateRandomCaptchaString = () => {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { loginUser, adminLogin, registeredAccounts } = useApp();
   const [loginType, setLoginType] = useState<LoginType>("farmer");
   const [showPass, setShowPass] = useState(false);
@@ -328,7 +329,10 @@ export default function LoginPage() {
 
         loginUser(mappedAccount);
         toast.success(`Welcome back, ${u.name}! Login successful.`);
-        if (u.role === "dealer") {
+        const from = (location.state as any)?.from;
+        if (from && typeof from === "string" && from !== "/register" && from !== "/login") {
+          navigate(from);
+        } else if (u.role === "dealer") {
           navigate("/dealer-dashboard");
         } else {
           navigate("/profile");
@@ -433,7 +437,12 @@ export default function LoginPage() {
 
       const roleTitle = loginType === "farmer" ? "Farmer Partner" : "Agri Dealer";
       toast.success(`Welcome back ${existingAccount.fullName}! Logged in as ${roleTitle}.`);
-      navigate("/");
+      const from = (location.state as any)?.from;
+      if (from && typeof from === "string" && from !== "/register" && from !== "/login") {
+        navigate(from);
+      } else {
+        navigate("/profile");
+      }
     } catch (err) {
       console.error("Login error:", err);
       toast.error("Login request failed. Please check network connection.");

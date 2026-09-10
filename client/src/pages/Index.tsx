@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import {
   TrendingUp, ShoppingCart, Users, MessageSquare, CloudSun, Wallet,
@@ -26,11 +26,25 @@ const TESTIMONIALS = [
 ];
 
 export default function Index() {
+  const navigate = useNavigate();
   const {
-    t, user, isKccIssued, checkKccPermission, setIsKccAppModalOpen, hasAppliedKcc,
+    t, user, isAdminLoggedIn, isKccIssued, checkKccPermission, setIsKccAppModalOpen, hasAppliedKcc,
     kccDetails, dealerApplyFarmerKcc, chargeFarmerCard, addDealerListing,
     registerFarmerByDealer, checkKccStatusByPhoneAadhaar, getFarmerProfileByDetails
   } = useApp();
+
+  const handleServiceClick = (targetHref?: string, actionFn?: () => void) => {
+    if (!user && !isAdminLoggedIn) {
+      toast.info("Please register or login first to access this service.");
+      navigate("/register", { state: { from: targetHref || "/services" } });
+      return;
+    }
+    if (actionFn) {
+      actionFn();
+    } else if (targetHref) {
+      navigate(targetHref);
+    }
+  };
 
   const [selectedFeature, setSelectedFeature] = useState<{
     icon: any;
@@ -582,17 +596,20 @@ export default function Index() {
                     <Button
                       size="lg"
                       variant="outline"
-                      onClick={() => setIsKccAppModalOpen(true)}
-                      className="border-amber-400/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-bold text-base px-6 rounded-full shadow-sm"
+                      onClick={() => handleServiceClick("/", () => setIsKccAppModalOpen(true))}
+                      className="border-amber-400/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-bold text-base px-6 rounded-full shadow-sm cursor-pointer"
                     >
                       <CreditCard className="mr-2 h-5 w-5 text-amber-400" /> {t.hero.applyKcc || "Apply for KCC"}
                     </Button>
                   )}
-                  <Link to="/mandi-bhav">
-                    <Button size="lg" variant="ghost" className="border border-white/20 text-gray-200 hover:text-white hover:bg-white/10 text-base px-6 rounded-full">
-                      Mandi Bhav &gt;
-                    </Button>
-                  </Link>
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    onClick={() => handleServiceClick("/mandi-bhav")}
+                    className="border border-white/20 text-gray-200 hover:text-white hover:bg-white/10 text-base px-6 rounded-full cursor-pointer"
+                  >
+                    Mandi Bhav &gt;
+                  </Button>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 pt-6 border-t border-white/10">
@@ -699,7 +716,7 @@ export default function Index() {
                     ) : (
                       <Button
                         size="sm"
-                        onClick={() => setIsKccAppModalOpen(true)}
+                        onClick={() => handleServiceClick("/", () => setIsKccAppModalOpen(true))}
                         className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs px-4 py-2 rounded-full shadow-md shrink-0 cursor-pointer animate-pulse"
                       >
                         {hasAppliedKcc ? "Track Status →" : "Apply for KCC Now →"}
@@ -716,9 +733,13 @@ export default function Index() {
                       <span className="text-xs font-bold text-white uppercase tracking-wider">Live Mandi Bhav</span>
                       <span className="text-[10px] text-gray-400">• Bihar & UP</span>
                     </div>
-                    <Link to="/mandi-bhav" className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => handleServiceClick("/mandi-bhav")}
+                      className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-0.5 cursor-pointer"
+                    >
                       All Mandis &gt;
-                    </Link>
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 text-center">
@@ -742,27 +763,39 @@ export default function Index() {
 
                 {/* Quick Feature Badges */}
                 <div className="grid grid-cols-3 gap-2">
-                  <Link to="/machinery-booking" className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all text-left">
+                  <button
+                    type="button"
+                    onClick={() => handleServiceClick("/machinery-booking")}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all text-left cursor-pointer"
+                  >
                     <Tractor className="h-4 w-4 text-primary shrink-0" />
                     <div className="min-w-0">
                       <div className="text-[11px] font-bold text-white truncate">Machinery</div>
                       <div className="text-[9px] text-gray-400 truncate">Book Tractor</div>
                     </div>
-                  </Link>
-                  <Link to="/labour-booking" className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all text-left">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleServiceClick("/labour-booking")}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all text-left cursor-pointer"
+                  >
                     <Users className="h-4 w-4 text-primary shrink-0" />
                     <div className="min-w-0">
                       <div className="text-[11px] font-bold text-white truncate">Labour</div>
                       <div className="text-[9px] text-gray-400 truncate">Verified Crew</div>
                     </div>
-                  </Link>
-                  <Link to="/expert-advice" className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all text-left">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleServiceClick("/expert-advice")}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-primary/40 hover:bg-primary/5 transition-all text-left cursor-pointer"
+                  >
                     <MessageSquare className="h-4 w-4 text-primary shrink-0" />
                     <div className="min-w-0">
                       <div className="text-[11px] font-bold text-white truncate">Agri Expert</div>
                       <div className="text-[9px] text-gray-400 truncate">Free Advice</div>
                     </div>
-                  </Link>
+                  </button>
                 </div>
               </motion.div>
             </div>
@@ -799,7 +832,7 @@ export default function Index() {
               </div>
               <Button
                 size="sm"
-                onClick={() => setIsKccAppModalOpen(true)}
+                onClick={() => handleServiceClick("/", () => setIsKccAppModalOpen(true))}
                 className="bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs px-5 py-2.5 rounded-xl shrink-0 cursor-pointer shadow-md border border-amber-300"
               >
                 Apply for KCC to Unlock →
@@ -816,57 +849,30 @@ export default function Index() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.04 }}
               >
-                {s.action ? (
-                  <div
-                    onClick={s.action}
-                    className="relative flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl bg-[#111] border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all group cursor-pointer hover:-translate-y-1 h-full overflow-hidden"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-colors">
-                          <s.icon className="h-5 w-5" />
-                        </div>
-                        <span className="text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full">
-                          {s.badge}
-                        </span>
+                <div
+                  onClick={() => handleServiceClick(s.href, s.action)}
+                  className="relative flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl bg-[#111] border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all group cursor-pointer hover:-translate-y-1 h-full overflow-hidden"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-colors">
+                        <s.icon className="h-5 w-5" />
                       </div>
-                      <h3 className="text-sm font-bold text-white mb-1 group-hover:text-primary transition-colors">
-                        {s.label}
-                      </h3>
-                      <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
-                        {s.desc}
-                      </p>
+                      <span className="text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full">
+                        {s.badge}
+                      </span>
                     </div>
-                    <div className="mt-4 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                      Explore &gt;
-                    </div>
+                    <h3 className="text-sm font-bold text-white mb-1 group-hover:text-primary transition-colors">
+                      {s.label}
+                    </h3>
+                    <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
+                      {s.desc}
+                    </p>
                   </div>
-                ) : (
-                  <Link
-                    to={s.href}
-                    className="relative flex flex-col justify-between p-5 rounded-2xl bg-[#111] border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all group cursor-pointer hover:-translate-y-1 h-full overflow-hidden"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-colors">
-                          <s.icon className="h-5 w-5" />
-                        </div>
-                        <span className="text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full">
-                          {s.badge}
-                        </span>
-                      </div>
-                      <h3 className="text-sm font-bold text-white mb-1 group-hover:text-primary transition-colors">
-                        {s.label}
-                      </h3>
-                      <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
-                        {s.desc}
-                      </p>
-                    </div>
-                    <div className="mt-4 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                      Explore &gt;
-                    </div>
-                  </Link>
-                )}
+                  <div className="mt-4 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                    Explore &gt;
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -888,7 +894,7 @@ export default function Index() {
                 </div>
               </div>
               <Button
-                onClick={() => setIsKccAppModalOpen(true)}
+                onClick={() => handleServiceClick("/", () => setIsKccAppModalOpen(true))}
                 className="w-full md:w-auto bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm py-3 px-8 rounded-full shrink-0 cursor-pointer shadow-lg border border-amber-300"
               >
                 Apply Now
@@ -924,6 +930,11 @@ export default function Index() {
               >
                 <div
                   onClick={() => {
+                    if (!user && !isAdminLoggedIn) {
+                      toast.info("Please register or login first to access this service.");
+                      navigate("/register", { state: { from: f.href } });
+                      return;
+                    }
                     if (f.action) {
                       f.action();
                       return;
@@ -1015,11 +1026,13 @@ export default function Index() {
                   <p className="text-xs text-gray-300 mb-3 line-clamp-2 leading-relaxed">
                     {card.desc}
                   </p>
-                  <Link to={card.href}>
-                    <Button size="sm" className="bg-primary text-black font-bold text-xs py-1.5 px-4 hover:bg-primary/90 rounded-xl cursor-pointer">
-                      {card.btn} →
-                    </Button>
-                  </Link>
+                  <Button
+                    size="sm"
+                    onClick={() => handleServiceClick(card.href)}
+                    className="bg-primary text-black font-bold text-xs py-1.5 px-4 hover:bg-primary/90 rounded-xl cursor-pointer"
+                  >
+                    {card.btn} →
+                  </Button>
                 </div>
               </motion.div>
             ))}
@@ -1041,8 +1054,8 @@ export default function Index() {
                 <p className="text-amber-500/80 text-sm">{t.home.kccPromoDesc}</p>
               </div>
               <Button
-                onClick={() => setIsKccAppModalOpen(true)}
-                className="bg-amber-500 hover:bg-amber-400 text-black font-bold shrink-0"
+                onClick={() => handleServiceClick("/", () => setIsKccAppModalOpen(true))}
+                className="bg-amber-500 hover:bg-amber-400 text-black font-bold shrink-0 cursor-pointer"
               >
                 {t.home.applyNow}
               </Button>
@@ -1730,15 +1743,20 @@ export default function Index() {
               <Button
                 variant="outline"
                 onClick={() => setSelectedFeature(null)}
-                className="w-full sm:w-auto border-white/10 text-gray-300 hover:bg-white/5 rounded-xl"
+                className="w-full sm:w-auto border-white/10 text-gray-300 hover:bg-white/5 rounded-xl cursor-pointer"
               >
                 Close
               </Button>
-              <Link to={selectedFeature.href} className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto bg-primary text-black font-bold hover:bg-primary/90 rounded-xl">
-                  Go to {selectedFeature.title} Section →
-                </Button>
-              </Link>
+              <Button
+                onClick={() => {
+                  const target = selectedFeature.href;
+                  setSelectedFeature(null);
+                  handleServiceClick(target);
+                }}
+                className="w-full sm:w-auto bg-primary text-black font-bold hover:bg-primary/90 rounded-xl cursor-pointer"
+              >
+                Go to {selectedFeature.title} Section →
+              </Button>
             </div>
           </div>
         </div>

@@ -54,18 +54,18 @@ function AppInner() {
           <Route path="/" element={<Index />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/services" element={<ServicesPage />} />
           <Route path="/blog" element={<BlogPage />} />
-          <Route path="/weather" element={<WeatherPage />} />
-          <Route path="/mandi-bhav" element={<MandiBhavPage />} />
-          <Route path="/agri-market" element={<AgriMarketPage />} />
           <Route path="/crop-calendar" element={<CropCalendarPage />} />
           <Route path="/government-schemes" element={<GovernmentSchemesPage />} />
           <Route path="/farming-tips" element={<FarmingTipsPage />} />
           <Route path="/kisan-pathshala" element={<KisanPathshalaPage />} />
           <Route path="/help-center" element={<HelpCenterPage />} />
 
-          {/* Protected Platform Routes (Requires Login / Account) */}
+          {/* Protected Platform & Service Routes (Requires Login / Account) */}
+          <Route path="/services" element={<AuthGate><ServicesPage /></AuthGate>} />
+          <Route path="/mandi-bhav" element={<AuthGate><MandiBhavPage /></AuthGate>} />
+          <Route path="/agri-market" element={<AuthGate><AgriMarketPage /></AuthGate>} />
+          <Route path="/weather" element={<AuthGate><WeatherPage /></AuthGate>} />
           <Route path="/dashboard" element={<AuthGate><DashboardPage /></AuthGate>} />
           <Route path="/dealer-dashboard" element={<AuthGate><DashboardPage /></AuthGate>} />
           <Route path="/profile" element={<AuthGate><ProfilePage /></AuthGate>} />

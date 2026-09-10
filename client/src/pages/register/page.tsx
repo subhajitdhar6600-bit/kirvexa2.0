@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, User, Phone, MapPin, Lock, CheckCircle, Shield, Zap, Clock, Users, Store, Building2, FileText, Mail, ArrowLeft, KeyRound, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -27,6 +27,7 @@ const DEALER_TYPES = [
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { loginUser, registerNewAccount, registeredAccounts } = useApp();
 
   const [role, setRole] = useState<"farmer" | "dealer">("farmer");
@@ -319,9 +320,16 @@ export default function RegisterPage() {
 
       toast.success("Email address verified! Registration completed successfully.");
       
-      // Direct redirect to homepage as logged in user!
+      // Direct redirect to requested service or according to profile status
       setTimeout(() => {
-        navigate("/");
+        const from = (location.state as any)?.from;
+        if (from && typeof from === "string" && from !== "/register" && from !== "/login") {
+          navigate(from);
+        } else if (role === "dealer") {
+          navigate("/dealer-dashboard");
+        } else {
+          navigate("/profile");
+        }
       }, 500);
     }, 600);
   };

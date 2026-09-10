@@ -154,6 +154,17 @@
     @apply bg-background text-foreground;
   }
 
+  img, video, canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Enable smooth touch scrolling on mobile devices */
+  .overflow-x-auto,
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;

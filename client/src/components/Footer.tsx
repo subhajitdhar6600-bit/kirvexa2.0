@@ -1,10 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Phone, Mail, Globe, MapPin, CreditCard, Wheat, Shield } from "lucide-react";
 import { useApp } from "@/context/AppContext.tsx";
+import { toast } from "sonner";
 
 export default function Footer() {
+  const navigate = useNavigate();
   const year = new Date().getFullYear();
-  const { t, setIsKccAppModalOpen, hasAppliedKcc } = useApp();
+  const { t, setIsKccAppModalOpen, hasAppliedKcc, user, isAdminLoggedIn } = useApp();
 
   const QUICK_LINKS = [
     { label: "Home", href: "/" },
@@ -46,7 +48,14 @@ export default function Footer() {
         {!hasAppliedKcc && (
           <div
             className="flex items-center justify-center gap-3 py-5 px-4 bg-linear-to-r from-amber-900/40 via-amber-800/30 to-amber-900/40 border-b border-amber-500/20 cursor-pointer group"
-            onClick={() => setIsKccAppModalOpen(true)}
+            onClick={() => {
+              if (!user && !isAdminLoggedIn) {
+                toast.info("Please register or login to apply for Kisan Credit Card.");
+                navigate("/register", { state: { from: "/" } });
+                return;
+              }
+              setIsKccAppModalOpen(true);
+            }}
           >
             <CreditCard className="h-5 w-5 text-amber-400 shrink-0" />
             <div className="text-center">

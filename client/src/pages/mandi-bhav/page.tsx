@@ -156,7 +156,7 @@ export default function MandiBhavPage() {
           <div>
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
               Mandi Prices
-              <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium hidden sm:inline-flex">
+              <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium inline-flex">
                 Live Updates
               </span>
             </h1>
@@ -257,12 +257,12 @@ export default function MandiBhavPage() {
         </div>
 
         {/* UNIT INDICATOR */}
-        <div className="flex items-center justify-between mb-3 px-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-3 px-1">
           <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
             ₹ / Quintal
           </div>
-          <div className="text-[11px] text-gray-500">
+          <div className="text-[11px] text-gray-400 leading-snug">
             Showing rates for <span className="text-emerald-400 font-bold">{activeCropObj.name} ({activeCropObj.hindi})</span> in <span className="text-white font-medium">{selectedMandi}</span>
           </div>
         </div>

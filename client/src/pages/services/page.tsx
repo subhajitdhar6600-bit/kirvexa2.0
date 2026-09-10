@@ -1,265 +1,435 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Search, Bell, CheckCircle2, ArrowRight, MessageCircle } from "lucide-react";
-import { toast } from "sonner";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  TrendingUp, ShoppingCart, Package, Tractor, Users, FlaskConical,
+  MessageSquare, CloudSun, Wallet, ShieldCheck, CheckCircle2,
+  AlertCircle, ArrowRight, Search, PhoneCall, Sparkles, CreditCard,
+  Building2, UserCheck, ShieldAlert, FileText, ChevronRight
+} from "lucide-react";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Badge } from "@/components/ui/badge.tsx";
+import Navbar from "@/components/Navbar.tsx";
+import Footer from "@/components/Footer.tsx";
 import { useApp } from "@/context/AppContext.tsx";
-
-const SERVICES = [
-  { id:"doctor", emoji:"?????", title:"Doctor Visit", hindi:"?????? ?? ??? ???????? ?? ??????", action:"Book Now", bg:"bg-blue-50", border:"border-blue-100", titleColor:"text-blue-700", btnClass:"bg-blue-600 hover:bg-blue-700" },
-  { id:"pesticide", emoji:"??", title:"Dava (Pesticide)", hindi:"???? ????? ?? ????????? ?? ?????", action:"Buy Now", bg:"bg-green-50", border:"border-green-100", titleColor:"text-green-700", btnClass:"bg-green-600 hover:bg-green-700" },
-  { id:"weather", emoji:"???", title:"Weather Information", hindi:"???? ?? ???? ??????? ?? ??????", action:"Check Now", bg:"bg-sky-50", border:"border-sky-100", titleColor:"text-sky-700", btnClass:"bg-sky-500 hover:bg-sky-600" },
-  { id:"soil", emoji:"??", title:"Soil Testing", hindi:"?????? ?? ???? ?? ??? ??? ?? ????", action:"Book Test", bg:"bg-amber-50", border:"border-amber-100", titleColor:"text-amber-700", btnClass:"bg-amber-600 hover:bg-amber-700" },
-  { id:"tractor", emoji:"??", title:"Tractor Booking", hindi:"???????? ??? ???? - ?????, ???? ?? ??? ?? ???", action:"Book Tractor", bg:"bg-emerald-50", border:"border-emerald-100", titleColor:"text-emerald-700", btnClass:"bg-emerald-600 hover:bg-emerald-700" },
-  { id:"labour", emoji:"??", title:"Labour Booking", hindi:"???? ?? ??? ????? ??? ????", action:"Book Labour", bg:"bg-orange-50", border:"border-orange-100", titleColor:"text-orange-700", btnClass:"bg-orange-600 hover:bg-orange-700" },
-  { id:"land", emoji:"???", title:"Land Preparation", hindi:"??? ?? ?????? ?? ????? ?? ??? ??????", action:"Book Service", bg:"bg-violet-50", border:"border-violet-100", titleColor:"text-violet-700", btnClass:"bg-violet-600 hover:bg-violet-700" },
-  { id:"agri", emoji:"??", title:"Agri Consultation", hindi:"???? ?????????? ?? ???? ?????? ?? ??????", action:"Get Advice", bg:"bg-teal-50", border:"border-teal-100", titleColor:"text-teal-700", btnClass:"bg-teal-600 hover:bg-teal-700" },
-];
-
-const ACTIVE_SERVICES = [
-  { icon:"?????", title:"Doctor Visit", sub:"Dr. Suresh Kumar", detail:"25 May 2025  10:30 AM", status:"Scheduled", statusColor:"text-blue-600 bg-blue-50 border-blue-200" },
-  { icon:"??", title:"Soil Testing", sub:"Lab No. 7845", detail:"24 May 2025  02:15 PM", status:"In Progress", statusColor:"text-amber-600 bg-amber-50 border-amber-200" },
-  { icon:"??", title:"Tractor Booking", sub:"Mahindra 575 DI", detail:"26 May 2025  08:00 AM", status:"Confirmed", statusColor:"text-emerald-700 bg-emerald-50 border-emerald-200" },
-  { icon:"??", title:"Dava (Pesticide)", sub:"Bayer Insecticide", detail:"22 May 2025  04:20 PM", status:"Delivered", statusColor:"text-violet-600 bg-violet-50 border-violet-200" },
-];
-
-const RECENT_REQUESTS = [
-  { service:"Doctor Visit", date:"25 May 2025, 10:30 AM", status:"Scheduled", statusColor:"text-blue-600 bg-blue-50 border-blue-200" },
-  { service:"Soil Testing", date:"24 May 2025, 02:15 PM", status:"In Progress", statusColor:"text-amber-600 bg-amber-50 border-amber-200" },
-  { service:"Tractor Booking", date:"20 May 2025, 08:00 AM", status:"Completed", statusColor:"text-emerald-700 bg-emerald-50 border-emerald-200" },
-];
-
-const NAV_ITEMS = [
-  { label:"Dashboard", href:"/dashboard", icon:"??" },
-  { label:"My Farm", href:"/dashboard", icon:"??" },
-  { label:"Market Prices", href:"/mandi-bhav", icon:"??" },
-  { label:"Products", href:"/agri-market", icon:"??" },
-  { label:"Services", href:"/services", icon:"??", active:true },
-  { label:"Fasal Selling", href:"/sell-crops", icon:"??" },
-  { label:"Credit & Wallet", href:"/wallet", icon:"??" },
-  { label:"Reports", href:"/dashboard", icon:"??" },
-  { label:"Support", href:"/help-center", icon:"??" },
-  { label:"Settings", href:"/profile", icon:"??" },
-];
+import { toast } from "sonner";
 
 export default function ServicesPage() {
-  const { user } = useApp();
-  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+  const {
+    user,
+    isKccIssued,
+    hasAppliedKcc,
+    kccDetails,
+    setIsKccAppModalOpen,
+    checkKccPermission,
+  } = useApp();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState<"all" | "farming" | "market" | "advisory">("all");
+
+  const SERVICES = [
+    {
+      id: "mandi-bhav",
+      title: "Live Mandi Bhav",
+      hindi: "लाइव मंडी भाव",
+      desc: "Real-time crop market prices from 500+ mandis across Bihar and North India with daily price trends.",
+      icon: TrendingUp,
+      href: "/mandi-bhav",
+      category: "market",
+      badge: "Real-time",
+      requiresKcc: false,
+      kccNote: "Open to all verified farmers",
+      color: "emerald"
+    },
+    {
+      id: "agri-market",
+      title: "Agri Marketplace & Inputs",
+      hindi: "कृषि इनपुट्स एवं बीज",
+      desc: "Buy certified seeds, quality fertilizers, pesticides, and modern farming equipment with direct delivery.",
+      icon: ShoppingCart,
+      href: "/agri-market",
+      category: "market",
+      badge: "Verified Products",
+      requiresKcc: true,
+      kccNote: "KCC limit or verified profile required for checkout",
+      color: "blue"
+    },
+    {
+      id: "sell-crops",
+      title: "Direct Crop Selling",
+      hindi: "फसल बिक्री (0% कमीशन)",
+      desc: "Sell your harvest directly to verified buyers, millers, and bulk traders without exploitative middlemen.",
+      icon: Package,
+      href: "/sell-crops",
+      category: "market",
+      badge: "Zero Commission",
+      requiresKcc: true,
+      kccNote: "Requires active KCC card to post crop listings",
+      color: "amber"
+    },
+    {
+      id: "machinery-booking",
+      title: "Machinery Booking",
+      hindi: "कृषि यंत्र एवं ट्रैक्टर बुकिंग",
+      desc: "On-demand tractor, rotavator, power tiller, and combine harvester rental coordinated to your field.",
+      icon: Tractor,
+      href: "/machinery-booking",
+      category: "farming",
+      badge: "Instant Allocation",
+      requiresKcc: true,
+      kccNote: "Requires active KCC card for equipment dispatch",
+      color: "orange"
+    },
+    {
+      id: "labour-booking",
+      title: "Labour Booking",
+      hindi: "श्रमिक एवं मजदूर सेवा",
+      desc: "Book verified, experienced agricultural labour crews for harvesting, sowing, weeding, and land preparation.",
+      icon: Users,
+      href: "/labour-booking",
+      category: "farming",
+      badge: "Verified Crews",
+      requiresKcc: true,
+      kccNote: "Requires active KCC card for labour allotment",
+      color: "purple"
+    },
+    {
+      id: "soil-testing",
+      title: "Soil Testing Laboratory",
+      hindi: "मिट्टी परीक्षण प्रयोगशाला",
+      desc: "Certified lab testing for pH, N-P-K, organic carbon, and micronutrients with doorstep sample pickup & PDF report.",
+      icon: FlaskConical,
+      href: "/soil-testing",
+      category: "farming",
+      badge: "Certified Lab",
+      requiresKcc: true,
+      kccNote: "Requires active KCC card or farmer account",
+      color: "teal"
+    },
+    {
+      id: "expert-advice",
+      title: "Agricultural Scientist Advisory",
+      hindi: "कृषि विशेषज्ञ परामर्श",
+      desc: "24/7 direct consultation with senior agricultural scientists for crop diseases, pest remedies, and fertilizer dosage.",
+      icon: MessageSquare,
+      href: "/expert-advice",
+      category: "advisory",
+      badge: "24/7 Free Call",
+      requiresKcc: false,
+      kccNote: "Available to all registered farmers",
+      color: "sky"
+    },
+    {
+      id: "weather",
+      title: "Hyperlocal Weather Update",
+      hindi: "मौसम पूर्वानुमान एवं अलर्ट",
+      desc: "Real-time rain forecast, temperature alerts, wind speed, and tailored weekly agricultural advisories.",
+      icon: CloudSun,
+      href: "/weather",
+      category: "advisory",
+      badge: "Live Forecast",
+      requiresKcc: false,
+      kccNote: "Open to all verified farmers",
+      color: "cyan"
+    },
+    {
+      id: "wallet",
+      title: "Kisan Credit & Digital Wallet",
+      hindi: "किसान क्रेडिट एवं वॉलेट",
+      desc: "Check available KCC balance, manage payment statements, download transaction receipts, and settle dues securely.",
+      icon: Wallet,
+      href: "/wallet",
+      category: "farming",
+      badge: "Govt. Credit Link",
+      requiresKcc: true,
+      kccNote: "Active KCC allotment required",
+      color: "emerald"
+    },
+    ...(user?.role === "dealer" ? [
+      {
+        id: "dealer-hub",
+        title: "Dealer Control Hub & POS",
+        hindi: "डीलर कंट्रोल हब एवं बिलिंग",
+        desc: "Manage product inventory, tractor fleet listings, farmer KCC card verification, and instant POS billing.",
+        icon: ShieldCheck,
+        href: "/dealer-dashboard",
+        category: "market" as const,
+        badge: "Dealer Exclusive",
+        requiresKcc: false,
+        kccNote: "Authorized Dealer Feature",
+        color: "amber"
+      }
+    ] : [])
+  ];
+
+  const filteredServices = SERVICES.filter((s) => {
+    const matchesCategory = activeCategory === "all" || s.category === activeCategory;
+    const matchesSearch = s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.hindi.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const handleServiceClick = (service: typeof SERVICES[0]) => {
+    if (service.requiresKcc && !isKccIssued && user?.role !== "dealer") {
+      const permitted = checkKccPermission(`use ${service.title}`);
+      if (!permitted) return;
+    }
+    navigate(service.href);
+  };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-56 bg-white border-r border-gray-100 flex flex-col shrink-0">
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-black text-sm">K</span>
-            </div>
-            <div>
-              <p className="text-sm font-black text-gray-900">Krivexo</p>
-              <p className="text-[10px] text-emerald-600 font-medium">Kheti ko Digital Saath</p>
-            </div>
-          </div>
-        </div>
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-              {user?.name?.charAt(0) || "R"}
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-800">{user?.name || "Ramesh Kumar"}</p>
-              <p className="text-[10px] text-gray-400">Farmer ID: KR123456</p>
-              <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-semibold">Premium</span>
-            </div>
-          </div>
-        </div>
-        <nav className="flex-1 overflow-y-auto p-2">
-          {NAV_ITEMS.map((n, i) => (
-            <Link key={i} to={n.href} className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold mb-0.5 transition-colors ${n.active ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-100"}`}>
-              <span className="text-sm">{n.icon}</span>{n.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="p-3 border-t border-gray-100">
-          <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-xl p-3 text-white">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center"><span className="text-sm">??</span></div>
-              <div><p className="text-[10px] font-black leading-tight">Krivexo</p><p className="text-[9px] text-emerald-200">Kisan Card</p></div>
-            </div>
-            <p className="text-[9px] text-emerald-200 leading-tight mb-2">?? ????? ?? ????, ???? ?? ?????</p>
-            <button className="w-full h-6 bg-white/20 hover:bg-white/30 rounded-lg text-[9px] font-bold text-white transition-colors">View Card Details</button>
-          </div>
-          <p className="text-center text-[9px] text-amber-600 font-bold italic mt-2">"Behtar Kheti Samriddh Kisan"</p>
-        </div>
-      </aside>
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
+      <Navbar />
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Topbar */}
-        <header className="bg-white border-b border-gray-100 px-6 py-3 flex items-center gap-4 shrink-0">
-          <div className="relative flex-1 max-w-lg">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search for services, experts, or anything..." className="w-full h-9 pl-9 pr-4 text-xs border border-gray-200 rounded-xl bg-gray-50 text-gray-700 outline-none focus:border-emerald-400" />
+      {/* Hero Header Banner */}
+      <section className="relative bg-linear-to-b from-[#121812] to-[#0a0a0a] border-b border-white/10 py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+            <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+            <span>/</span>
+            <span className="text-primary font-semibold">Services Hub</span>
           </div>
-          <div className="flex items-center gap-3 ml-auto">
-            <button className="relative w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50">
-              <Bell className="h-4 w-4" /><span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
-            <button className="h-8 px-3 text-[11px] border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50">?? ?? ?</button>
-            <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-1.5">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white text-[10px] font-bold">{user?.name?.charAt(0) || "R"}</div>
-              <div><p className="text-[11px] font-bold text-gray-800">{user?.name || "Ramesh Kumar"}</p><p className="text-[9px] text-gray-400">Farmer</p></div>
-            </div>
-          </div>
-        </header>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-5">
-          <div className="flex gap-5 items-start">
-            {/* Left Column */}
-            <div className="flex-1 min-w-0 space-y-5">
-              {/* Hero Banner */}
-              <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 rounded-2xl p-6 relative overflow-hidden min-h-[140px] flex items-center">
-                <div className="absolute inset-0 overflow-hidden">
-                  <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/5" />
-                  <div className="absolute bottom-0 right-0 w-64 h-full flex items-center justify-end pr-4 gap-2">
-                    <div className="text-5xl opacity-60">??</div><div className="text-6xl opacity-70">??</div><div className="text-6xl opacity-60">??</div>
-                  </div>
-                  <div className="absolute top-3 right-24 text-5xl opacity-40">?????</div>
-                </div>
-                <div className="relative z-10">
-                  <h1 className="text-2xl font-black text-white leading-tight">Krivexo Services</h1>
-                  <p className="text-emerald-200 text-base font-bold mt-0.5">?? ?????? ?? ??????, ?? ?? ?????????? ??</p>
-                  <p className="text-emerald-300 text-sm mt-0.5">???? ???, ???? ?????, ????? ??????</p>
-                  <div className="flex items-center gap-3 mt-4">
-                    {["? Expert Support","? Fast Service","?? Trusted Partner"].map((t,i)=>(
-                      <div key={i} className="flex items-center gap-1.5 bg-white/20 text-white text-[11px] font-semibold px-3 py-1.5 rounded-full">{t}</div>
-                    ))}
-                  </div>
-                </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-3 py-1 mb-2">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <span className="text-primary text-xs font-semibold uppercase tracking-wider">
+                  Krivexo Services Platform
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight" style={{ fontFamily: "Rajdhani, sans-serif" }}>
+                All Agricultural <span className="text-primary">Services & Solutions</span>
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-300 max-w-2xl mt-1.5 leading-relaxed">
+                Explore our full suite of digital farming services tailored for Bihar and North Indian agriculture. Every feature is synchronized with your profile status.
+              </p>
+            </div>
+
+            {/* Profile Status Summary Badge Card */}
+            <div className="bg-[#141414] border border-white/10 rounded-2xl p-4 sm:p-5 w-full md:w-80 shrink-0 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] uppercase tracking-wider text-gray-400 font-bold">Profile Status</span>
+                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                  user?.role === "dealer"
+                    ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                    : "bg-primary/20 text-primary border-primary/30"
+                }`}>
+                  {user?.role === "dealer" ? "Agri Dealer" : "Registered Farmer"}
+                </span>
               </div>
 
-              {/* Services Grid */}
+              <div className="text-sm font-bold text-white mb-1 truncate">
+                {user?.name || "Registered User"}
+              </div>
+              <div className="text-xs text-gray-400 mb-3 flex items-center gap-1.5">
+                <UserCheck className="h-3.5 w-3.5 text-emerald-400" />
+                <span>Status: <strong className="text-white font-medium">{user?.verificationStatus || "Active Member"}</strong></span>
+              </div>
+
+              {/* KCC Status indicator */}
+              <div className="pt-2.5 border-t border-white/10 flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-gray-400 block text-[10px]">KCC Allocation:</span>
+                  <span className={`font-bold ${isKccIssued ? "text-emerald-400" : hasAppliedKcc ? "text-amber-400" : "text-gray-400"}`}>
+                    {isKccIssued ? "Active & Issued" : hasAppliedKcc ? "Under Review" : "Not Applied"}
+                  </span>
+                </div>
+                {!isKccIssued && (
+                  <Button
+                    size="sm"
+                    onClick={() => setIsKccAppModalOpen(true)}
+                    className="bg-amber-500 hover:bg-amber-400 text-black text-[11px] font-bold px-3 py-1 rounded-xl cursor-pointer"
+                  >
+                    {hasAppliedKcc ? "Track" : "Apply KCC"}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Search & Filter Bar */}
+          <div className="mt-8 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search services (e.g., Mandi, Tractor, Soil Testing, Seeds)..."
+                className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-black/50 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:border-primary/50"
+              />
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 shrink-0">
+              {[
+                { id: "all", label: "All Services" },
+                { id: "farming", label: "Field & Farm" },
+                { id: "market", label: "Market & Trading" },
+                { id: "advisory", label: "Advisory & Weather" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveCategory(tab.id as any)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    activeCategory === tab.id
+                      ? "bg-primary text-black font-bold shadow-sm"
+                      : "bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white border border-white/10"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Main Services Grid */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+
+        {/* Informational Alert on KCC Requirements if not issued */}
+        {!isKccIssued && user?.role !== "dealer" && (
+          <div className="mb-8 bg-linear-to-r from-amber-950/60 via-amber-900/30 to-black border border-amber-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 mt-1 sm:mt-0">
+                <CreditCard className="h-5 w-5" />
+              </div>
               <div>
-                <p className="text-base font-black text-gray-900">Our Services</p>
-                <p className="text-xs text-gray-500 mb-3">???? ?? ????? ??? ??????, ?? ?? ???</p>
-                <div className="grid grid-cols-4 gap-3">
-                  {SERVICES.map((s) => (
-                    <div key={s.id} className={`${s.bg} ${s.border} border rounded-2xl p-4 cursor-pointer hover:shadow-md transition-all group`}>
-                      <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">{s.emoji}</div>
-                      <p className={`text-xs font-black ${s.titleColor} mb-1`}>{s.title}</p>
-                      <p className="text-[10px] text-gray-500 leading-tight mb-3">{s.hindi}</p>
-                      <button onClick={() => toast.info(s.action)} className={`w-full h-7 rounded-xl ${s.btnClass} text-white text-[10px] font-bold flex items-center justify-center gap-1 transition-colors`}>
-                        {s.action} <ArrowRight className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Recent Requests + Benefits */}
-              <div className="flex gap-4">
-                <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs font-bold text-gray-800">?? Recent Service Requests</p>
-                    <button className="text-[11px] text-emerald-600 font-semibold hover:underline">View All ?</button>
-                  </div>
-                  <div className="grid grid-cols-3 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-50">
-                    <span>Service</span><span>Date</span><span>Status</span>
-                  </div>
-                  {RECENT_REQUESTS.map((r,i) => (
-                    <div key={i} className="grid grid-cols-3 py-2.5 items-center border-b border-gray-50 last:border-0">
-                      <p className="text-[11px] font-semibold text-gray-800">{r.service}</p>
-                      <p className="text-[10px] text-gray-500">{r.date}</p>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full ${r.statusColor} text-[10px] font-semibold border w-fit`}>{r.status}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="w-56 shrink-0 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                  <p className="text-xs font-bold text-gray-800 mb-3">Service Benefits</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { icon:"?????", label:"Expert Guidance", sub:"Anubhavi Vishesagya" },
-                      { icon:"?", label:"Sahi Samay Par", sub:"Fast & Reliable" },
-                      { icon:"?", label:"100% Trusted", sub:"Verified Partners" },
-                      { icon:"??", label:"Digital Tracking", sub:"Har Step Par Update" },
-                    ].map((b,i) => (
-                      <div key={i} className="bg-gray-50 rounded-xl p-2 text-center">
-                        <div className="text-2xl mb-1">{b.icon}</div>
-                        <p className="text-[10px] font-bold text-gray-800 leading-tight">{b.label}</p>
-                        <p className="text-[9px] text-gray-500">{b.sub}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <h3 className="text-sm font-bold text-amber-300">
+                  Profile Status Notice: Full Features Require Kisan Credit Card
+                </h3>
+                <p className="text-xs text-gray-300 mt-0.5 leading-relaxed">
+                  Information & advisory services (Mandi Bhav, Weather, Expert Chat) are fully accessible. To book machinery, sell crops, or purchase inputs, apply for your free KCC allotment.
+                </p>
               </div>
             </div>
+            <Button
+              onClick={() => setIsKccAppModalOpen(true)}
+              className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs py-2.5 px-5 rounded-xl shrink-0 cursor-pointer shadow-md border border-amber-300"
+            >
+              {hasAppliedKcc ? "Check Application Status →" : "Apply for Free KCC →"}
+            </Button>
+          </div>
+        )}
 
-            {/* Right Panel */}
-            <div className="w-64 shrink-0 space-y-4">
-              {/* Quick Access */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                <p className="text-xs font-bold text-gray-800 mb-1">?? Quick Access</p>
-                <p className="text-[10px] text-gray-400 mb-3">???? ??????, ????? ????</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { icon:"?????", label:"Doctor Visit", color:"bg-blue-50 border-blue-100 text-blue-700" },
-                    { icon:"??", label:"Crop Advisory", color:"bg-green-50 border-green-100 text-green-700" },
-                    { icon:"??", label:"Soil Testing", color:"bg-amber-50 border-amber-100 text-amber-700" },
-                    { icon:"???", label:"Weather Info", color:"bg-sky-50 border-sky-100 text-sky-700" },
-                  ].map((q,i) => (
-                    <button key={i} onClick={() => toast.info(q.label)} className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border ${q.color} text-[10px] font-semibold hover:opacity-80 transition-opacity`}>
-                      <span className="text-xl">{q.icon}</span>
-                      <span className="text-center leading-tight">{q.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+        {/* Services List Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {filteredServices.map((service) => {
+            const Icon = service.icon;
+            const isLocked = service.requiresKcc && !isKccIssued && user?.role !== "dealer";
 
-              {/* My Active Services */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold text-gray-800">My Active Services</p>
-                  <button className="text-[11px] text-emerald-600 font-semibold hover:underline">View All ?</button>
-                </div>
-                <div className="space-y-2.5">
-                  {ACTIVE_SERVICES.map((s,i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-base shrink-0">{s.icon}</div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-semibold text-gray-800 truncate">{s.title}</p>
-                        <p className="text-[9px] text-gray-400 truncate">{s.sub}</p>
-                        <p className="text-[9px] text-gray-400">{s.detail}</p>
-                      </div>
-                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${s.statusColor} shrink-0 whitespace-nowrap`}>{s.status}</span>
+            return (
+              <div
+                key={service.id}
+                onClick={() => handleServiceClick(service)}
+                className="group relative flex flex-col justify-between rounded-2xl bg-[#111] border border-white/10 hover:border-primary/50 hover:bg-white/2 p-5 sm:p-6 transition-all duration-200 cursor-pointer hover:-translate-y-1 shadow-md hover:shadow-xl"
+              >
+                <div>
+                  {/* Top Badges */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-black transition-colors shadow-sm">
+                      <Icon className="h-6 w-6" />
                     </div>
-                  ))}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        {service.badge}
+                      </span>
+                      {isLocked && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                          KCC Required
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Titles */}
+                  <h3 className="text-base sm:text-lg font-black text-white group-hover:text-primary transition-colors flex items-center gap-2" style={{ fontFamily: "Rajdhani, sans-serif" }}>
+                    {service.title}
+                  </h3>
+                  <div className="text-xs text-primary/80 font-semibold mb-2">
+                    {service.hindi}
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-xs text-gray-300 leading-relaxed line-clamp-3 mb-4">
+                    {service.desc}
+                  </p>
+                </div>
+
+                {/* Bottom Access Status & Action CTA */}
+                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[11px] text-gray-400">
+                    {isLocked ? (
+                      <span className="text-amber-400 font-medium flex items-center gap-1">
+                        <AlertCircle className="h-3.5 w-3.5" /> Apply KCC to Unlock
+                      </span>
+                    ) : (
+                      <span className="text-emerald-400 font-medium flex items-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Ready &amp; Active
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                    {isLocked ? "Unlock Service →" : "Open Service →"}
+                  </span>
                 </div>
               </div>
+            );
+          })}
+        </div>
 
-              {/* Promo */}
-              <div className="bg-gradient-to-br from-emerald-700 to-teal-800 rounded-2xl p-4 relative overflow-hidden">
-                <div className="absolute -bottom-4 -right-2 text-5xl opacity-40">?????</div>
-                <div className="relative z-10">
-                  <p className="text-white text-xs font-black leading-tight mb-1">Kheti ko Banaye<br />Aur Bhi Aasan</p>
-                  <p className="text-emerald-200 text-[10px] mb-3">Krivexo Services ke saath!</p>
-                  <button onClick={() => toast.info("Explore Now")} className="w-full h-7 rounded-xl bg-white text-emerald-700 text-[10px] font-bold flex items-center justify-center gap-1.5 hover:bg-gray-100">
-                    Explore Now <ArrowRight className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
+        {/* Empty Search State */}
+        {filteredServices.length === 0 && (
+          <div className="text-center py-16 bg-[#111] border border-white/10 rounded-2xl">
+            <Search className="h-10 w-10 text-gray-500 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-white mb-1">No services found</h3>
+            <p className="text-xs text-gray-400 mb-4">Try searching with different keywords or reset filter.</p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => { setSearchQuery(""); setActiveCategory("all"); }}
+              className="border-white/20 text-gray-300 hover:text-white"
+            >
+              Reset Filters
+            </Button>
+          </div>
+        )}
 
-              {/* Chat */}
-              <button onClick={() => toast.info("Opening chat...")} className="w-full flex items-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl transition-colors">
-                <MessageCircle className="h-4 w-4 shrink-0" />
-                <div className="text-left">
-                  <p className="text-xs font-bold">Chat With Us</p>
-                  <p className="text-[10px] text-emerald-200">Koi bhi Service Book karne mein pareshaan ho rahi hai?</p>
-                </div>
-              </button>
+        {/* Bottom Support & Helpline Strip */}
+        <div className="mt-12 bg-[#121212] border border-white/10 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shrink-0">
+              <PhoneCall className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Need help choosing or booking a service?</h4>
+              <p className="text-xs text-gray-400 mt-0.5">Our agricultural helpline team is available 24/7 to assist farmers across Bihar.</p>
             </div>
           </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <a href="tel:+918708742170" className="w-full sm:w-auto">
+              <Button size="sm" className="w-full sm:w-auto bg-primary text-black font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer">
+                Call Helpline: +91 87087 42170
+              </Button>
+            </a>
+            <Link to="/help-center" className="w-full sm:w-auto">
+              <Button size="sm" variant="outline" className="w-full sm:w-auto border-white/20 text-gray-300 text-xs px-4 py-2.5 rounded-xl cursor-pointer">
+                Help Center
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
+
+      </main>
+
+      <Footer />
     </div>
   );
 }

@@ -15,12 +15,12 @@ export default function AuthGate({ children }: AuthGateProps) {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      toast.info("Please login or register to explore and use Krivexo platform features.");
+      toast.info("Please register or login to access Krivexo services and features.");
     }
   }, [isAuthenticated]);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
+    return <Navigate to="/register" replace state={{ from: location }} />;
   }
 
   return <>{children}</>;
