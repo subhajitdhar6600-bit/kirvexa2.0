@@ -53,6 +53,7 @@ import RefundsView from "./views/RefundsView";
 
 import { useApp } from "@/context/AppContext.tsx";
 import { api } from "@/services/api.ts";
+import { formatDate, formatDateTime } from "@/lib/dateUtils.ts";
 
 const EMPTY_SETTINGS: AdminSettings = {
   platformName: "Krivexo",
@@ -483,7 +484,7 @@ export default function AdminDashboard() {
           landType: "—",
           mainCrops: u.cropType || u.occupation || "Grain, Vegetables",
           organicCertified: "No" as const,
-          createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
+          createdAt: u.createdAt ? formatDateTime(u.createdAt) : "Recent",
           avatar: u.avatar || "",
           registeredByDealer: u.registeredByDealer || "",
           aadhaarNumber: u.aadhaarNumber || "",
@@ -512,7 +513,7 @@ export default function AdminDashboard() {
         totalOrders: 0,
         totalPurchases: 0,
         outstanding: 0,
-        createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
+        createdAt: u.createdAt ? formatDateTime(u.createdAt) : "Recent",
         avatar: u.avatar || "",
         rawUser: u,
       }));
@@ -591,7 +592,7 @@ export default function AdminDashboard() {
             status: (o.status?.toLowerCase() || "placed") as OrderItem["status"],
             paymentStatus: "paid",
             paymentMethod: o.paymentMethod || "UPI",
-            date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "—",
+            date: o.createdAt ? formatDateTime(o.createdAt) : "—",
             tracking: [],
           };
 
@@ -621,7 +622,7 @@ export default function AdminDashboard() {
               type: (p.type || "Payment") as any,
               amount: Number(p.amount || 0),
               method: (p.paymentMethod === "kcc" ? "KCC Credit" : p.paymentMethod === "wallet" ? "Wallet" : "UPI") as any,
-              date: p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN") : "Recent",
+              date: p.createdAt ? formatDateTime(p.createdAt) : "Recent",
               status: (p.status?.toLowerCase() === "failed" ? "failed" : p.status?.toLowerCase() === "pending" ? "pending" : "success") as any,
             });
           }
@@ -705,7 +706,7 @@ export default function AdminDashboard() {
             userType: "Farmer",
             type: "Labour Booking",
             subject: `${l.labourType} Request`,
-            date: l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "—",
+            date: l.createdAt ? formatDateTime(l.createdAt) : "—",
             status: l.status === "assigned" ? "resolved" : l.status === "pending" ? "new" : "in_review",
             priority: "Medium",
             description: `Need ${l.count} ${l.labourType}(s) for ${l.days} days from ${l.startDate}`,
@@ -723,7 +724,7 @@ export default function AdminDashboard() {
             userType: "Farmer",
             type: "Machinery Booking",
             subject: `${m.machineryType} Booking`,
-            date: m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "—",
+            date: m.createdAt ? formatDateTime(m.createdAt) : "—",
             status: m.status === "allotted" ? "resolved" : m.status === "pending" ? "new" : "closed",
             priority: "Medium",
             description: `Machinery: ${m.machineryType}, Date: ${m.bookingDate}, Duration: ${m.durationHours}h`,
@@ -741,7 +742,7 @@ export default function AdminDashboard() {
             userType: "Farmer",
             type: "Expert Advice",
             subject: `${e.cropName} Problem`,
-            date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-IN") : "—",
+            date: e.createdAt ? formatDateTime(e.createdAt) : "—",
             status: e.status === "resolved" ? "resolved" : "new",
             priority: "High",
             description: e.problemDetails || "—",

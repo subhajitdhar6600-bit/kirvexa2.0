@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
 import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
+import { formatDateTime } from "@/lib/dateUtils.ts";
 
 export default function SellCropsPage() {
   const { addCropListing, checkKccPermission, isKccIssued, setIsKccAppModalOpen, addNotification, user, t } = useApp();
@@ -92,6 +93,7 @@ export default function SellCropsPage() {
           "Address details": form.address || "Not Specified",
           "Pincode": form.pincode || "Not Specified",
           "Photos Uploaded": `${images.length} images attached`,
+          "Listing Submission Date & Time": formatDateTime(new Date()),
         },
       });
 
@@ -350,7 +352,8 @@ export default function SellCropsPage() {
           "City / Town": form.city || "N/A",
           "Postal Code": form.pincode || "N/A",
           "Full Address": form.address || "N/A",
-          "Images Attached": `${images.length} photo(s)`
+          "Images Attached": `${images.length} photo(s)`,
+          "Submission Time": formatDateTime(new Date()),
         }}
         loading={loading}
       />

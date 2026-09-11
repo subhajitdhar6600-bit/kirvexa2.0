@@ -17,6 +17,7 @@ import Footer from "@/components/Footer.tsx";
 import { useApp } from "@/context/AppContext.tsx";
 import { toast } from "sonner";
 import { generateFormPdf, downloadPdf } from "@/lib/pdfGenerator.ts";
+import { formatDateTime } from "@/lib/dateUtils.ts";
 import { sendEmailJS } from "@/services/emailService.ts";
 import { api } from "@/services/api.ts";
 import AddNewProductForm, { type AddProductPayload } from "@/components/products/AddNewProductForm.tsx";
@@ -168,7 +169,7 @@ export default function Index() {
         "Aadhaar Number": applyAadhaar,
         "Land Size": `${applyLand || "2.5"} Acres`,
         "District": applyDistrict,
-        "Submission Date": new Date().toLocaleDateString("en-IN"),
+        "Submission Date": formatDateTime(new Date()),
         "Status": "PENDING ADMIN APPROVAL"
       }
     });
@@ -217,7 +218,7 @@ export default function Index() {
         "District": res.district,
         "State": res.state,
         "Registered By Dealer": res.registeredByDealer,
-        "Registration Date": new Date().toLocaleDateString("en-IN")
+        "Registration Date": formatDateTime(new Date())
       }
     });
 

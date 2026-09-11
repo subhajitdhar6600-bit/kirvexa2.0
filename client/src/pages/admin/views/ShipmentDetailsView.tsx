@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDate, formatTime } from "@/lib/dateUtils.ts";
 
 interface ShipmentDetailsViewProps {
   shipmentAwb?: string;
@@ -34,7 +35,8 @@ export default function ShipmentDetailsView({ shipmentAwb, orders: propOrders, o
   const customerName = currentOrder?.buyer || currentOrder?.userName || "Registered Farmer";
   const customerPhone = currentOrder?.phone || currentOrder?.contactNumber || "9876543210";
   const productName = currentOrder?.product || (currentOrder?.items?.[0]?.name) || "Agricultural Certified Inputs";
-  const orderDate = currentOrder?.date || (currentOrder?.createdAt ? new Date(currentOrder.createdAt).toLocaleDateString("en-IN") : "Today");
+  const orderDate = currentOrder?.createdAt ? formatDate(currentOrder.createdAt) : (currentOrder?.date || formatDate(new Date()));
+  const orderTime = currentOrder?.createdAt ? formatTime(currentOrder.createdAt) : "10:30 AM";
   const isDelivered = currentOrder?.status === "delivered" || currentOrder?.status === "completed";
 
   return (
@@ -107,7 +109,7 @@ export default function ShipmentDetailsView({ shipmentAwb, orders: propOrders, o
           <div className="flex items-center justify-between relative">
             <div className="absolute top-4 left-6 right-6 h-0.5 bg-emerald-500 -z-0" />
             {[
-              { step: "Order Placed", date: orderDate, time: "10:30 AM", Icon: Package, done: true },
+              { step: "Order Placed", date: orderDate, time: orderTime, Icon: Package, done: true },
               { step: "Picked Up", date: orderDate, time: "02:15 PM", Icon: Truck, done: true },
               { step: "In Transit", date: orderDate, time: "08:45 PM", Icon: Truck, done: true },
               { step: "Out for Delivery", date: orderDate, time: "09:30 AM", Icon: Bike, done: isDelivered },

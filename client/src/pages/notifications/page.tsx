@@ -8,10 +8,10 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import Navbar from "@/components/Navbar.tsx";
 import Footer from "@/components/Footer.tsx";
-import { useApp } from "@/context/AppContext.tsx";
-import type { UserNotification } from "@/context/AppContext.tsx";
+import { useApp, type UserNotification } from "@/context/AppContext.tsx";
 import { cn } from "@/lib/utils.ts";
 import { toast } from "sonner";
+import { formatRelativeTime, formatDateTime } from "@/lib/dateUtils.ts";
 
 type FilterType = "all" | "unread" | "crops" | "machinery" | "labour" | "expert" | "wallet" | "kcc" | "account" | "mandi";
 
@@ -272,7 +272,16 @@ export default function NotificationsPage() {
                       <p className={cn("text-sm font-bold leading-snug", n.read ? "text-gray-300" : "text-white")}>
                         {n.title}
                       </p>
-                      <span className="text-[10px] text-gray-500 shrink-0 mt-0.5">{n.time}</span>
+                      <div className="flex flex-col items-end shrink-0 mt-0.5 text-right">
+                        <span className="text-[10px] font-medium text-gray-400">
+                          {n.createdAt ? formatRelativeTime(n.createdAt) : n.time}
+                        </span>
+                        {n.createdAt && (
+                          <span className="text-[9px] text-gray-500 font-mono">
+                            {formatDateTime(n.createdAt)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <p className="text-xs text-gray-400 leading-relaxed">{n.message}</p>
 

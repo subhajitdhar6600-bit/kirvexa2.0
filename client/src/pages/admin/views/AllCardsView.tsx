@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { api } from "@/services/api";
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDate } from "@/lib/dateUtils.ts";
 
 interface CardItem {
   id: string;
@@ -94,7 +95,7 @@ export default function AllCardsView() {
             creditLimit,
             availableLimit,
             status,
-            issuedOn: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "01 Jan 2026",
+            issuedOn: u.createdAt ? formatDate(u.createdAt) : "01 Jan 2026",
             validThru: "31 Dec 2030",
             avatar: name.slice(0, 2).toUpperCase(),
             isVerified,
@@ -176,7 +177,7 @@ export default function AllCardsView() {
       creditLimit: Number(issueForm.creditLimit) || 50000,
       availableLimit: Number(issueForm.creditLimit) || 50000,
       status: "Active",
-      issuedOn: new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),
+      issuedOn: formatDate(new Date()),
       validThru: "31 Dec 2030",
       avatar: (targetUser.fullName || targetUser.name || "U").slice(0, 2).toUpperCase(),
       isVerified: true,

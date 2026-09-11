@@ -11,6 +11,7 @@ const labourBookingSchema = new mongoose.Schema(
     days: { type: Number, required: true },
     startDate: { type: String, default: '' },
     endDate: { type: String, default: '' },
+    reportingTime: { type: String, default: '' },
     location: { type: String, default: '' },
     status: {
       type: String,

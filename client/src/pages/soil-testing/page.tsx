@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlaskConical, CheckCircle, MapPin, Calendar, FileText, Loader2 } from "lucide-react";
+import { FlaskConical, CheckCircle, MapPin, Calendar, FileText, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
 import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
+import { formatDate, formatDateTime, getDefaultBookingDate } from "@/lib/dateUtils.ts";
 
 const PACKAGES = [
   { name: "Basic Soil Test", price: "₹299", tests: ["pH Level", "Nitrogen (N)", "Phosphorus (P)", "Potassium (K)"], popular: false },
@@ -30,7 +31,8 @@ export default function SoilTestingPage() {
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [address, setAddress] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(() => getDefaultBookingDate(2));
+  const [timeSlot, setTimeSlot] = useState("10:00 AM - 01:00 PM (Morning)");
   const [crop, setCrop] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -68,17 +70,19 @@ export default function SoilTestingPage() {
           "Customer Name": name,
           "Contact Phone": phone,
           "Field Address": address,
-          "Preferred Date": date,
+          "Preferred Date": formatDate(date),
+          "Preferred Time Slot": timeSlot,
           "Intended Crop": crop,
           "Chosen Package": selected,
           "Price Rate": selectedPkg?.price || "N/A",
+          "Booking Timestamp": formatDateTime(new Date()),
         },
       });
 
       // Send notification with PDF receipt
       addNotification(
         "Soil Test Scheduled 🔬",
-        `Your booking for ${selected} has been registered (Ref: ${refId}). Download PDF receipt.`,
+        `Your booking for ${selected} on ${formatDate(date)} (${timeSlot}) has been registered (Ref: ${refId}). Download PDF receipt.`,
         "success",
         "/soil-testing",
         "soil",
@@ -90,7 +94,8 @@ export default function SoilTestingPage() {
       setName("");
       setPhone("");
       setAddress("");
-      setDate("");
+      setDate(getDefaultBookingDate(2));
+      setTimeSlot("10:00 AM - 01:00 PM (Morning)");
       setCrop("");
       toast.success("Soil test booked! Our expert will contact you shortly.");
     }, 1000);
@@ -181,7 +186,7 @@ export default function SoilTestingPage() {
                 <Input value={address} onChange={(e) => setAddress(e.target.value)} required placeholder="Enter field location" className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-600" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label className="text-gray-300 text-sm mb-1.5 block">Preferred Date</Label>
                 <div className="relative">
@@ -190,6 +195,21 @@ export default function SoilTestingPage() {
                 </div>
               </div>
               <div>
+                <Label className="text-gray-300 text-sm mb-1.5 block">Preferred Time Slot</Label>
+                <div className="relative">
+                  <Select value={timeSlot} onValueChange={setTimeSlot}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                      <SelectValue placeholder="Select time slot" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                      <SelectItem value="08:00 AM - 11:00 AM (Early Morning)">08:00 AM - 11:00 AM (Early Morning)</SelectItem>
+                      <SelectItem value="10:00 AM - 01:00 PM (Morning)">10:00 AM - 01:00 PM (Morning)</SelectItem>
+                      <SelectItem value="02:00 PM - 05:00 PM (Afternoon)">02:00 PM - 05:00 PM (Afternoon)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="sm:col-span-2">
                 <Label className="text-gray-300 text-sm mb-1.5 block">Crop Type</Label>
                 <Select value={crop} onValueChange={setCrop}>
                   <SelectTrigger className="bg-white/5 border-white/10 text-gray-400">
@@ -225,11 +245,13 @@ export default function SoilTestingPage() {
         data={{
           "Customer Name": name,
           "Contact Phone": phone,
-          "Preferred Date": date,
+          "Preferred Date": formatDate(date),
+          "Preferred Time Slot": timeSlot,
           "Crop Cultivated": crop,
           "Address/Location": address,
           "Test Package": selected,
-          "Estimated Cost": PACKAGES.find((p) => p.name === selected)?.price || "N/A"
+          "Estimated Cost": PACKAGES.find((p) => p.name === selected)?.price || "N/A",
+          "Booking Request Time": formatDateTime(new Date()),
         }}
         loading={loading}
       />

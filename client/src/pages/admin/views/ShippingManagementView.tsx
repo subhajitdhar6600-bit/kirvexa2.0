@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDate, formatDateTime } from "@/lib/dateUtils.ts";
 
 interface ShipmentItem {
   awb: string;
@@ -97,7 +98,7 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
 
       const cleanNum = String(o.id || idx).replace(/[^0-9]/g, "").padStart(8, "0").slice(-8);
       const awb = `KRVX4${cleanNum}N`;
-      const dateStr = o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "Today");
+      const dateStr = o.date || (o.createdAt ? formatDateTime(o.createdAt) : formatDate(new Date()));
 
       return {
         awb,
@@ -108,8 +109,8 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
         courierInitial: courier.initial,
         courierColor: courier.color,
         status,
-        shippedOn: `${dateStr}, 10:30 AM`,
-        expectedDelivery: status === "Delivered" ? `${dateStr}, 05:00 PM` : `${dateStr}, Expected Tomorrow`,
+        shippedOn: formatDateTime(o.createdAt || o.date || new Date()),
+        expectedDelivery: status === "Delivered" ? formatDateTime(o.createdAt || o.date || new Date()) : `${formatDate(new Date(Date.now() + 86400000))}, by 06:00 PM`,
       };
     });
   }, [rawOrders]);
@@ -180,8 +181,8 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
       return;
     }
     const courierObj = COURIER_PARTNERS.find(c => c.name === createForm.courier) || COURIER_PARTNERS[0];
-    const newAwb = `KRVX4${Math.floor(10000000 + Math.random() * 90000000)}N`;
-    const today = new Date().toLocaleDateString("en-IN");
+    const now = new Date();
+    const newAwb = `KRVX${Math.floor(10000000 + Math.random() * 90000000)}N`;
 
     const newShipment: ShipmentItem = {
       awb: newAwb,
@@ -192,8 +193,8 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
       courierInitial: courierObj.initial,
       courierColor: courierObj.color,
       status: "In Transit",
-      shippedOn: `${today}, 10:30 AM`,
-      expectedDelivery: `${today}, Expected Tomorrow`,
+      shippedOn: formatDateTime(now),
+      expectedDelivery: `${formatDate(new Date(now.getTime() + 86400000))}, by 06:00 PM`,
     };
 
     setShipments(prev => [newShipment, ...prev]);
@@ -238,11 +239,11 @@ export default function ShippingManagementView({ orders: propOrders, onViewShipm
   const isShipmentInDateFilter = (shippedOn: string, filter: string) => {
     if (filter === "all") return true;
     const now = new Date();
-    const todayStr = now.toLocaleDateString("en-IN");
+    const todayStr = formatDate(now);
 
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toLocaleDateString("en-IN");
+    const yesterdayStr = formatDate(yesterday);
 
     const cleanDate = shippedOn.split(",")[0].trim();
 

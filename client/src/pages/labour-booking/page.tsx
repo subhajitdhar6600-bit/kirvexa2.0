@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
 import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
+import { formatDate, formatDateTime, getDefaultBookingDate } from "@/lib/dateUtils.ts";
 
 export default function LabourBookingPage() {
   const { labourTypes, addLabourBooking, labourBookings, checkKccPermission, isKccIssued, setIsKccAppModalOpen, addNotification, user, t, openRateReviewModal } = useApp();
@@ -21,8 +22,9 @@ export default function LabourBookingPage() {
     labourType: "",
     count: "",
     days: "",
-    startDate: "",
+    startDate: getDefaultBookingDate(1),
     endDate: "",
+    reportingTime: "07:00 AM (Morning Shift)",
     location: "",
     userName: "",
     phone: "",
@@ -58,9 +60,11 @@ export default function LabourBookingPage() {
           "Labour Type Needed": form.labourType,
           "Number of Workers": `${form.count} Person(s)`,
           "Duration of Booking": `${form.days} Days`,
-          "Start Date": form.startDate || "As soon as possible",
-          "End Date": form.endDate || "N/A",
+          "Start Date": form.startDate ? formatDate(form.startDate) : "As soon as possible",
+          "End Date": form.endDate ? formatDate(form.endDate) : "N/A",
+          "Reporting Shift": form.reportingTime || "07:00 AM (Morning Shift)",
           "Work Location": form.location,
+          "Submission Date & Time": formatDateTime(new Date()),
         },
       });
 
@@ -73,6 +77,7 @@ export default function LabourBookingPage() {
         days: parseInt(form.days),
         startDate: form.startDate,
         endDate: form.endDate,
+        reportingTime: form.reportingTime,
         location: form.location,
       });
 
@@ -140,7 +145,7 @@ export default function LabourBookingPage() {
                 <Clock className="h-4 w-4" /> {t.labourBooking.pendingBadge}
               </div>
               <div className="mt-4">
-                <Button onClick={() => { setSubmitted(false); setForm({ labourType: "", count: "", days: "", startDate: "", endDate: "", location: "", userName: "", phone: "" }); setNumDays(""); }}
+                <Button onClick={() => { setSubmitted(false); setForm({ labourType: "", count: "", days: "", startDate: getDefaultBookingDate(1), endDate: "", reportingTime: "07:00 AM (Morning Shift)", location: "", userName: "", phone: "" }); setNumDays(""); }}
                   className="bg-primary text-black font-bold">{t.labourBooking.submitAnother}</Button>
               </div>
             </div>
@@ -173,8 +178,8 @@ export default function LabourBookingPage() {
                 </div>
               </div>
 
-              {/* Start & End Date (show end date only if days > 2) */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Start & End Date & Shift */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-gray-300 text-sm mb-1.5 block">{t.labourBooking.startDate}</Label>
                   <div className="relative">
@@ -182,8 +187,22 @@ export default function LabourBookingPage() {
                     <Input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className="pl-10 bg-white/5 border-white/10 text-white" />
                   </div>
                 </div>
+                <div>
+                  <Label className="text-gray-300 text-sm mb-1.5 block">Reporting Shift / Time</Label>
+                  <Select value={form.reportingTime} onValueChange={v => setForm(f => ({ ...f, reportingTime: v }))}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                      <SelectValue placeholder="Select shift / time" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                      <SelectItem value="07:00 AM (Morning Shift)">07:00 AM (Morning Shift)</SelectItem>
+                      <SelectItem value="08:00 AM (Standard Shift)">08:00 AM (Standard Shift)</SelectItem>
+                      <SelectItem value="09:00 AM (Day Shift)">09:00 AM (Day Shift)</SelectItem>
+                      <SelectItem value="01:00 PM (Afternoon Shift)">01:00 PM (Afternoon Shift)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 {parseInt(numDays) > 2 && (
-                  <div>
+                  <div className="sm:col-span-2">
                     <Label className="text-gray-300 text-sm mb-1.5 block">{t.labourBooking.endDate}</Label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -269,8 +288,10 @@ export default function LabourBookingPage() {
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs text-gray-300 bg-black/20 p-2.5 rounded-lg mb-3">
-                    <div><span className="text-gray-500">Count:</span> {b.count} Workers</div>
-                    <div><span className="text-gray-500">Duration:</span> {b.days} Days</div>
+                    <div><span className="text-gray-500">Start Date:</span> <span className="font-semibold text-white">{b.startDate ? formatDate(b.startDate) : "Immediate"}</span></div>
+                    <div><span className="text-gray-500">Shift / Time:</span> <span className="font-semibold text-white">{b.reportingTime || "07:00 AM"}</span></div>
+                    <div><span className="text-gray-500">Workers:</span> {b.count} Workers ({b.days} Days)</div>
+                    <div><span className="text-gray-500">Requested:</span> {b.createdAt ? formatDateTime(b.createdAt) : "Recent"}</div>
                     <div className="col-span-2"><span className="text-gray-500">Location:</span> {b.location}</div>
                   </div>
 
@@ -350,9 +371,11 @@ export default function LabourBookingPage() {
           "Labour Category": form.labourType,
           "Number of Workers": form.count,
           "Days Needed": form.days,
-          "Start Date": form.startDate || "Immediate",
-          "End Date": form.endDate || "N/A",
+          "Start Date": form.startDate ? formatDate(form.startDate) : "Immediate",
+          "Reporting Shift": form.reportingTime,
+          "End Date": form.endDate ? formatDate(form.endDate) : "N/A",
           "Service Location": form.location,
+          "Submission Time": formatDateTime(new Date()),
         }}
         loading={loading}
       />

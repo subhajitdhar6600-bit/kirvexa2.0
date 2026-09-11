@@ -1,4 +1,5 @@
 import jsPDF from "jspdf";
+import { formatDateTime } from "./dateUtils.ts";
 
 export interface FormPdfData {
   formTitle: string;
@@ -19,7 +20,7 @@ export function generateFormPdf(params: FormPdfData): { dataUrl: string; fileNam
   const userName = params.userName || (detailsObj["Farmer Name"] as string) || (detailsObj["Applicant Name"] as string) || (detailsObj["Full Name"] as string) || "Farmer";
   const userPhone = params.userPhone || (detailsObj["Phone Number"] as string) || (detailsObj["Mobile Number"] as string) || "N/A";
   const userRole = params.userRole || "Farmer";
-  const timestamp = params.timestamp || new Date().toLocaleString("en-IN");
+  const timestamp = params.timestamp ? formatDateTime(params.timestamp) : formatDateTime(new Date());
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",

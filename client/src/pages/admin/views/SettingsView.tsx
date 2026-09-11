@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { AdminSettings } from "../types.ts";
+import { formatDate } from "@/lib/dateUtils.ts";
 
 interface SettingsViewProps {
   settings?: AdminSettings;
@@ -1583,7 +1584,7 @@ export default function SettingsView({ settings, setSettings }: SettingsViewProp
             <p className="text-[10px] text-gray-500 mb-2">Create and download database backup.</p>
             <div className="flex items-center justify-between text-xs">
               <span className="text-gray-400 text-[11px]">Last Backup</span>
-              <span className="font-semibold text-gray-800 text-[10.5px]">{new Date().toLocaleDateString("en-IN")}</span>
+              <span className="font-semibold text-gray-800 text-[10.5px]">{formatDate(new Date())}</span>
             </div>
           </div>
           <button

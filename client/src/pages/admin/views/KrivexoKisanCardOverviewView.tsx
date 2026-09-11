@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/services/api";
+import { formatDate, formatDateTime } from "@/lib/dateUtils.ts";
 
 interface KrivexoKisanCardOverviewViewProps {
   onNavigateTab?: (tab: string) => void;
@@ -130,7 +131,7 @@ export default function KrivexoKisanCardOverviewView({ onNavigateTab }: KrivexoK
       icon: isCancelled ? ArrowUpRight : ShoppingBag,
       label: `Order #${(o.id || o._id || `ORD${idx}`).slice(-8).toUpperCase()}`,
       sub: `${o.customerName || (o.deliveryAddress?.name) || "Customer"} • ${o.status || "Completed"}`,
-      date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Recent",
+      date: o.createdAt ? formatDateTime(o.createdAt) : formatDate(new Date()),
       amount: `₹ ${(Number(o.totalAmount) || Number(o.amount) || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
       color: isCancelled ? "text-red-500" : "text-emerald-600",
       bg: isCancelled ? "bg-red-50" : "bg-emerald-50",
@@ -161,7 +162,7 @@ export default function KrivexoKisanCardOverviewView({ onNavigateTab }: KrivexoK
     try {
       const rows = [
         ["Report", "Farma Platform Financial Summary"],
-        ["Generated On", new Date().toLocaleString("en-IN")],
+        ["Generated On", formatDateTime(new Date())],
         ["Total Volume", `₹ ${totalVolume.toFixed(2)}`],
         ["Available Balance", `₹ ${availableBalance.toFixed(2)}`],
         ["On Hold Balance", `₹ ${onHoldBalance.toFixed(2)}`],
@@ -173,7 +174,7 @@ export default function KrivexoKisanCardOverviewView({ onNavigateTab }: KrivexoK
         ...orders.map(o => [
           o.id || o._id || "N/A",
           o.customerName || "Customer",
-          o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "N/A",
+          o.createdAt ? formatDateTime(o.createdAt) : "N/A",
           o.status || "Completed",
           (Number(o.totalAmount) || Number(o.amount) || 0).toFixed(2)
         ])

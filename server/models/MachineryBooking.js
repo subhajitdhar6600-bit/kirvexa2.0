@@ -8,6 +8,7 @@ const machineryBookingSchema = new mongoose.Schema(
     phone: { type: String, required: true },
     machineryType: { type: String, required: true },
     bookingDate: { type: String, default: '' },
+    bookingTime: { type: String, default: '' },
     durationHours: { type: mongoose.Schema.Types.Mixed, default: 1 },
     location: { type: String, default: '' },
     status: {

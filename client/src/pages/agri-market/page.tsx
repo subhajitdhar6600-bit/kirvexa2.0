@@ -6,9 +6,9 @@ import { Badge } from "@/components/ui/badge.tsx";
 import Navbar from "@/components/Navbar.tsx";
 import Footer from "@/components/Footer.tsx";
 import { toast } from "sonner";
-import { useApp } from "@/context/AppContext.tsx";
-import type { CropListing } from "@/context/AppContext.tsx";
+import { useApp, type CropListing } from "@/context/AppContext.tsx";
 import { api } from "@/services/api.ts";
+import { formatDateTime } from "@/lib/dateUtils.ts";
 
 export interface LiveProduct {
   id: string;
@@ -85,6 +85,10 @@ function CropDetailModal({ crop, onClose }: CropDetailModalProps) {
             <div className="bg-white/5 rounded-xl p-3">
               <p className="text-xs text-gray-500">{t.buyInputs.askingPrice}</p>
               <p className="text-sm font-black text-primary">₹{crop.price}/Qtl</p>
+            </div>
+            <div className="bg-white/5 rounded-xl p-3 col-span-2">
+              <p className="text-xs text-gray-500">Listed On Platform</p>
+              <p className="text-xs font-semibold text-gray-200">{crop.createdAt ? formatDateTime(crop.createdAt) : "Verified Recent"}</p>
             </div>
           </div>
           <div className="bg-white/5 rounded-xl p-4">
@@ -348,7 +352,8 @@ export default function AgriMarketPage() {
                   </div>
                   <div className="p-4">
                     <h3 className="text-sm font-bold mb-1 text-white">{crop.cropName}</h3>
-                    <p className="text-xs text-gray-400 mb-2">{t.buyInputs.by} {crop.sellerName} · {crop.weight}</p>
+                    <p className="text-xs text-gray-400 mb-1">{t.buyInputs.by} {crop.sellerName} · {crop.weight}</p>
+                    <p className="text-[10px] text-gray-500 mb-2">Listed: {crop.createdAt ? formatDateTime(crop.createdAt) : "Recently Listed"}</p>
                     <div className="flex items-end justify-between">
                       <div className="text-xl font-black text-amber-400" style={{ fontFamily: "Rajdhani, sans-serif" }}>₹{crop.price}<span className="text-xs text-gray-500 font-normal">/Qtl</span></div>
                       <div className="flex gap-1.5">

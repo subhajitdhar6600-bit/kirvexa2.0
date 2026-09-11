@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { toast } from "sonner";
 import { api } from "@/services/api.ts";
+import { formatDate } from "@/lib/dateUtils.ts";
 
 interface AllUsersViewProps {
   farmers?: any[];
@@ -94,7 +95,7 @@ export default function AllUsersView({
       dob: (u.dob && u.dob !== "—") ? u.dob : "—",
       address: u.address || "",
       location: [u.village, u.district, u.state].filter(Boolean).join(", ") || u.location || "Bihar, India",
-      joinedOn: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
+      joinedOn: u.createdAt ? formatDate(u.createdAt) : "Recent",
       status: (u.status === "inactive" || u.isActive === false) ? "Inactive" : "Active",
       verified: u.isVerified === true || u.verificationStatus === "Verified" || u.verified === "verified" || u.verified === true,
       avatar: name.slice(0, 2).toUpperCase(),

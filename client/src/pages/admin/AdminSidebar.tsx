@@ -134,9 +134,11 @@ export default function AdminSidebar({
         {/* Brand Header */}
         <div className="p-4 border-b border-emerald-900/40 flex items-center justify-between bg-[#081814]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 shadow-md">
-              <span className="text-lg">🌿</span>
-            </div>
+            <img 
+              src="/krivexo-logo.png" 
+              alt="Krivexo Logo" 
+              className="w-9 h-9 object-cover rounded-xl border border-emerald-400/40 shadow-md" 
+            />
             <div>
               <h1 className="text-base font-black tracking-wide text-white leading-tight">
                 Krivexo

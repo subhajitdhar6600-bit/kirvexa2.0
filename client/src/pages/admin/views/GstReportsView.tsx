@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDate } from "@/lib/dateUtils.ts";
 
 interface GstReportsViewProps {
   orders?: any[];
@@ -93,7 +94,7 @@ export default function GstReportsView({ orders: propOrders, onViewInvoice }: Gs
       const gstAmt = Math.round((amt - taxVal) * 100) / 100;
       const c = Math.round((gstAmt / 2) * 100) / 100;
       const s = Math.round((gstAmt - c) * 100) / 100;
-      const dateStr = o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "Today");
+      const dateStr = o.date || (o.createdAt ? formatDate(o.createdAt) : formatDate(new Date()));
 
       return {
         id: String(o.id || `ORD${8000 + idx}`),

@@ -10,6 +10,7 @@ import type { ProductItem } from "../types.ts";
 import { toast } from "sonner";
 import { api } from "@/services/api";
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDateTime } from "@/lib/dateUtils.ts";
 import AddNewProductForm from "@/components/products/AddNewProductForm.tsx";
 import type { AddProductPayload } from "@/components/products/AddNewProductForm.tsx";
 
@@ -1022,7 +1023,7 @@ export default function ProductsView({ products: propProducts, setProducts, prod
                 ["Quantity / Weight", viewCrop.weight],
                 ["Target Price", `₹ ${Number(viewCrop.price || 0).toLocaleString("en-IN")} / Quintal`],
                 ["Current Status", viewCrop.status],
-                ["Submitted On", viewCrop.createdAt ? new Date(viewCrop.createdAt).toLocaleDateString("en-IN") : "Recent"],
+                ["Submitted On", viewCrop.createdAt ? formatDateTime(viewCrop.createdAt) : formatDateTime(new Date())],
               ].map(([label, val], i) => (
                 <div key={i} className="flex items-center justify-between border-b border-gray-50 pb-1.5">
                   <span className="text-gray-500 font-medium">{label}</span>

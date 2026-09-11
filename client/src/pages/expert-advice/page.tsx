@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
 import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
+import { formatDateTime } from "@/lib/dateUtils.ts";
 
 const ADMIN_PHONE = "8708742170";
 
@@ -55,6 +56,7 @@ export default function ExpertAdvicePage() {
           "Crop Name": form.cropName,
           "Problem Symptoms": form.problemDetails,
           "Farmer Address": form.address || "Not Specified",
+          "Request Timestamp": formatDateTime(new Date()),
         },
       });
 
@@ -226,6 +228,7 @@ export default function ExpertAdvicePage() {
           "Farmer Address": form.address || "N/A",
           "Crop Affected": form.cropName,
           "Details of Problem": form.problemDetails,
+          "Request Timestamp": formatDateTime(new Date()),
         }}
         loading={loading}
       />

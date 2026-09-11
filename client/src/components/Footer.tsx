@@ -72,9 +72,11 @@ export default function Footer() {
             {/* Brand */}
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center">
-                  <Wheat className="h-5 w-5 text-primary" />
-                </div>
+                <img 
+                  src="/krivexo-logo.png" 
+                  alt="KRIVEXO Logo" 
+                  className="w-10 h-10 object-cover rounded-xl border border-primary/40" 
+                />
                 <span className="text-white font-bold text-xl tracking-widest" style={{ fontFamily: "Rajdhani, sans-serif" }}>
                   KRIV<span className="text-primary">E</span>XA
                 </span>

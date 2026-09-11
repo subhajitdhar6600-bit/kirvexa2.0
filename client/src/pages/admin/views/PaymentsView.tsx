@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { api } from "@/services/api";
+import { formatDate, formatTime } from "@/lib/dateUtils.ts";
 
 interface PaymentRecord {
   id: string;
@@ -70,8 +71,8 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
           const st = (p.status || "").toUpperCase();
           const isFailed = st === "FAILED" || st === "CANCELLED";
           const isPending = st === "PENDING" || st === "INITIATED";
-          const dateStr = p.paidAt ? new Date(p.paidAt).toLocaleDateString("en-IN") : (p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN") : "Today");
-          const timeStr = p.paidAt ? new Date(p.paidAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "10:30 am";
+          const dateStr = formatDate(p.paidAt || p.createdAt || new Date());
+          const timeStr = formatTime(p.paidAt || p.createdAt || new Date());
 
           const matchingUser = usersMap.get(p.userId);
           const uName = p.userName || p.user || (matchingUser ? (matchingUser.name || matchingUser.fullName) : p.userId === 'usr_admin_01' ? 'Super Admin' : (p.userId || 'Registered User'));
@@ -99,8 +100,8 @@ export default function PaymentsView({ orders: propOrders, onNavigateTab }: Paym
           const st = (o.status || "").toLowerCase();
           const isFailed = st === "cancelled" || st === "rejected";
           const isPending = st === "pending" || st === "placed" || st === "processing";
-          const dateStr = o.date || (o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "Today");
-          const timeStr = o.createdAt ? new Date(o.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "10:30 am";
+          const dateStr = formatDate(o.createdAt || o.date || new Date());
+          const timeStr = formatTime(o.createdAt || o.date || new Date());
 
           const matchingUser = usersMap.get(o.userId);
           const uName = o.userName || o.customerName || o.buyer || (matchingUser ? (matchingUser.name || matchingUser.fullName) : (o.userId || 'Registered User'));

@@ -3,6 +3,7 @@ import { Play, BookOpen, Leaf, Droplets, Bug, Sun, Sprout, Video, Search, Gradua
 import Navbar from "@/components/Navbar.tsx";
 import Footer from "@/components/Footer.tsx";
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDate } from "@/lib/dateUtils.ts";
 
 const CATEGORIES = [
   { id: "all", label: "All Videos", icon: BookOpen },
@@ -181,7 +182,7 @@ export default function KisanPathshalaPage() {
 
                     <div className="flex items-center justify-between pt-2 border-t border-white/10">
                       <div className="text-[10px] text-gray-500">
-                        Added {new Date(video.createdAt).toLocaleDateString("en-IN")}
+                        Added {formatDate(video.createdAt)}
                       </div>
                       <a
                         href={video.youtubeUrl}

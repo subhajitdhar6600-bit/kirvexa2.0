@@ -17,6 +17,7 @@ import { generateFormPdf, downloadPdf } from "@/lib/pdfGenerator.ts";
 import { api } from "@/services/api.ts";
 import { toast } from "sonner";
 import { sendEmailJS } from "@/services/emailService.ts";
+import { formatDateTime } from "@/lib/dateUtils.ts";
 import AddNewProductForm from "@/components/products/AddNewProductForm.tsx";
 import type { AddProductPayload } from "@/components/products/AddNewProductForm.tsx";
 
@@ -232,7 +233,7 @@ export default function DashboardPage() {
     title: `Order #${o.id}`,
     customer: o.userName,
     amount: `₹${o.totalAmount}`,
-    date: new Date(o.createdAt).toLocaleDateString("en-IN"),
+    date: formatDateTime(o.createdAt),
     status: o.status,
   }));
 
@@ -247,7 +248,7 @@ export default function DashboardPage() {
     categoryName: "Product Purchase",
     title: o.items.map(i => `${i.name} (x${i.quantity})`).join(", "),
     vendor: o.assignedDealerName || user?.name || "Agri Dealer",
-    date: new Date(o.createdAt).toLocaleDateString("en-IN"),
+    date: formatDateTime(o.createdAt),
     amount: `₹${o.totalAmount}`,
     status: o.status,
     statusBadge: o.status === "Delivered" ? "bg-primary/20 text-primary border-primary/30" : o.status === "Dispatched" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-blue-500/20 text-blue-400 border-blue-500/30",
@@ -332,7 +333,7 @@ export default function DashboardPage() {
         "District": applyDistrict || "Patna",
         "Residential Address": applyAddress || "Bihar Village",
         "Applied By Dealer": user?.name || "Verified Dealer",
-        "Submission Date": new Date().toLocaleDateString("en-IN"),
+        "Submission Date": formatDateTime(new Date()),
         "Status": "PENDING ADMIN APPROVAL",
       },
     });
@@ -386,7 +387,7 @@ export default function DashboardPage() {
         "State & Pincode": `${regState || "Bihar"} - ${regPincode || "800001"}`,
         "Land Size": regLand ? `${regLand} Acres` : "3 Acres",
         "Registered By Dealer": user?.name || "Verified Dealer",
-        "Registration Date": new Date().toLocaleDateString("en-IN"),
+        "Registration Date": formatDateTime(new Date()),
       },
     });
 

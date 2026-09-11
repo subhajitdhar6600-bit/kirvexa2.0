@@ -85,13 +85,13 @@ export default function OrderDetailsView({ order, onOrderChange, onBack }: Order
 
             <div className="space-y-4 pt-2">
               {[
-                { title: "Order Placed", date: "20 May 2024, 10:30 AM", stepStatus: "placed" },
-                { title: "Confirmed", date: "20 May 2024, 11:15 AM", stepStatus: "confirmed" },
-                { title: "Processing", date: "20 May 2024, 02:00 PM", stepStatus: "processing" },
-                { title: "Ready to Dispatch", date: "21 May 2024, 09:00 AM", stepStatus: "ready_to_dispatch" },
-                { title: "Dispatched", date: "21 May 2024, 11:30 AM", stepStatus: "dispatched" },
-                { title: "Delivered", date: "22 May 2024, 04:00 PM", stepStatus: "delivered" },
-                { title: "Completed", date: "22 May 2024, 04:30 PM", stepStatus: "completed" },
+                { title: "Order Placed", date: order.date || "Today", stepStatus: "placed" },
+                { title: "Confirmed", date: order.date || "Today", stepStatus: "confirmed" },
+                { title: "Processing", date: order.date || "Today", stepStatus: "processing" },
+                { title: "Ready to Dispatch", date: order.date || "Today", stepStatus: "ready_to_dispatch" },
+                { title: "Dispatched", date: order.date || "Today", stepStatus: "dispatched" },
+                { title: "Delivered", date: order.date || "Today", stepStatus: "delivered" },
+                { title: "Completed", date: order.date || "Today", stepStatus: "completed" },
               ].map((step, idx) => (
                 <div key={idx} className="flex items-center gap-4 text-xs">
                   <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold shrink-0">

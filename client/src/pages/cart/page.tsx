@@ -9,6 +9,7 @@ import Footer from "@/components/Footer.tsx";
 import { useApp } from "@/context/AppContext.tsx";
 import { toast } from "sonner";
 import { api } from "@/services/api.ts";
+import { formatDateTime } from "@/lib/dateUtils.ts";
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -506,7 +507,7 @@ export default function CartPage() {
                         <div>
                           <span className="text-xs font-bold text-primary">{ord.id || ord.orderNumber}</span>
                           <span className="text-[11px] text-gray-400 ml-2">
-                            {ord.createdAt ? new Date(ord.createdAt).toLocaleString("en-IN") : "Today"}
+                            {formatDateTime(ord.createdAt || ord.date || new Date())}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">

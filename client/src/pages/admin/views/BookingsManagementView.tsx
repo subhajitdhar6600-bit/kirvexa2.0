@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { api } from "@/services/api.ts";
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDate, formatTime, BOOKING_TIME_SLOTS, DEFAULT_BOOKING_TIME } from "@/lib/dateUtils.ts";
 
 export interface BookingRow {
   id: string;
@@ -54,6 +55,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
   const [createCustomer, setCreateCustomer] = useState("");
   const [createPhone, setCreatePhone] = useState("");
   const [createDate, setCreateDate] = useState(new Date().toISOString().split("T")[0]);
+  const [createTime, setCreateTime] = useState(DEFAULT_BOOKING_TIME);
   const [createLocation, setCreateLocation] = useState("Patna, Bihar");
   const [createDetails, setCreateDetails] = useState("");
   const [createAmount, setCreateAmount] = useState(1800);
@@ -248,8 +250,8 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
             icon: "👥",
             customer: l.userName || "Farmer Customer",
             phone: l.phone || "—",
-            date: l.startDate || (l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "Today"),
-            time: "09:00 AM",
+            date: l.startDate ? formatDate(l.startDate) : (l.createdAt ? formatDate(l.createdAt) : formatDate(new Date())),
+            time: l.reportingTime || (l.createdAt ? formatTime(l.createdAt) : "08:00 AM"),
             status: bStatus === "allotted" || bStatus === "assigned" || bStatus === "completed" ? "Confirmed" : bStatus === "cancelled" ? "Cancelled" : "Ongoing",
             bookingStatus: bStatus,
             amount: l.rateQuoteAmount || (Number(l.count) || 1) * (Number(l.days) || 1) * 450,
@@ -275,8 +277,8 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
             icon: "🚜",
             customer: m.userName || "Farmer Customer",
             phone: m.phone || "—",
-            date: m.bookingDate || (m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "Today"),
-            time: "10:30 AM",
+            date: m.bookingDate ? formatDate(m.bookingDate) : (m.createdAt ? formatDate(m.createdAt) : formatDate(new Date())),
+            time: m.bookingTime || (m.createdAt ? formatTime(m.createdAt) : "09:00 AM"),
             status: bStatus === "allotted" || bStatus === "completed" ? "Confirmed" : (bStatus === "rejected" || bStatus === "cancelled") ? "Cancelled" : "Ongoing",
             bookingStatus: bStatus,
             amount: m.rateQuoteAmount || (Number(m.durationHours) || 1) * 350,
@@ -302,8 +304,8 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
             icon: "🩺",
             customer: e.farmerName || "Farmer Customer",
             phone: e.phone || "—",
-            date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-IN") : "Today",
-            time: "11:00 AM",
+            date: e.createdAt ? formatDate(e.createdAt) : formatDate(new Date()),
+            time: e.createdAt ? formatTime(e.createdAt) : "10:00 AM",
             status: e.status === "resolved" ? "Completed" : "Confirmed",
             amount: 500.0,
             rawType: "expert",
@@ -402,6 +404,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
           count: 1,
           days: 1,
           startDate: createDate,
+          reportingTime: createTime,
           location: createLocation,
           status: "pending",
         });
@@ -411,8 +414,8 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
           icon: "👥",
           customer: createCustomer,
           phone: createPhone,
-          date: createDate,
-          time: "09:00 AM",
+          date: formatDate(createDate),
+          time: createTime,
           status: "Confirmed",
           amount: Number(createAmount) || 1200,
           rawType: "labour",
@@ -434,8 +437,8 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
           icon: "🩺",
           customer: createCustomer,
           phone: createPhone,
-          date: createDate,
-          time: "11:00 AM",
+          date: formatDate(createDate),
+          time: createTime,
           status: "Confirmed",
           amount: Number(createAmount) || 500,
           rawType: "expert",
@@ -448,6 +451,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
           phone: createPhone,
           machineryType: createServiceType,
           bookingDate: createDate,
+          bookingTime: createTime,
           durationHours: 4,
           location: createLocation,
           status: "pending",
@@ -458,8 +462,8 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
           icon: typeLower.includes("soil") ? "🧪" : typeLower.includes("warehouse") ? "🏬" : typeLower.includes("transport") ? "🚚" : "🚜",
           customer: createCustomer,
           phone: createPhone,
-          date: createDate,
-          time: "10:30 AM",
+          date: formatDate(createDate),
+          time: createTime,
           status: "Confirmed",
           amount: Number(createAmount) || 2450,
           rawType: "machinery",
@@ -671,7 +675,7 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                 <th className="py-3 px-4 text-left">Service Type</th>
                 <th className="py-3 px-4 text-left">Customer Name</th>
                 <th className="py-3 px-4 text-left">Phone Number</th>
-                <th className="py-3 px-4 text-left">Booking Date</th>
+                <th className="py-3 px-4 text-left">Schedule & Time</th>
                 <th className="py-3 px-4 text-left">Status</th>
                 <th className="py-3 px-4 text-left">Amount</th>
                 <th className="py-3 px-4 text-center">Actions</th>
@@ -706,7 +710,12 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                     </td>
                     <td className="py-3.5 px-4 font-semibold text-gray-800">{b.customer}</td>
                     <td className="py-3.5 px-4 text-gray-600">{b.phone}</td>
-                    <td className="py-3.5 px-4 text-gray-500">{b.date}</td>
+                    <td className="py-3.5 px-4">
+                      <div className="font-semibold text-gray-800">{b.date}</div>
+                      <div className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5 font-medium">
+                        <Clock className="h-3 w-3 text-emerald-600 inline" /> {b.time || "Scheduled"}
+                      </div>
+                    </td>
                     <td className="py-3.5 px-4">{getStatusBadge(b)}</td>
                     <td className="py-3.5 px-4 font-bold text-gray-900">₹ {b.amount.toLocaleString("en-IN")}</td>
                     <td className="py-3.5 px-4 text-center">
@@ -825,14 +834,28 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
                   <Input type="date" value={createDate} onChange={(e) => setCreateDate(e.target.value)} className="bg-gray-50 border-gray-200 text-xs" required />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-700 mb-1 block">Booking Amount (₹)</label>
-                  <Input type="number" value={createAmount} onChange={(e) => setCreateAmount(Number(e.target.value))} className="bg-gray-50 border-gray-200 text-xs" required />
+                  <label className="text-xs font-bold text-gray-700 mb-1 block">Preferred Time / Shift</label>
+                  <select
+                    value={createTime}
+                    onChange={(e) => setCreateTime(e.target.value)}
+                    className="w-full h-9 bg-gray-50 border border-gray-200 rounded-md text-xs px-2 text-gray-800"
+                  >
+                    {BOOKING_TIME_SLOTS.map((slot) => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-gray-700 mb-1 block">Location / Address</label>
-                <Input value={createLocation} onChange={(e) => setCreateLocation(e.target.value)} placeholder="e.g. Village Rampur, Danapur, Patna" className="bg-gray-50 border-gray-200 text-xs" />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-gray-700 mb-1 block">Booking Amount (₹)</label>
+                  <Input type="number" value={createAmount} onChange={(e) => setCreateAmount(Number(e.target.value))} className="bg-gray-50 border-gray-200 text-xs" required />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 mb-1 block">Location / Address</label>
+                  <Input value={createLocation} onChange={(e) => setCreateLocation(e.target.value)} placeholder="e.g. Village Rampur, Danapur, Patna" className="bg-gray-50 border-gray-200 text-xs" />
+                </div>
               </div>
 
               <div>
@@ -1217,8 +1240,8 @@ export default function BookingsManagementView({ initialServiceFilter = "all", o
 
               <div className="grid grid-cols-2 gap-2">
                 <div className="p-2.5 bg-gray-50 rounded-xl">
-                  <span className="text-gray-400 block text-[10px]">Date:</span>
-                  <span className="font-medium text-gray-800">{detailsBooking.date}</span>
+                  <span className="text-gray-400 block text-[10px]">Date & Preferred Time:</span>
+                  <span className="font-semibold text-gray-900">{detailsBooking.date} • {detailsBooking.time}</span>
                 </div>
                 <div className="p-2.5 bg-gray-50 rounded-xl">
                   <span className="text-gray-400 block text-[10px]">Duration / Workers:</span>

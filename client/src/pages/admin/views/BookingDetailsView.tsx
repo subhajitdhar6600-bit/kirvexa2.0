@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { toast } from "sonner";
+import { formatDate, formatTime } from "@/lib/dateUtils.ts";
 
 interface BookingDetailsViewProps {
   bookingId?: string;
@@ -14,6 +15,8 @@ interface BookingDetailsViewProps {
 }
 
 export default function BookingDetailsView({ bookingId = "BK2505250001", onBack }: BookingDetailsViewProps) {
+  const currentDate = formatDate(new Date());
+  const currentTime = formatTime(new Date());
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -61,8 +64,8 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
               <div><span className="text-gray-400">Service Type: </span><span className="font-semibold text-gray-800">Tractor Booking</span></div>
               <div><span className="text-gray-400">Customer Name: </span><span className="font-semibold text-gray-800">Ramesh Kumar</span></div>
               <div><span className="text-gray-400">Phone Number: </span><span className="font-semibold text-gray-800">9876543210</span></div>
-              <div><span className="text-gray-400">Booking Date: </span><span className="text-gray-800">25 May 2025</span></div>
-              <div><span className="text-gray-400">Booking Time: </span><span className="text-gray-800">10:30 AM</span></div>
+              <div><span className="text-gray-400">Booking Date: </span><span className="text-gray-800">{currentDate}</span></div>
+              <div><span className="text-gray-400">Booking Time: </span><span className="text-gray-800">{currentTime}</span></div>
             </div>
           </div>
 
@@ -94,9 +97,9 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
           <div className="flex items-center justify-between relative">
             <div className="absolute top-4 left-6 right-6 h-0.5 bg-emerald-500 -z-0" />
             {[
-              { title: "Booking Placed", date: "25 May 2025", time: "10:30 AM", icon: "📅", done: true },
-              { title: "Confirmed", date: "25 May 2025", time: "10:35 AM", icon: "⏳", done: true },
-              { title: "In Progress", date: "26 May 2025", time: "08:00 AM", icon: "🚜", done: true },
+              { title: "Booking Placed", date: currentDate, time: currentTime, icon: "📅", done: true },
+              { title: "Confirmed", date: currentDate, time: currentTime, icon: "⏳", done: true },
+              { title: "In Progress", date: currentDate, time: "08:00 AM", icon: "🚜", done: true },
               { title: "Completed", date: "—", time: "—", icon: "🏁", done: false },
               { title: "Reviewed", date: "—", time: "—", icon: "⭐", done: false },
             ].map((st, i) => (
@@ -157,8 +160,8 @@ export default function BookingDetailsView({ bookingId = "BK2505250001", onBack 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-2 text-xs">
           <p className="font-bold text-gray-800">Booking Schedule</p>
           <div className="space-y-1.5">
-            <div className="flex justify-between"><span className="text-gray-400">Booking Date</span><span className="text-gray-800 font-semibold">25 May 2025</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">Booking Time</span><span className="text-gray-800">10:30 AM</span></div>
+            <div className="flex justify-between"><span className="text-gray-400">Booking Date</span><span className="text-gray-800 font-semibold">{currentDate}</span></div>
+            <div className="flex justify-between"><span className="text-gray-400">Booking Time</span><span className="text-gray-800">{currentTime}</span></div>
             <div className="flex justify-between"><span className="text-gray-400">Start Date</span><span className="text-gray-800 font-semibold">26 May 2025</span></div>
             <div className="flex justify-between"><span className="text-gray-400">Start Time</span><span className="text-gray-800">08:00 AM</span></div>
             <div className="flex justify-between"><span className="text-gray-400">End Date</span><span className="text-gray-800 font-semibold">26 May 2025</span></div>

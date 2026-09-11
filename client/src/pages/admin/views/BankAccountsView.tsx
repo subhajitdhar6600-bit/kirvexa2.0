@@ -5,6 +5,7 @@ import {
   ChevronRight, AlertCircle, Check, X, Trash2, Pencil, Phone, IndianRupee
 } from "lucide-react";
 import { toast } from "sonner";
+import { formatDate } from "@/lib/dateUtils.ts";
 
 interface BankAccountItem {
   id: string;
@@ -474,7 +475,7 @@ export default function BankAccountsView() {
                 <p className="font-bold text-gray-800 text-[11px]">Bank Account Added</p>
                 <p className="text-[10px] text-gray-400">HDFC Bank - ****5678</p>
               </div>
-              <span className="text-[9px] text-gray-400 whitespace-nowrap">25 May 2025, 10:30 AM</span>
+              <span className="text-[9px] text-gray-400 whitespace-nowrap">{formatDate(new Date())}, 10:30 AM</span>
             </div>
 
             <div className="flex items-start gap-2.5">
@@ -485,7 +486,7 @@ export default function BankAccountsView() {
                 <p className="font-bold text-gray-800 text-[11px]">Account Verified</p>
                 <p className="text-[10px] text-gray-400">SBI Bank - ****2345</p>
               </div>
-              <span className="text-[9px] text-gray-400 whitespace-nowrap">24 May 2025, 02:15 PM</span>
+              <span className="text-[9px] text-gray-400 whitespace-nowrap">{formatDate(new Date(Date.now() - 86400000))}, 02:15 PM</span>
             </div>
 
             <div className="flex items-start gap-2.5">
@@ -496,7 +497,7 @@ export default function BankAccountsView() {
                 <p className="font-bold text-gray-800 text-[11px]">Primary Account Changed</p>
                 <p className="text-[10px] text-gray-400">ICICI Bank - ****8910</p>
               </div>
-              <span className="text-[9px] text-gray-400 whitespace-nowrap">23 May 2025, 11:45 AM</span>
+              <span className="text-[9px] text-gray-400 whitespace-nowrap">{formatDate(new Date(Date.now() - 172800000))}, 11:45 AM</span>
             </div>
 
             <div className="flex items-start gap-2.5">
@@ -507,7 +508,7 @@ export default function BankAccountsView() {
                 <p className="font-bold text-gray-800 text-[11px]">Account Verification Pending</p>
                 <p className="text-[10px] text-gray-400">PNB Bank - ****7788</p>
               </div>
-              <span className="text-[9px] text-gray-400 whitespace-nowrap">22 May 2025, 04:20 PM</span>
+              <span className="text-[9px] text-gray-400 whitespace-nowrap">{formatDate(new Date(Date.now() - 259200000))}, 04:20 PM</span>
             </div>
           </div>
         </div>

@@ -10,6 +10,7 @@ import { useApp } from "@/context/AppContext.tsx";
 import { toast } from "sonner";
 import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
+import { formatDate, formatDateTime, BOOKING_TIME_SLOTS, DEFAULT_BOOKING_TIME, getDefaultBookingDate } from "@/lib/dateUtils.ts";
 
 const MACHINERY_OPTIONS = [
   "Tractor (45 HP)",
@@ -26,11 +27,8 @@ export default function MachineryBookingPage() {
   const [selectedMachine, setSelectedMachine] = useState<string>("Tractor (45 HP)");
   const [userName, setUserName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
-  const [bookingDate, setBookingDate] = useState(() => {
-    const today = new Date();
-    today.setDate(today.getDate() + 1);
-    return today.toISOString().split("T")[0];
-  });
+  const [bookingDate, setBookingDate] = useState(() => getDefaultBookingDate(1));
+  const [bookingTime, setBookingTime] = useState<string>(DEFAULT_BOOKING_TIME);
   const [durationHours, setDurationHours] = useState("4");
   const [location, setLocation] = useState(() => {
     if (user?.village && user?.district) return `${user.village}, ${user.district}`;
@@ -68,9 +66,11 @@ export default function MachineryBookingPage() {
           "Applicant Name": userName,
           "Contact Phone": phone,
           "Requested Equipment": selectedMachine,
-          "Booking Date": bookingDate,
+          "Booking Date": formatDate(bookingDate),
+          "Preferred Time Slot": bookingTime,
           "Duration Hours": `${durationHours} Hour(s)`,
           "Field Location": location,
+          "Submission Date & Time": formatDateTime(new Date()),
         },
       });
 
@@ -80,6 +80,7 @@ export default function MachineryBookingPage() {
         phone,
         machineryType: selectedMachine,
         bookingDate,
+        bookingTime,
         durationHours: Number(durationHours) || 4,
         location,
       });
@@ -192,6 +193,19 @@ export default function MachineryBookingPage() {
                   </div>
                 </div>
                 <div>
+                  <Label className="text-gray-300 text-xs mb-1.5 block">Preferred Time Slot</Label>
+                  <Select value={bookingTime} onValueChange={setBookingTime}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                      <SelectValue placeholder="Select time slot" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                      {BOOKING_TIME_SLOTS.map((slot) => (
+                        <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="sm:col-span-2">
                   <Label className="text-gray-300 text-xs mb-1.5 block">Duration (hours)</Label>
                   <div className="relative">
                     <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -276,8 +290,10 @@ export default function MachineryBookingPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-xs text-gray-300 bg-white/5 p-3 rounded-xl mb-3">
-                      <div><span className="text-gray-500">Date:</span> {b.bookingDate}</div>
+                      <div><span className="text-gray-500">Booking Date:</span> <span className="font-semibold text-white">{formatDate(b.bookingDate)}</span></div>
+                      <div><span className="text-gray-500">Time Slot:</span> <span className="font-semibold text-white">{b.bookingTime || "09:00 AM - 12:00 PM"}</span></div>
                       <div><span className="text-gray-500">Duration:</span> {b.durationHours} Hours</div>
+                      <div><span className="text-gray-500">Requested:</span> {b.createdAt ? formatDateTime(b.createdAt) : "Recent"}</div>
                       <div className="col-span-2"><span className="text-gray-500">Location:</span> {b.location}</div>
                     </div>
 
@@ -368,9 +384,11 @@ export default function MachineryBookingPage() {
           "Equipment Request": selectedMachine,
           "Operator/Applicant": userName,
           "Contact Phone": phone,
-          "Required Date": bookingDate,
+          "Required Date": formatDate(bookingDate),
+          "Preferred Time Slot": bookingTime,
           "Booking Duration": `${durationHours} Hour(s)`,
           "Field Address": location,
+          "Submission Time": formatDateTime(new Date()),
         }}
         loading={loading}
       />

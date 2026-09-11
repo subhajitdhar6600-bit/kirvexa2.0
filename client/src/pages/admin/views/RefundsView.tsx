@@ -5,6 +5,7 @@ import {
   TrendingUp, Check, Sliders, X, Save, Plus, FileText, Settings, Phone
 } from "lucide-react";
 import { toast } from "sonner";
+import { formatDate, formatTime } from "@/lib/dateUtils.ts";
 
 interface RefundItem {
   id: string;
@@ -18,17 +19,21 @@ interface RefundItem {
   date: string;
 }
 
+const todayStr = formatDate(new Date());
+const yesterdayStr = formatDate(new Date(Date.now() - 86400000));
+const twoDaysAgoStr = formatDate(new Date(Date.now() - 172800000));
+
 const INITIAL_REFUNDS_DATA: RefundItem[] = [
-  { id: "RFN2505250001", orderId: "ORD2505250001", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 2,450.00", amountNum: 2450, reason: "Order Cancelled by User", method: "UPI\nramesh@upi", status: "Processed", date: "25 May 2025\n10:30 AM" },
-  { id: "RFN2505250002", orderId: "ORD2505250002", user: "Suresh Yadav\n(Farmer)", amount: "₹ 5,000.00", amountNum: 5000, reason: "Product Not Delivered", method: "Bank Transfer\nSBI **** 5678", status: "Processed", date: "25 May 2025\n09:45 AM" },
-  { id: "RFN2505240003", orderId: "ORD2505240003", user: "Anita Devi\n(Farmer)", amount: "₹ 1,230.00", amountNum: 1230, reason: "Wrong Product Received", method: "Wallet", status: "Pending", date: "24 May 2025\n04:20 PM" },
-  { id: "RFN2505240004", orderId: "ORD2505240004", user: "Vikash Singh\n(Farmer)", amount: "₹ 7,500.00", amountNum: 7500, reason: "Product Damaged", method: "UPI\nvikash@upi", status: "Processed", date: "24 May 2025\n11:15 AM" },
-  { id: "RFN2505230005", orderId: "ORD2505230005", user: "Pooja Kumari\n(Farmer)", amount: "₹ 2,000.00", amountNum: 2000, reason: "Payment Failed (Auto Refund)", method: "Wallet", status: "Processed", date: "23 May 2025\n02:30 PM" },
-  { id: "RFN2505230006", orderId: "ORD2505230006", user: "Manoj Thakur\n(Farmer)", amount: "₹ 1,080.00", amountNum: 1080, reason: "Order Cancelled by User", method: "Net Banking\nHDFC **** 2345", status: "Failed", date: "23 May 2025\n12:05 PM" },
-  { id: "RFN2505220007", orderId: "ORD2505220007", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 3,000.00", amountNum: 3000, reason: "Service Not Satisfactory", method: "Bank Transfer\nPNB **** 4567", status: "Pending", date: "22 May 2025\n05:40 PM" },
-  { id: "RFN2505220008", orderId: "ORD2505220008", user: "Sunil Kumar\n(Farmer)", amount: "₹ 1,500.00", amountNum: 1500, reason: "Duplicate Payment", method: "UPI\nsunil@upi", status: "Processed", date: "22 May 2025\n01:20 PM" },
-  { id: "RFN2505210009", orderId: "ORD2505210009", user: "Neha Kumari\n(Farmer)", amount: "₹ 4,500.00", amountNum: 4500, reason: "Order Cancelled by Admin", method: "Wallet", status: "Processed", date: "21 May 2025\n03:15 PM" },
-  { id: "RFN2505210010", orderId: "ORD2505210010", user: "Ajay Kumar\n(Farmer)", amount: "₹ 1,000.00", amountNum: 1000, reason: "Payment Gateway Failure", method: "UPI\najay@upi", status: "Pending", date: "21 May 2025\n11:10 AM" },
+  { id: "RFN2505250001", orderId: "ORD2505250001", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 2,450.00", amountNum: 2450, reason: "Order Cancelled by User", method: "UPI\nramesh@upi", status: "Processed", date: `${todayStr}\n10:30 AM` },
+  { id: "RFN2505250002", orderId: "ORD2505250002", user: "Suresh Yadav\n(Farmer)", amount: "₹ 5,000.00", amountNum: 5000, reason: "Product Not Delivered", method: "Bank Transfer\nSBI **** 5678", status: "Processed", date: `${todayStr}\n09:45 AM` },
+  { id: "RFN2505240003", orderId: "ORD2505240003", user: "Anita Devi\n(Farmer)", amount: "₹ 1,230.00", amountNum: 1230, reason: "Wrong Product Received", method: "Wallet", status: "Pending", date: `${yesterdayStr}\n04:20 PM` },
+  { id: "RFN2505240004", orderId: "ORD2505240004", user: "Vikash Singh\n(Farmer)", amount: "₹ 7,500.00", amountNum: 7500, reason: "Product Damaged", method: "UPI\nvikash@upi", status: "Processed", date: `${yesterdayStr}\n11:15 AM` },
+  { id: "RFN2505230005", orderId: "ORD2505230005", user: "Pooja Kumari\n(Farmer)", amount: "₹ 2,000.00", amountNum: 2000, reason: "Payment Failed (Auto Refund)", method: "Wallet", status: "Processed", date: `${twoDaysAgoStr}\n02:30 PM` },
+  { id: "RFN2505230006", orderId: "ORD2505230006", user: "Manoj Thakur\n(Farmer)", amount: "₹ 1,080.00", amountNum: 1080, reason: "Order Cancelled by User", method: "Net Banking\nHDFC **** 2345", status: "Failed", date: `${twoDaysAgoStr}\n12:05 PM` },
+  { id: "RFN2505220007", orderId: "ORD2505220007", user: "Ramesh Kumar\n(Farmer)", amount: "₹ 3,000.00", amountNum: 3000, reason: "Service Not Satisfactory", method: "Bank Transfer\nPNB **** 4567", status: "Pending", date: `${twoDaysAgoStr}\n05:40 PM` },
+  { id: "RFN2505220008", orderId: "ORD2505220008", user: "Sunil Kumar\n(Farmer)", amount: "₹ 1,500.00", amountNum: 1500, reason: "Duplicate Payment", method: "UPI\nsunil@upi", status: "Processed", date: `${twoDaysAgoStr}\n01:20 PM` },
+  { id: "RFN2505210009", orderId: "ORD2505210009", user: "Neha Kumari\n(Farmer)", amount: "₹ 4,500.00", amountNum: 4500, reason: "Order Cancelled by Admin", method: "Wallet", status: "Processed", date: `${twoDaysAgoStr}\n03:15 PM` },
+  { id: "RFN2505210010", orderId: "ORD2505210010", user: "Ajay Kumar\n(Farmer)", amount: "₹ 1,000.00", amountNum: 1000, reason: "Payment Gateway Failure", method: "UPI\najay@upi", status: "Pending", date: `${twoDaysAgoStr}\n11:10 AM` },
 ];
 
 const REFUND_REASONS = [
@@ -692,7 +697,7 @@ export default function RefundsView() {
               <button onClick={() => {
                 if (!manualRefundForm.orderId || !manualRefundForm.amount || !manualRefundForm.user) { toast.error("Please fill all required fields"); return; }
                 const newId = `RFN${Date.now().toString().slice(-10)}`;
-                const newRefund: RefundItem = { id: newId, orderId: manualRefundForm.orderId, user: manualRefundForm.user + "\n(Manual)", amount: `₹ ${Number(manualRefundForm.amount).toLocaleString("en-IN", {minimumFractionDigits: 2})}`, amountNum: Number(manualRefundForm.amount), reason: manualRefundForm.reason || "Manual Refund", method: manualRefundForm.method, status: "Pending", date: new Date().toLocaleDateString("en-IN", {day:"2-digit",month:"short",year:"numeric"}) + "\n" + new Date().toLocaleTimeString("en-IN", {hour:"2-digit",minute:"2-digit"}) };
+                const newRefund: RefundItem = { id: newId, orderId: manualRefundForm.orderId, user: manualRefundForm.user + "\n(Manual)", amount: `₹ ${Number(manualRefundForm.amount).toLocaleString("en-IN", {minimumFractionDigits: 2})}`, amountNum: Number(manualRefundForm.amount), reason: manualRefundForm.reason || "Manual Refund", method: manualRefundForm.method, status: "Pending", date: formatDate(new Date()) + "\n" + formatTime(new Date()) };
                 setRefunds(prev => [newRefund, ...prev]);
                 toast.success(`Manual refund ${newId} created!`);
                 setShowManualRefundModal(false);

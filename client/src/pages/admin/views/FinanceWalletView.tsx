@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { api } from "@/services/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { formatDate, formatDateTime } from "@/lib/dateUtils.ts";
 
 interface FinanceWalletViewProps {
   onNavigateTab?: (tab: string) => void;
@@ -56,7 +57,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
             customer: "Admin Reserve Deposit",
             amount: Number(p.amount) || 0,
             status: "Delivered",
-            date: p.paidAt || (p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN") : "Recent"),
+            date: p.paidAt ? formatDateTime(p.paidAt) : (p.createdAt ? formatDateTime(p.createdAt) : formatDate(new Date())),
           });
         });
       }
@@ -75,7 +76,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
             customer: o.customerName || o.userName || o.buyer || "Customer",
             amount: Number(o.totalAmount) || Number(o.amount) || 0,
             status: isDelivered ? "Delivered" : isCancelled ? "Cancelled" : "Processing",
-            date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "Recent",
+            date: o.createdAt ? formatDateTime(o.createdAt) : formatDate(new Date()),
           });
         });
       }
@@ -93,7 +94,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
             customer: l.userName || "Farmer Customer",
             amount: (Number(l.count) || 1) * 450,
             status: isAssigned ? "Delivered" : "Processing",
-            date: l.startDate || (l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "Recent"),
+            date: l.startDate ? formatDate(l.startDate) : (l.createdAt ? formatDateTime(l.createdAt) : formatDate(new Date())),
           });
         });
       }
@@ -112,7 +113,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
             customer: m.userName || "Farmer Customer",
             amount: (Number(m.durationHours) || 1) * 350,
             status: isAllotted ? "Delivered" : isRejected ? "Cancelled" : "Processing",
-            date: m.bookingDate || (m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "Recent"),
+            date: m.bookingDate ? formatDate(m.bookingDate) : (m.createdAt ? formatDateTime(m.createdAt) : formatDate(new Date())),
           });
         });
       }
@@ -130,7 +131,7 @@ export default function FinanceWalletView({ onNavigateTab }: FinanceWalletViewPr
             customer: e.farmerName || "Farmer Customer",
             amount: 500.0,
             status: isResolved ? "Delivered" : "Processing",
-            date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-IN") : "Recent",
+            date: e.createdAt ? formatDateTime(e.createdAt) : formatDate(new Date()),
           });
         });
       }

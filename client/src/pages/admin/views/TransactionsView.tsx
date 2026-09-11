@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { api } from "@/services/api";
+import { formatDate, formatTime } from "@/lib/dateUtils.ts";
 
 const AVATAR_COLORS = [
   "bg-emerald-100 text-emerald-800",
@@ -91,8 +92,8 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
             id: p.id || `PAY${1000 + idx}`,
             rawId: p.id || p._id,
             isPaymentModel: true,
-            date: p.paidAt ? new Date(p.paidAt).toLocaleDateString("en-IN") : (p.createdAt ? new Date(p.createdAt).toLocaleDateString("en-IN") : "Today"),
-            time: p.paidAt ? new Date(p.paidAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "10:30 AM",
+            date: formatDate(p.paidAt || p.createdAt || new Date()),
+            time: formatTime(p.paidAt || p.createdAt || new Date()),
             user: uName,
             userType: uRole,
             avatar,
@@ -123,8 +124,8 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
             id: o.id || `ORD${8000 + idx}`,
             rawId: o.id || o._id,
             isPaymentModel: false,
-            date: o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "Today",
-            time: o.createdAt ? new Date(o.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "10:00 AM",
+            date: formatDate(o.createdAt || new Date()),
+            time: formatTime(o.createdAt || new Date()),
             user: uName,
             userType: uRole,
             avatar,
@@ -149,8 +150,8 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
             id: l.id || `LAB${100 + idx}`,
             rawId: l.id || l._id,
             isPaymentModel: false,
-            date: l.startDate || (l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "Today"),
-            time: "09:00 AM",
+            date: l.startDate ? formatDate(l.startDate) : (l.createdAt ? formatDate(l.createdAt) : formatDate(new Date())),
+            time: l.reportingTime || (l.createdAt ? formatTime(l.createdAt) : "08:00 AM"),
             user: uName,
             userType: "Farmer",
             avatar,
@@ -175,8 +176,8 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
             id: m.id || `MAC${100 + idx}`,
             rawId: m.id || m._id,
             isPaymentModel: false,
-            date: m.bookingDate || (m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "Today"),
-            time: "10:30 AM",
+            date: m.bookingDate ? formatDate(m.bookingDate) : (m.createdAt ? formatDate(m.createdAt) : formatDate(new Date())),
+            time: m.bookingTime || (m.createdAt ? formatTime(m.createdAt) : "09:00 AM"),
             user: uName,
             userType: "Farmer",
             avatar,
@@ -186,6 +187,31 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
             status: m.status === "allotted" ? "Success" : m.status === "rejected" ? "Failed" : "Pending",
             method: "UPI",
             rawStatus: m.status,
+          });
+        });
+      }
+
+      // 5. Expert Consultations
+      if (expertRes.status === "fulfilled" && Array.isArray(expertRes.value)) {
+        expertRes.value.forEach((e: any, idx: number) => {
+          const uName = e.farmerName || "Farmer Customer";
+          const avatar = uName.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
+
+          txList.push({
+            id: e.id || `EXP${100 + idx}`,
+            rawId: e.id || e._id,
+            isPaymentModel: false,
+            date: formatDate(e.createdAt || new Date()),
+            time: formatTime(e.createdAt || new Date()),
+            user: uName,
+            userType: "Farmer",
+            avatar,
+            type: "Debit",
+            description: `Doctor Consultation (${e.cropName || 'Crop Advisory'})`,
+            amount: 500,
+            status: e.status === "resolved" ? "Success" : "Pending",
+            method: "UPI",
+            rawStatus: e.status,
           });
         });
       }

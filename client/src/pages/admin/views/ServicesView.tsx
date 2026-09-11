@@ -108,6 +108,7 @@ function avatarColor(name: string) {
 }
 
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDate, formatTime } from "@/lib/dateUtils.ts";
 
 interface ServicesViewProps {
   requests?: any[];
@@ -124,8 +125,8 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
       farmerId: l.phone || "—",
       provider: "Assigned Labour Team",
       status: l.status === "assigned" ? "Completed" : l.status === "pending" ? "Pending" : "In Progress",
-      date: l.createdAt ? new Date(l.createdAt).toLocaleDateString("en-IN") : "Today",
-      time: l.createdAt ? new Date(l.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "10:00 AM",
+      date: formatDate(l.createdAt || l.startDate || new Date()),
+      time: l.reportingTime || formatTime(l.createdAt || new Date()),
     })),
     ...(machineryBookings || []).map((m: any, idx: number) => ({
       id: m.id || `SRV${250160000 + idx}`,
@@ -134,8 +135,8 @@ export default function ServicesView({ requests: propRequests }: ServicesViewPro
       farmerId: m.phone || "—",
       provider: m.allottedMachineDetails || "Agri Machinery",
       status: m.status === "allotted" ? "Completed" : m.status === "pending" ? "Pending" : "In Progress",
-      date: m.createdAt ? new Date(m.createdAt).toLocaleDateString("en-IN") : "Today",
-      time: m.createdAt ? new Date(m.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "10:00 AM",
+      date: formatDate(m.createdAt || m.bookingDate || new Date()),
+      time: m.bookingTime || formatTime(m.createdAt || new Date()),
     })),
   ];
 

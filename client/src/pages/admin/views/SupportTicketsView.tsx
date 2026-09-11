@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { api } from "@/services/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/dateUtils.ts";
 
 export interface TicketItem {
   id: string;
@@ -61,7 +62,7 @@ export default function SupportTicketsView() {
             category: "Agri Advisory",
             priority: "High",
             status: e.status === "resolved" ? "Resolved" : "Open",
-            createdOn: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-IN") : "Today",
+            createdOn: e.createdAt ? formatDate(e.createdAt) : formatDate(new Date()),
           });
         });
       }

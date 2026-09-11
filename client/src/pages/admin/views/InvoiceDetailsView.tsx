@@ -6,6 +6,7 @@ import {
 import { Button } from "@/components/ui/button.tsx";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDate } from "@/lib/dateUtils.ts";
 
 interface InvoiceDetailsViewProps {
   invoiceId?: string;
@@ -38,7 +39,7 @@ export default function InvoiceDetailsView({ invoiceId, orders: propOrders, onBa
   const buyerAddress = currentOrder?.shippingAddress || "Samastipur, Bihar - 848101, India";
   const orderAmount = Number(currentOrder?.totalAmount || currentOrder?.amount || 0);
   const paymentMethod = (currentOrder?.paymentMethod || "UPI").toUpperCase();
-  const orderDate = currentOrder?.date || (currentOrder?.createdAt ? new Date(currentOrder.createdAt).toLocaleDateString("en-IN") : new Date().toLocaleDateString("en-IN"));
+  const orderDate = currentOrder?.date || (currentOrder?.createdAt ? formatDate(currentOrder.createdAt) : formatDate(new Date()));
 
   // Calculate taxes (GST is 5% included or added for agricultural goods)
   const taxableValue = Math.round((orderAmount / 1.05) * 100) / 100;

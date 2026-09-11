@@ -15,6 +15,7 @@ import Footer from "@/components/Footer.tsx";
 import { useApp } from "@/context/AppContext.tsx";
 import { api } from "@/services/api.ts";
 import { toast } from "sonner";
+import { formatDate, formatDateTime } from "@/lib/dateUtils.ts";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -642,8 +643,10 @@ export default function ProfilePage() {
 
                     {/* Schedule & Location details */}
                     <div className="grid grid-cols-2 gap-2 text-[11px] bg-black/30 p-2.5 rounded-lg text-gray-300">
-                      <div><span className="text-gray-500">Date:</span> {b.bookingDate || b.startDate || "Scheduled"}</div>
+                      <div><span className="text-gray-500">Date:</span> <span className="text-white font-semibold">{formatDate(b.bookingDate || b.startDate)}</span></div>
+                      <div><span className="text-gray-500">Time/Shift:</span> <span className="text-white font-semibold">{b.bookingTime || b.reportingTime || "Morning Shift"}</span></div>
                       <div><span className="text-gray-500">Duration:</span> {isMach ? `${b.durationHours} Hours` : `${b.days} Days (${b.count} Workers)`}</div>
+                      <div><span className="text-gray-500">Requested:</span> {b.createdAt ? formatDateTime(b.createdAt) : "Recent"}</div>
                       <div className="col-span-2 truncate"><span className="text-gray-500">Location:</span> {b.location}</div>
                     </div>
 

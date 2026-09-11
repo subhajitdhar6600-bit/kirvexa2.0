@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { type Language, TRANSLATIONS, type Translations } from "@/lib/translations.ts";
 import { toast } from "sonner";
 import { api } from "@/services/api";
+import { formatDate, formatTime, formatDateTime, formatRelativeTime } from "@/lib/dateUtils.ts";
 
 // ?? One-time migration: rename krivexa_* localStorage keys to krivexo_* ??????
 (function migrateLocalStorageKeys() {
@@ -62,6 +63,7 @@ export interface LabourBookingRequest {
   days: number;
   startDate: string;
   endDate: string;
+  reportingTime?: string;
   location: string;
   status: "pending" | "pending_rate" | "rate_quoted" | "rate_accepted" | "cancelled" | "assigned" | "allotted" | "completed";
   rateQuote?: string;
@@ -204,6 +206,7 @@ export interface MachineryBookingRequest {
   phone: string;
   machineryType: string;
   bookingDate: string;
+  bookingTime?: string;
   durationHours: string | number;
   location: string;
   status: "pending" | "pending_rate" | "rate_quoted" | "rate_accepted" | "cancelled" | "allotted" | "rejected" | "completed";
@@ -302,6 +305,7 @@ export interface CartOrder {
   deliveryAddress: string;
   status: "Confirmed" | "Packed" | "Dispatched" | "Delivered" | "Processing";
   assignedDealerName?: string;
+  date?: string;
   createdAt: string;
 }
 
@@ -328,6 +332,7 @@ export interface WalletTransaction {
   date: string;
   category: string;
   source?: "wallet" | "kcc";
+  createdAt?: string;
 }
 
 interface AppContextType {
@@ -1030,10 +1035,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.addMachineryBooking(newBooking).catch(() => {});
     addNotification(
       "Machinery Booking Request Sent 🚜",
-      `Your booking request for ${booking.machineryType} on ${booking.bookingDate} has been sent to admin for rate quote.`,
+      `Your booking request for ${booking.machineryType} on ${booking.bookingDate}${booking.bookingTime ? ` (${booking.bookingTime})` : ""} has been sent to admin for rate quote.`,
       "info",
       "/machinery-booking",
-      "machinery"
+      "machinery",
+      undefined,
+      undefined,
+      { bookingId: newBooking.id, bookingType: "machinery", machineryType: booking.machineryType, bookingDate: booking.bookingDate, bookingTime: booking.bookingTime }
     );
   };
 
@@ -1146,10 +1154,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     api.addLabourBooking(newBooking).catch(() => {});
     addNotification(
       "Labour Booking Request Sent 👷",
-      `Your request for ${booking.count} ${booking.labourType}(s) starting ${booking.startDate} has been submitted for rate quote.`,
+      `Your request for ${booking.count} ${booking.labourType}(s) starting ${booking.startDate}${booking.reportingTime ? ` (${booking.reportingTime})` : ""} has been submitted for rate quote.`,
       "info",
       "/labour-booking",
-      "labour"
+      "labour",
+      undefined,
+      undefined,
+      { bookingId: newBooking.id, bookingType: "labour", labourType: booking.labourType, startDate: booking.startDate, reportingTime: booking.reportingTime }
     );
   };
 
@@ -1348,10 +1359,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [walletTransactions]);
 
   const addWalletTransaction = (txn: Omit<WalletTransaction, "id" | "date">) => {
+    const now = new Date();
     const newTxn: WalletTransaction = {
       ...txn,
       id: `#TXN-${Math.floor(100000 + Math.random() * 900000)}`,
-      date: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
+      date: formatDateTime(now),
+      createdAt: now.toISOString(),
     };
     setWalletTransactions((prev) => [newTxn, ...prev]);
   };
@@ -1537,19 +1550,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     link?: string,
     category?: UserNotification["category"],
     pdfDataUrl?: string,
-    pdfFileName?: string
+    pdfFileName?: string,
+    data?: any
   ) => {
+    const nowIso = new Date().toISOString();
     const newNotif: UserNotification = {
       id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       title,
       message,
-      time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+      time: formatRelativeTime(nowIso),
       read: false,
       type,
       link,
       category,
       pdfDataUrl,
       pdfFileName,
+      data,
+      createdAt: nowIso,
     };
     setNotifications((prev) => [newNotif, ...prev]);
     api.addNotification(newNotif);
@@ -1581,7 +1598,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const res = await api.getNotifications();
       if (Array.isArray(res)) {
-        setNotifications(res);
+        const formatted = res.map((n: any) => ({
+          ...n,
+          time: n.createdAt ? formatRelativeTime(n.createdAt) : (n.time || formatTime(new Date())),
+          createdAt: n.createdAt || new Date().toISOString(),
+        }));
+        setNotifications(formatted);
       }
     } catch (err) {
       console.warn("[AppContext] Failed to refresh notifications:", err);
@@ -2374,6 +2396,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+    const nowIso = new Date().toISOString();
     const newOrder: CartOrder = {
       id: orderId,
       userId: user?.id || user?.userId || "guest",
@@ -2383,7 +2406,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       paymentMethod,
       deliveryAddress,
       status: "Confirmed",
-      createdAt: new Date().toISOString(),
+      date: formatDateTime(nowIso),
+      createdAt: nowIso,
     };
 
     setOrders((prev) => [newOrder, ...prev]);

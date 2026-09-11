@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "KisanSeva - Kisan ki Seva",
-  "short_name": "KisanSeva",
+  "name": "KRIVEXO - Smart Agriculture",
+  "short_name": "KRIVEXO",
   "description": "A comprehensive agricultural platform for Indian farmers — mandi prices, expert advice, machinery booking, weather, soil testing, and more.",
   "start_url": "/",
   "scope": "/",
@@ -11,10 +11,10 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon/icon-192.png",
-      "sizes": "1024x1024",
+      "src": "/krivexo-logo.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "/icon/icon-512.png",

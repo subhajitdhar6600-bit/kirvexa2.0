@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { toast } from "sonner";
 import { useApp } from "@/context/AppContext.tsx";
+import { formatDate } from "@/lib/dateUtils.ts";
 
 const CARD_TYPE_COLORS: Record<string, string> = {
   "Kisan Card Basic": "bg-emerald-50 text-emerald-700 border border-emerald-200",
@@ -41,7 +42,7 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
     cardNumber: k.cardNumber || k.kccCardNumber,
     creditRequested: k.creditLimit || k.paymentAmount || 50000,
     status: (k.status?.toLowerCase() === "approved" ? "Approved" : k.status?.toLowerCase() === "rejected" ? "Rejected" : "Pending") as "Pending" | "Approved" | "Rejected",
-    appliedOn: k.createdAt ? new Date(k.createdAt).toLocaleDateString("en-IN") : "Today",
+    appliedOn: k.createdAt ? formatDate(k.createdAt) : formatDate(new Date()),
     idProof: k.aadhaar ? "Aadhaar Card" : "Government ID",
     appliedByDealer: k.appliedByDealer || k.dealerName || "",
     avatar: (k.fullName || "KC").slice(0, 2).toUpperCase(),

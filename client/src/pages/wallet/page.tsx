@@ -11,6 +11,7 @@ import { useApp } from "@/context/AppContext.tsx";
 import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
 import { sendEmailJS } from "@/services/emailService.ts";
+import { formatDateTime } from "@/lib/dateUtils.ts";
 
 export default function WalletPage() {
   const {
@@ -451,7 +452,7 @@ export default function WalletPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold">{t.title}</div>
-                      <div className="text-xs text-gray-500">{t.date} • {t.id}</div>
+                      <div className="text-xs text-gray-500">{formatDateTime(t.createdAt || t.date)} • {t.id}</div>
                     </div>
                     <Badge className={`text-[10px] ${
                       (t.source === "kcc" || t.category === "KCC Order Payment" || t.title.toLowerCase().startsWith("kcc"))
