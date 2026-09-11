@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { type Language, TRANSLATIONS, type Translations } from "@/lib/translations.ts";
 import { toast } from "sonner";
 import { api } from "@/services/api";
@@ -776,7 +776,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Admin: load ALL KCC applications from DB (called by admin panel on mount)
-  const loadAllKccApplications = async () => {
+  const loadAllKccApplications = useCallback(async () => {
     try {
       const allApps = await api.getKccApplications();
       if (allApps && allApps.length > 0) {
@@ -785,7 +785,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn("Failed to load KCC applications:", e);
     }
-  };
+  }, []);
 
   // Update KCC Credit Limit across applications, user profile, accounts, POS store & backend API
   const updateKccLimit = async (cardNumber: string, newLimit: number, phone?: string) => {
@@ -873,7 +873,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Allot Dealer ID and Password upon Admin Review
-  const allotDealerCredentials = async (
+  const allotDealerCredentials = useCallback(async (
     dealerIdentifier: { id?: string; phone?: string; email?: string },
     dealerId: string,
     password: string
@@ -919,7 +919,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn("Backend dealer credential allotment error:", e);
     }
-  };
+  }, []);
 
   // Crop Listings State
   const [cropListings, setCropListings] = useState<CropListing[]>(() => {

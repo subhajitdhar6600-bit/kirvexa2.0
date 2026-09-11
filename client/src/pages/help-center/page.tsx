@@ -54,7 +54,7 @@ export default function HelpCenterPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
           {[
             { icon: MessageSquare, label: "Live Chat", desc: "Chat with our support team", action: "Start Chat" },
-            { icon: Phone, label: "Call Support", desc: "+91 87087 42170", action: "Call Now" },
+            { icon: Phone, label: "Call Support", desc: "+91 91990 90509", action: "Call Now" },
             { icon: Mail, label: "Email Support", desc: "support@krivexo.com", action: "Send Email" },
           ].map((c) => (
             <div key={c.label} className="bg-[#111] border border-white/10 rounded-2xl p-5 text-center hover:border-primary/40 transition-colors">

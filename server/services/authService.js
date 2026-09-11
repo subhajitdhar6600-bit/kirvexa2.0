@@ -28,9 +28,11 @@ export const registerUser = async ({
   businessName,
   dealerType,
   gstNumber = '',
+  gstin = '',
   licenseNumber = '',
   district = '',
   state = 'Bihar',
+  village = '',
   gender = 'Male',
   dob = '',
   address = '',
@@ -69,6 +71,7 @@ export const registerUser = async ({
   const generatedId = `usr_${crypto.randomBytes(8).toString('hex')}`;
   const passwordHash = password ? await hashPassword(password) : '';
   const initialStatus = role === ROLES.DEALER ? 'PENDING_APPROVAL' : USER_STATUS.ACTIVE;
+  const effectiveGst = gstNumber || gstin || '';
 
   const user = await User.create({
     id: generatedId,
@@ -79,14 +82,21 @@ export const registerUser = async ({
     gender,
     dob,
     address,
+    village,
     passwordHash,
+    password: password || '',
+    dealerPassword: role === ROLES.DEALER ? password || '' : '',
     role,
     status: initialStatus,
+    dealerStatus: role === ROLES.DEALER ? 'pending' : undefined,
     kccStatus: KCC_STATUS.NOT_APPLIED,
     district,
     state,
     businessName: role === ROLES.DEALER ? businessName || `${name}'s Agro Store` : undefined,
     dealerType: role === ROLES.DEALER ? dealerType || 'all' : undefined,
+    gstNumber: effectiveGst,
+    gstin: effectiveGst,
+    licenseNumber: licenseNumber || '',
   });
 
   // Create role profile
@@ -110,9 +120,11 @@ export const registerUser = async ({
       userId: generatedId,
       businessName: businessName || `${name}'s Agro Store`,
       dealerType: dealerType || 'all',
-      gstNumber,
+      gstNumber: effectiveGst,
+      gstin: effectiveGst,
       licenseNumber,
       shopAddress: {
+        addressLine: address || village || '',
         district,
         state,
       },

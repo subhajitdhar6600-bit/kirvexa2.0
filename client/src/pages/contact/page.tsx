@@ -9,9 +9,9 @@ import Footer from "@/components/Footer.tsx";
 import { toast } from "sonner";
 
 const CONTACT_INFO = [
-  { icon: Phone, label: "Phone", value: "+91 87087 42170", sub: "Mon–Sat, 9 AM – 6 PM" },
+  { icon: Phone, label: "Phone", value: "+91 91990 90509", sub: "Mon–Sat, 9 AM – 6 PM" },
   { icon: Mail, label: "Email", value: "support@krivexo.com", sub: "We reply within 24 hours" },
-  { icon: MapPin, label: "Address", value: "Kanpur, Uttar Pradesh", sub: "India – 208001" },
+  { icon: MapPin, label: "Address", value: "Chakmehsi Kalyanpur, Samastipur", sub: "Bihar 848302, India" },
   { icon: Clock, label: "Working Hours", value: "9 AM – 6 PM", sub: "Monday to Saturday" },
 ];
 
@@ -156,8 +156,8 @@ export default function ContactPage() {
         <div className="mt-10 bg-[#111] border border-white/10 rounded-2xl overflow-hidden h-56 flex items-center justify-center">
           <div className="text-center">
             <MapPin className="h-10 w-10 text-primary mx-auto mb-3" />
-            <div className="font-bold">Kanpur, Uttar Pradesh, India</div>
-            <div className="text-sm text-gray-500">Head Office Location</div>
+            <div className="font-bold">Chakmehsi Kalyanpur, Samastipur, Bihar</div>
+            <div className="text-sm text-gray-500">Krivexo AGRI Pvt. Ltd. — 848302</div>
           </div>
         </div>
       </div>

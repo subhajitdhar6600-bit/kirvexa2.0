@@ -6,8 +6,8 @@ import Navbar from "@/components/Navbar.tsx";
 import Footer from "@/components/Footer.tsx";
 
 const TEAM = [
-  { name: "Rajiv Sharma", role: "Founder & CEO", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&q=80", initials: "RS" },
-  { name: "Priya Agarwal", role: "CTO & Co-Founder", img: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=200&q=80", initials: "PA" },
+  { name: "Abhishek Kumar", role: "Founder & Director", img: "/adhishek-kumar.jpg", initials: "AK" },
+  { name: "Priya Agarwal", role: "Co-Founder & CTO", img: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=200&q=80", initials: "PA" },
   { name: "Suresh Verma", role: "Head of Agriculture", img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&q=80", initials: "SV" },
   { name: "Anita Mishra", role: "Head of Operations", img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&q=80", initials: "AM" },
 ];

@@ -11,7 +11,7 @@ import FormPreviewModal from "@/components/FormPreviewModal.tsx";
 import { generateFormPdf } from "@/lib/pdfGenerator.ts";
 import { formatDateTime } from "@/lib/dateUtils.ts";
 
-const ADMIN_PHONE = "8708742170";
+const ADMIN_PHONE = "9199090509";
 
 export default function ExpertAdvicePage() {
   const { addExpertQuery, checkKccPermission, isKccIssued, setIsKccAppModalOpen, addNotification, user, t } = useApp();

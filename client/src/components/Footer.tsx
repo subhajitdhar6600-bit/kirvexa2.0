@@ -88,7 +88,7 @@ export default function Footer() {
               {/* Helpline */}
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-4">
                 <p className="text-primary text-xs font-bold mb-1">{t.footer.helpline}</p>
-                <p className="text-white text-lg font-black" style={{ fontFamily: "Rajdhani, sans-serif" }}>+91 87087 42170</p>
+                <p className="text-white text-lg font-black" style={{ fontFamily: "Rajdhani, sans-serif" }}>+91 91990 90509</p>
                 <p className="text-gray-500 text-xs">support@krivexo.com</p>
               </div>
 
@@ -165,7 +165,7 @@ export default function Footer() {
               <ul className="space-y-2.5 text-gray-400 text-xs">
                 <li className="flex items-center gap-2">
                   <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
-                  <span>+91 87087 42170</span>
+                  <span>+91 91990 90509</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-3.5 w-3.5 text-primary shrink-0" />

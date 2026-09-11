@@ -58,12 +58,16 @@ router.get('/dealer/:dealerId', async (req, res) => {
     const clean = (dealerId || '').trim();
     if (!clean) return res.status(400).json({ error: 'Dealer ID is required' });
 
+    const query = [
+      { dealerId: { $regex: new RegExp(`^${clean}$`, 'i') } },
+      { id: clean },
+    ];
+    if (mongoose.Types.ObjectId.isValid(clean)) {
+      query.push({ _id: clean });
+    }
+
     const dealer = await User.findOne({
-      $or: [
-        { dealerId: { $regex: new RegExp(`^${clean}$`, 'i') } },
-        { id: clean }
-      ],
-      role: 'dealer'
+      $or: query
     });
     res.json(dealer || null);
   } catch (err) {
@@ -86,6 +90,15 @@ router.post('/', async (req, res) => {
     }
     if (userData.role) {
       userData.role = userData.role.toLowerCase();
+    }
+    if (userData.gstin && !userData.gstNumber) {
+      userData.gstNumber = userData.gstin;
+    }
+    if (userData.gstNumber && !userData.gstin) {
+      userData.gstin = userData.gstNumber;
+    }
+    if (userData.role === 'dealer' && !userData.dealerStatus) {
+      userData.dealerStatus = userData.dealerId ? 'approved' : 'pending';
     }
     const filter = userData.phone ? { phone: userData.phone } : { id: userData.id };
     const user = await User.findOneAndUpdate(

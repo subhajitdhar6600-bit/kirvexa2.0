@@ -12,7 +12,7 @@ const router = express.Router();
  */
 router.post('/register', async (req, res) => {
   try {
-    const { name, userId, phone, email, password, role, businessName, dealerType, gstNumber, licenseNumber, district, state, gender, dob, address } = req.body;
+    const { name, userId, phone, email, password, role, businessName, dealerType, gstNumber, gstin, licenseNumber, district, state, village, gender, dob, address } = req.body;
 
     if (!name || !phone) {
       return sendError(res, 'Name and phone number are required.', 'VALIDATION_ERROR', 400);
@@ -27,10 +27,12 @@ router.post('/register', async (req, res) => {
       role,
       businessName,
       dealerType,
-      gstNumber,
+      gstNumber: gstNumber || gstin || '',
+      gstin: gstin || gstNumber || '',
       licenseNumber,
       district,
       state,
+      village,
       gender,
       dob,
       address,

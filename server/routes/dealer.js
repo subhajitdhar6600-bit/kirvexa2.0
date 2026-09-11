@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import DealerListing from '../models/DealerListing.js';
 import User from '../models/User.js';
 import DealerProfile from '../models/DealerProfile.js';
@@ -281,24 +282,48 @@ router.post('/allot-credentials', async (req, res) => {
     const cleanEmail = (email || '').trim().toLowerCase();
 
     const orClauses = [];
-    if (id) orClauses.push({ id });
+    if (id) {
+      orClauses.push({ id });
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        orClauses.push({ _id: id });
+      }
+    }
     if (cleanPhone) orClauses.push({ phone: { $regex: cleanPhone } });
     if (cleanEmail) orClauses.push({ email: cleanEmail });
     if (dealerId) orClauses.push({ dealerId });
 
+    let passwordHash = '';
+    try {
+      passwordHash = await bcrypt.hash(password, 10);
+    } catch (e) {
+      console.warn('Password hash generation warning:', e);
+    }
+
+    const updateFields = {
+      dealerId,
+      dealerPassword: password,
+      password,
+      status: 'active',
+      dealerStatus: 'approved',
+      verificationStatus: 'Verified',
+      isVerified: true,
+    };
+    if (passwordHash) {
+      updateFields.passwordHash = passwordHash;
+    }
+
     const updatedUser = await User.findOneAndUpdate(
       orClauses.length > 0 ? { $or: orClauses } : { id },
-      {
-        dealerId,
-        dealerPassword: password,
-        password,
-        status: 'active',
-        dealerStatus: 'approved',
-        verificationStatus: 'Verified',
-        isVerified: true,
-      },
+      updateFields,
       { new: true, upsert: false }
     );
+
+    if (updatedUser) {
+      await DealerProfile.findOneAndUpdate(
+        { $or: [{ userId: updatedUser.id }, { userId: String(updatedUser._id) }] },
+        { isVerifiedByAdmin: true }
+      ).catch(() => {});
+    }
 
     return res.json({ success: true, user: updatedUser });
   } catch (error) {

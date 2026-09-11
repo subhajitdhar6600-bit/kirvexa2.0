@@ -52,6 +52,7 @@ const userSchema = new mongoose.Schema(
     dealerPassword: { type: String, default: '' },
     dealerStatus: { type: String, default: 'pending' },
     gstNumber: { type: String, default: '' },
+    gstin: { type: String, default: '' },
     licenseNumber: { type: String, default: '' },
     password: { type: String, default: '' },
     aadhaarNumber: { type: String },

@@ -6,6 +6,7 @@ const dealerProfileSchema = new mongoose.Schema(
     businessName: { type: String, required: true },
     dealerType: { type: String, enum: ['seeds', 'fertilizer', 'pesticides', 'machinery', 'all'], default: 'all' },
     gstNumber: { type: String, default: '' },
+    gstin: { type: String, default: '' },
     licenseNumber: { type: String, default: '' },
     shopAddress: {
       addressLine: { type: String, default: '' },
