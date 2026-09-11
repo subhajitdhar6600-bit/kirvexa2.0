@@ -210,7 +210,7 @@ const TAB_TO_URL: Record<AdminTab, string> = {
 };
 
 export default function AdminDashboard() {
-  const { adminLogout, adminName, kccApplications, loadAllKccApplications, registeredAccounts } = useApp();
+  const { adminLogout, adminName, kccApplications, loadAllKccApplications, registeredAccounts, registeredFarmers } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -324,6 +324,7 @@ export default function AdminDashboard() {
         expertRes,
         notifsRes,
         paymentsRes,
+        regFarmersRes,
       ] = await Promise.allSettled([
         loadAllKccApplications(),
         api.getUsers(),
@@ -336,12 +337,19 @@ export default function AdminDashboard() {
         api.getExpertQueries(),
         api.getNotifications(),
         api.getPayments(),
+        api.getRegisteredFarmers(),
       ]);
 
       // Process users (combining DB users + registeredAccounts from AppContext)
       let fetchedUsers: any[] = [];
       if (usersRes.status === "fulfilled" && usersRes.value) {
         fetchedUsers = Array.isArray(usersRes.value) ? usersRes.value : [];
+      }
+
+      // Process registered farmers from DB / Dealer registrations
+      let fetchedFarmers: any[] = [];
+      if (regFarmersRes.status === "fulfilled" && regFarmersRes.value) {
+        fetchedFarmers = Array.isArray(regFarmersRes.value) ? regFarmersRes.value : [];
       }
 
       const localAccounts = Array.isArray(registeredAccounts) ? registeredAccounts : [];
@@ -401,6 +409,44 @@ export default function AdminDashboard() {
         }
       });
 
+      // Merge registered farmers (e.g. registered via Dealer panel)
+      const allRegisteredFarmers = [...fetchedFarmers];
+      (registeredFarmers || []).forEach((rf: any) => {
+        const p = (rf.phone || "").replace(/\D/g, "").slice(-10);
+        if (!allRegisteredFarmers.some(f => (f.phone || "").replace(/\D/g, "").slice(-10) === p)) {
+          allRegisteredFarmers.push(rf);
+        }
+      });
+
+      allRegisteredFarmers.forEach((rf: any) => {
+        const cleanP = (rf.phone || "").replace(/\D/g, "").slice(-10);
+        if (cleanP && !existingPhones.has(cleanP)) {
+          combinedUsers.push({
+            id: rf.id || rf._id || `FRM-${cleanP}`,
+            userId: rf.userId || `FRM${cleanP}`,
+            name: rf.fullName || rf.name || "Farmer",
+            fullName: rf.fullName || rf.name || "Farmer",
+            phone: rf.phone,
+            email: rf.email || "",
+            gender: rf.gender || "Male",
+            dob: rf.dob || "",
+            address: rf.address || [rf.village, rf.district, rf.state].filter(Boolean).join(", ") || "",
+            role: "farmer",
+            state: rf.state || "Bihar",
+            district: rf.district || "Patna",
+            village: rf.village || "—",
+            aadhaarNumber: rf.aadhaarNumber,
+            landSize: rf.landSize,
+            cropType: rf.cropType,
+            registeredByDealer: rf.registeredByDealer || rf.dealerName || "Dealer",
+            occupation: "Farmer",
+            status: "active",
+            createdAt: rf.createdAt || new Date().toISOString(),
+          });
+          existingPhones.add(cleanP);
+        }
+      });
+
       setRawUsers(combinedUsers);
 
       const farmerUsers = combinedUsers.filter((u: any) => (u.role || "").toLowerCase() === "farmer").map((u: any, idx: number) => {
@@ -435,10 +481,12 @@ export default function AdminDashboard() {
           farmName: u.businessName || `${u.fullName || u.name || "Farmer"} Farm`,
           totalLand: u.landSize || "—",
           landType: "—",
-          mainCrops: u.occupation || "Grain, Vegetables",
+          mainCrops: u.cropType || u.occupation || "Grain, Vegetables",
           organicCertified: "No" as const,
           createdAt: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-IN") : "Recent",
           avatar: u.avatar || "",
+          registeredByDealer: u.registeredByDealer || "",
+          aadhaarNumber: u.aadhaarNumber || "",
           rawUser: u,
         };
       });
@@ -1045,7 +1093,7 @@ export default function AdminDashboard() {
           {activeTab === "kisan_card" && <AllCardsView />}
           {activeTab === "kisan_card_overview" && <KrivexoKisanCardOverviewView onNavigateTab={(tab) => setActiveTab(tab as AdminTab)} />}
           {activeTab === "krivexo_cards" && <KrivexoCardsManagementView />}
-          {activeTab === "card_requests" && <CardRequestsView />}
+          {activeTab === "card_requests" && <CardRequestsView kccApplications={kccApplications} />}
           {activeTab === "card_types" && <CardTypesView />}
           {activeTab === "card_benefits" && <BenefitsOffersView />}
           {activeTab === "transactions" && <TransactionsView />}

@@ -162,7 +162,14 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                             </div>
                           )}
                           <div>
-                            <p className="font-bold text-gray-900 leading-tight">{f.name}</p>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="font-bold text-gray-900 leading-tight">{f.name}</p>
+                              {(f as any).registeredByDealer && (
+                                <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[9px] border border-emerald-300">
+                                  Dealer: {(f as any).registeredByDealer}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px] text-gray-400 font-mono">#{f.id}</p>
                           </div>
                         </div>
@@ -292,6 +299,7 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                     { label: "District", value: selectedFarmer.district || "Patna" },
                     { label: "Village", value: selectedFarmer.village || "—" },
                     { label: "Full Address", value: selectedFarmer.address || "—" },
+                    ...((selectedFarmer as any).registeredByDealer ? [{ label: "Registered By", value: `Dealer: ${(selectedFarmer as any).registeredByDealer}` }] : []),
                   ].map((row, i) => (
                     <div key={i} className="flex items-start justify-between gap-2">
                       <span className="text-gray-400 shrink-0">{row.label}</span>
@@ -383,6 +391,12 @@ export default function FarmersView({ farmers: propFarmers, setFarmers }: Farmer
                     <span className="text-gray-400 block text-[10.5px]">Account Status</span>
                     <span className="font-bold text-emerald-600 text-xs capitalize">{viewingModalFarmer.status}</span>
                   </div>
+                  {(viewingModalFarmer as any).registeredByDealer && (
+                    <div>
+                      <span className="text-gray-400 block text-[10.5px]">Registered By</span>
+                      <span className="font-bold text-emerald-700 text-xs">Dealer ({(viewingModalFarmer as any).registeredByDealer})</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

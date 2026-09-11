@@ -18,6 +18,8 @@ import { useApp } from "@/context/AppContext.tsx";
 import { toast } from "sonner";
 import { generateFormPdf, downloadPdf } from "@/lib/pdfGenerator.ts";
 import { sendEmailJS } from "@/services/emailService.ts";
+import { api } from "@/services/api.ts";
+import AddNewProductForm, { type AddProductPayload } from "@/components/products/AddNewProductForm.tsx";
 
 const TESTIMONIALS = [
   { name: "Ramesh Yadav", location: "Patna, Bihar", text: "Krivexo has changed the way I farm. I now sell my crops at better prices and can book labour with just one tap.", stars: 5 },
@@ -371,6 +373,52 @@ export default function Index() {
     setListPrice("");
     setListDesc("");
     setListImg("");
+  };
+
+  // Add Product from rich Variants Form (matching Admin Panel design)
+  const handleDealerAddProductFromForm = async (payload: AddProductPayload) => {
+    const primaryVariant = payload.variants[0] || { mrp: 500, salePrice: 450, stockQty: 20 };
+    const listingId = `dl-${Date.now()}`;
+    const prodId = `prod_${Date.now()}`;
+
+    // 1. Add Dealer Listing (for dealer listings view in Admin)
+    addDealerListing({
+      dealerId: user?.dealerId || user?.id || "usr-dealer",
+      dealerName: user?.businessName || user?.name || "Dealer Store",
+      type: "product",
+      title: payload.name,
+      category: payload.category,
+      price: primaryVariant.salePrice,
+      unit: payload.unitType,
+      description: payload.description,
+      image: payload.imageUrl,
+      location: `${user?.district || "Patna"}, ${user?.state || "Bihar"}`,
+    });
+
+    // 2. Add to MongoDB Products collection (for platform catalog in Admin)
+    api.addProduct({
+      id: prodId,
+      name: payload.name,
+      category: payload.category,
+      brand: payload.brand,
+      price: primaryVariant.salePrice,
+      mrp: primaryVariant.mrp,
+      stockQuantity: payload.variants.reduce((sum, v) => sum + (Number(v.stockQty) || 0), 0),
+      unit: payload.unitType,
+      description: payload.description,
+      imageUrl: payload.imageUrl,
+      images: [payload.imageUrl],
+      dealerId: user?.dealerId || user?.id || "usr-dealer",
+      dealerName: user?.businessName || user?.name || "Dealer Store",
+      status: "pending",
+      adminApprovalStatus: "PENDING",
+      variants: payload.variants,
+      tags: payload.tags,
+      createdAt: new Date().toISOString(),
+    }).catch((err) => console.warn("api.addProduct failed:", err));
+
+    setIsAddListingModalOpen(false);
+    toast.success(`🎉 "${payload.name}" successfully listed with ${payload.variants.length} variants! Submitted for Admin review.`);
   };
 
   const FEATURE_DETAILS: Record<string, { overview: string; keyBenefits: string[]; howItWorks: string[] }> = {
@@ -814,8 +862,8 @@ export default function Index() {
             <p className="text-gray-400 text-sm">{t.services.subtitle}</p>
           </div>
 
-          {/* KCC Status Alert Banner in Our Services */}
-          {!isKccIssued && (
+          {/* KCC Status Alert Banner in Our Services - only for non-dealer farmers */}
+          {!isKccIssued && user?.role !== "dealer" && (
             <div className="mb-8 bg-linear-to-r from-amber-950/60 via-amber-900/30 to-black border-2 border-amber-500/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
@@ -877,8 +925,8 @@ export default function Index() {
             ))}
           </div>
 
-          {/* Bottom KCC Card Section matching Image 5 */}
-          {!isKccIssued && !hasAppliedKcc && (
+          {/* Bottom KCC Card Section matching Image 5 — only for non-dealer farmers */}
+          {!isKccIssued && !hasAppliedKcc && user?.role !== "dealer" && (
             <div className="mt-12 bg-linear-to-r from-amber-950/40 via-[#16130b] to-[#0d0d0d] border border-amber-500/30 rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400">
@@ -1487,8 +1535,28 @@ export default function Index() {
 
       {/* === ADD PRODUCTS OR SERVICES MODAL === */}
       {isAddListingModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative shadow-2xl animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-200">
+          {listingType === "product" ? (
+            <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[94vh] shadow-2xl border border-gray-100 overflow-y-auto relative my-auto">
+              <button
+                onClick={() => setIsAddListingModalOpen(false)}
+                className="absolute top-4 right-4 z-20 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer shadow-xs"
+                title="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <AddNewProductForm
+                dealerInfo={{
+                  storeName: user?.businessName || "Shree Agro Store",
+                  retailerId: user?.dealerId || "KRVX5487",
+                  dealerName: user?.name || "Amit Kumar",
+                }}
+                onCancel={() => setIsAddListingModalOpen(false)}
+                onSuccess={handleDealerAddProductFromForm}
+              />
+            </div>
+          ) : (
+            <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 relative shadow-2xl animate-in fade-in zoom-in-95 my-auto">
             <button
               onClick={() => setIsAddListingModalOpen(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full p-2"
@@ -1513,10 +1581,10 @@ export default function Index() {
                 <div className="grid grid-cols-3 gap-2">
                   <Button
                     type="button"
-                    variant={listingType === "product" ? "default" : "ghost"}
+                    variant="ghost"
                     size="sm"
                     onClick={() => setListingType("product")}
-                    className={listingType === "product" ? "bg-primary text-black font-bold" : "border border-white/10 text-gray-300"}
+                    className="border border-white/10 text-gray-300 hover:border-primary/40 cursor-pointer"
                   >
                     <PackageCheck className="h-4 w-4 mr-1" /> Product
                   </Button>
@@ -1667,6 +1735,7 @@ export default function Index() {
               </Button>
             </form>
           </div>
+          )}
         </div>
       )}
 

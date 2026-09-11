@@ -179,6 +179,39 @@ export default function AddNewProductForm({
     }
   };
 
+  const handleClearForm = () => {
+    setProductName("");
+    setCategory("Fertilizer / Plant Nutrition");
+    setBrand("Profex");
+    setDescription("");
+    setImageUrl("https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=500&auto=format&fit=crop&q=60");
+    setVariants([
+      { id: "v-1", sizeWeight: "1 KG", packingType: "Pack", mrp: 0, salePrice: 0, stockQty: 10 }
+    ]);
+    setTagsInput("");
+    setShelfLife("12");
+    toast.info("Form cleared. Please enter new product details.");
+  };
+
+  const handleLoadTemplate = () => {
+    setProductName("Profex");
+    setCategory("Fertilizer / Plant Nutrition");
+    setBrand("Profex");
+    setDescription(
+      "Profex ek premium quality plant nutrition product hai jo fasal ki growth aur upaj badhane me madad karta hai. Yeh sabhi prakar ki fasalon ke liye upyogi hai."
+    );
+    setImageUrl("https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=500&auto=format&fit=crop&q=60");
+    setVariants([
+      { id: "v-1", sizeWeight: "100 GM", packingType: "Pack", mrp: 120, salePrice: 105, stockQty: 45 },
+      { id: "v-2", sizeWeight: "250 GM", packingType: "Pack", mrp: 240, salePrice: 210, stockQty: 32 },
+      { id: "v-3", sizeWeight: "500 GM", packingType: "Pack", mrp: 450, salePrice: 390, stockQty: 28 },
+      { id: "v-4", sizeWeight: "1 LTR", packingType: "Bottle", mrp: 780, salePrice: 680, stockQty: 20 },
+    ]);
+    setTagsInput("Organic, Plant Nutrition, High Yield");
+    setShelfLife("24");
+    toast.success("Sample Profex template loaded!");
+  };
+
   return (
     <div className="w-full bg-[#f0f4f8] text-gray-800 font-sans min-h-screen">
 
@@ -197,7 +230,21 @@ export default function AddNewProductForm({
             <span className="text-emerald-700 font-semibold">Add New Product</span>
           </div>
         </div>
-        <div className="flex items-center gap-2 self-end md:self-auto">
+        <div className="flex items-center gap-2 self-end md:self-auto flex-wrap">
+          <button
+            type="button"
+            onClick={handleClearForm}
+            className="text-[11px] font-bold text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+          >
+            Clear Form
+          </button>
+          <button
+            type="button"
+            onClick={handleLoadTemplate}
+            className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+          >
+            Sample Template
+          </button>
           <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5">
             <div className="w-7 h-7 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center">
               <UserIcon className="h-3.5 w-3.5 text-emerald-800" />

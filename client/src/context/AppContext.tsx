@@ -103,10 +103,10 @@ export interface KccApplication {
   id: string;
   fullName: string;
   phone: string;
-  aadhaar: string;
-  address: string;
-  district: string;
-  landSize: string;
+  aadhaar?: string;
+  address?: string;
+  district?: string;
+  landSize?: string;
   status: "pending" | "approved" | "rejected";
   cardNumber?: string;
   issueDate?: string;
@@ -115,7 +115,10 @@ export interface KccApplication {
   paymentAmount?: number;
   creditLimit?: number;
   creditBalance?: number;
+  appliedByDealer?: string;
+  dealerName?: string;
   createdAt: string;
+  [key: string]: any;
 }
 
 export interface UserProfile {
@@ -446,9 +449,9 @@ interface AppContextType {
   updateKccLimit: (cardNumber: string, newLimit: number, phone?: string) => Promise<void>;
 
   // Dealer KCC & POS Features
-  dealerApplyFarmerKcc: (appData: Omit<KccApplication, "id" | "status" | "createdAt">) => void;
+  dealerApplyFarmerKcc: (appData: Partial<KccApplication> & { fullName: string; phone: string; appliedByDealer?: string }) => void;
   checkFarmerCardBalance: (cardNumber: string) => { exists: boolean; cardHolder?: string; balance?: number; status?: string } | null;
-  chargeFarmerCard: (cardNumber: string, amount: number, itemDesc: string) => { success: boolean; message: string; remainingBalance?: number };
+  chargeFarmerCard: (cardNumber: string, amount: number, itemDesc: string) => { success: boolean; message: string; remainingBalance?: number; txId?: string };
   allotDealerCredentials: (dealerIdentifier: { id?: string; phone?: string; email?: string }, dealerId: string, password: string) => Promise<void>;
 
   // Dealer Product / Service Listings (Point 4)
@@ -470,6 +473,7 @@ interface AppContextType {
   // Checking KCC status by Phone/Aadhaar/Card Number & full profile lookup (Point 1.i & 1.iv)
   checkKccStatusByPhoneAadhaar: (phone?: string, aadhaar?: string, cardNumber?: string) => KccApplication | null;
   getFarmerProfileByDetails: (query: { kccNum?: string; aadhaar?: string; phone?: string }) => { exists: boolean; profile?: any; kccApp?: KccApplication; cardInfo?: any };
+  lookupFarmerProfileAsync: (query: { kccNum?: string; aadhaar?: string; phone?: string }) => Promise<{ exists: boolean; profile?: any; kccApp?: KccApplication; cardInfo?: any }>;
 
   // Order Status Updates by Dealer (Point 4)
   updateOrderStatus: (orderId: string, newStatus: "Confirmed" | "Packed" | "Dispatched" | "Delivered") => void;
@@ -649,8 +653,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem("krivexo_kcc_apps", JSON.stringify(kccApplications));
   }, [kccApplications]);
 
-  const submitKccApplication = (appData: Omit<KccApplication, "id" | "status" | "createdAt">) => {
+  const submitKccApplication = (appData: Partial<KccApplication>) => {
     const newApp: KccApplication = {
+      aadhaar: "",
+      address: "",
+      district: "Patna",
+      landSize: "3 Acres",
       ...appData,
       fullName: appData.fullName || user?.name || "Farmer",
       phone: appData.phone || user?.phone || "",
@@ -1407,34 +1415,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUser(newUser);
     api.saveUser(newUser);
 
-    // Fetch this user's KCC applications from DB after login
+    // Hydrate KCC applications from DB and update this user's profile if approved
     api.getKccApplications().then((allApps) => {
       if (allApps && allApps.length > 0) {
+        setKccApplications((prev) => {
+          const map = new Map<string, KccApplication>();
+          prev.forEach((item) => map.set(item.id, item));
+          allApps.forEach((item: any) => map.set(item.id, item));
+          const merged = Array.from(map.values());
+          localStorage.setItem("krivexo_kcc_apps", JSON.stringify(merged));
+          return merged;
+        });
+
         const userApps = allApps.filter((app: KccApplication) => {
           const appPhone = (app.phone || "").replace(/\D/g, "").slice(-10);
           return (cleanP && appPhone && cleanP === appPhone) ||
             (app.fullName?.trim().toLowerCase() === newUser.name?.trim().toLowerCase());
         });
-        if (userApps.length > 0) {
-          setKccApplications(userApps);
-          localStorage.setItem("krivexo_kcc_apps", JSON.stringify(userApps));
-          const approvedApp = userApps.find((a) => a.status === "approved" && a.cardNumber);
-          if (approvedApp) {
-            setIsKccIssuedState(true);
-            localStorage.setItem("krivexo_kcc_issued", "true");
-            setUser((u) => {
-              if (!u) return null;
-              const updated = {
-                ...u,
-                isKccIssued: true,
-                isVerified: true,
-                kccCardNumber: approvedApp.cardNumber,
-                kccCreditLimit: approvedApp.creditLimit || approvedApp.paymentAmount || u.kccCreditLimit || 50000,
-              };
-              localStorage.setItem("krivexo_user_profile", JSON.stringify(updated));
-              return updated;
-            });
-          }
+        const approvedApp = userApps.find((a) => a.status === "approved" && a.cardNumber);
+        if (approvedApp) {
+          setIsKccIssuedState(true);
+          localStorage.setItem("krivexo_kcc_issued", "true");
+          setUser((u) => {
+            if (!u) return null;
+            const updated = {
+              ...u,
+              isKccIssued: true,
+              isVerified: true,
+              kccCardNumber: approvedApp.cardNumber,
+              kccCreditLimit: approvedApp.creditLimit || approvedApp.paymentAmount || u.kccCreditLimit || 50000,
+            };
+            localStorage.setItem("krivexo_user_profile", JSON.stringify(updated));
+            return updated;
+          });
         }
       }
     }).catch(() => {});
@@ -1450,15 +1463,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logoutUser = () => {
     setUser(null);
-    // Clear all user-specific state from localStorage on logout
+    // Clear user-specific session state from localStorage on logout
     localStorage.removeItem("krivexo_user_profile");
     localStorage.removeItem("krivexo_kcc_issued");
-    localStorage.removeItem("krivexo_kcc_apps");
     localStorage.removeItem("krivexo_user_notifications");
     localStorage.removeItem("krivexo_wallet_txns");
-    // Reset KCC & Wallet state in memory so next user starts fresh
+    // Reset user session states
     setIsKccIssuedState(false);
-    setKccApplications([]);
     setWalletTransactions([]);
     setNotifications([]);
   };
@@ -1681,14 +1692,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 1. Admin always has full access
     if (isAdminLoggedIn) return true;
 
-    // 2. Dealer role can access Customer Services & Product/Service Listings for FREE without KCC
-    if (user?.role === "dealer" && (
-      actionName === "dealer-tools" || 
-      actionName === "customer-services" || 
-      actionName === "add-listing" ||
-      actionName === "product-listing" ||
-      actionName === "manage-listings"
-    )) {
+    // 2. Dealer role has FULL access to ALL platform services without requiring KCC
+    // Dealers are authorized commercial entities with verified business profiles
+    if (user?.role === "dealer") {
       return true;
     }
 
@@ -1717,18 +1723,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Dealer Features Implementation
-  const dealerApplyFarmerKcc = (appData: Omit<KccApplication, "id" | "status" | "createdAt">) => {
+  const dealerApplyFarmerKcc = (appData: Partial<KccApplication> & { fullName: string; phone: string; appliedByDealer?: string }) => {
+    const dealerName = appData.appliedByDealer || user?.name || "Verified Dealer";
     const newApp: KccApplication = {
+      aadhaar: "",
+      address: "",
+      district: "Patna",
+      landSize: "3 Acres",
       ...appData,
       id: `kcc-dealer-${Date.now()}`,
       status: "pending",
       createdAt: new Date().toISOString(),
+      appliedByDealer: dealerName,
     };
-    setKccApplications((prev) => [newApp, ...prev]);
-    api.submitKccApplication(newApp);
+    setKccApplications((prev) => {
+      const next = [newApp, ...prev.filter((a) => a.id !== newApp.id)];
+      localStorage.setItem("krivexo_kcc_apps", JSON.stringify(next));
+      return next;
+    });
+    api.submitKccApplication(newApp).catch((err) => console.warn("Submit KCC Application error:", err));
     addNotification(
-      "Farmer KCC Submitted",
-      `KCC Application for ${appData.fullName} submitted successfully by Dealer.`,
+      "Farmer KCC Submitted 💳",
+      `KCC Application for ${appData.fullName} submitted successfully by Dealer ${dealerName}. Pending Admin approval.`,
       "success",
       "/admin",
       "kcc"
@@ -1815,11 +1831,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     api.chargeFarmerCard(cleaned, amount).catch((err) => console.warn("Backend charge card error:", err));
 
+    // Record POS transaction in Admin Payments / Financial Ledger
+    const txId = `POS-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`;
+    const paymentRecord = {
+      id: txId,
+      orderId: txId,
+      transactionId: txId,
+      amount: Number(amount),
+      rawAmount: Number(amount),
+      method: "KCC POS",
+      customer: holderName,
+      farmerName: holderName,
+      dealerName: user?.name || "Verified Dealer",
+      status: "Completed",
+      date: new Date().toISOString(),
+      description: itemDesc || "KCC POS Store Purchase",
+    };
+    api.createPayment(paymentRecord).catch((err) => console.warn("POS Payment Record error:", err));
+
+    // Also record in wallet transactions
+    setWalletTransactions((prev) => [
+      {
+        id: `tx-${Date.now()}`,
+        title: `KCC POS Debit: ${itemDesc || "Store Purchase"}`,
+        amount: Number(amount),
+        type: "debit",
+        date: new Date().toISOString(),
+        status: "success",
+        category: "KCC POS Debit",
+        source: "kcc",
+      },
+      ...prev,
+    ]);
+
     addNotification(
       "KCC Payment Debited 💳",
       `₹${amount.toLocaleString("en-IN")} debited from KCC limit for "${itemDesc}". Available KCC limit: ₹${newBalance.toLocaleString("en-IN")}.`,
       "success",
-      "/wallet",
+      "/admin",
       "wallet"
     );
 
@@ -1827,6 +1876,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       success: true,
       message: `Payment of ₹${amount.toLocaleString("en-IN")} debited from KCC successfully!`,
       remainingBalance: newBalance,
+      txId,
     };
   };
 
@@ -1979,12 +2029,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
     };
     setRegisteredFarmers((prev) => [newFarmer, ...prev]);
-    api.registerFarmer(newFarmer);
+    api.registerFarmer(newFarmer).catch((err) => console.warn("API registerFarmer error:", err));
+
+    // Also register as active User account so farmer appears in Admin Farmers and All Users
+    const cleanP = (farmerData.phone || "").replace(/\D/g, "").slice(-10);
+    const farmerUserAccount = {
+      id: newFarmer.id,
+      userId: `FRM-${cleanP.slice(-4) || "0000"}-${Math.floor(100 + Math.random() * 900)}`,
+      name: farmerData.name,
+      fullName: farmerData.name,
+      phone: farmerData.phone,
+      role: "farmer" as const,
+      village: farmerData.village || "",
+      district: farmerData.district || "Patna",
+      state: farmerData.state || "Bihar",
+      pincode: farmerData.pincode || "800001",
+      address: [farmerData.village, farmerData.district, farmerData.state].filter(Boolean).join(", "),
+      landSize: farmerData.landSize || "3 Acres",
+      aadhaar: farmerData.aadhaar,
+      registeredByDealer: farmerData.registeredByDealer || user?.name || "Verified Dealer",
+      status: "active",
+      verificationStatus: "Verified",
+      isVerified: true,
+      createdAt: newFarmer.createdAt,
+    };
+    setRegisteredAccounts((prev) => [farmerUserAccount, ...prev.filter((a) => (a.phone || "").replace(/\D/g, "").slice(-10) !== cleanP)]);
+    api.saveUser(farmerUserAccount).catch((err) => console.warn("API saveUser error:", err));
+
     addNotification(
       "New Farmer Registered 👤",
       `Farmer ${farmerData.name} (+91 ${farmerData.phone}) registered successfully by ${farmerData.registeredByDealer}.`,
       "success",
-      "/dashboard",
+      "/admin",
       "account"
     );
     return newFarmer;
@@ -1992,16 +2068,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Checking KCC Status by Phone, Aadhaar, or Card Number (Point 1.i)
   const checkKccStatusByPhoneAadhaar = (phone?: string, aadhaar?: string, cardNumber?: string): KccApplication | null => {
-    const cleanPhone = (phone || "").trim();
+    const cleanPhone = (phone || "").replace(/\D/g, "").slice(-10);
     const cleanAadhaar = (aadhaar || "").trim().replace(/\s+/g, "");
-    const cleanCard = (cardNumber || "").trim();
+    const cleanCard = (cardNumber || "").trim().toLowerCase();
 
     if (!cleanPhone && !cleanAadhaar && !cleanCard) return null;
 
-    const matched = kccApplications.find(a => {
-      const matchPhone = cleanPhone && (a.phone.trim() === cleanPhone || a.phone.includes(cleanPhone));
-      const matchAadhaar = cleanAadhaar && (a.aadhaar.replace(/\s+/g, "") === cleanAadhaar || a.aadhaar.includes(cleanAadhaar));
-      const matchCard = cleanCard && (a.cardNumber?.toLowerCase() === cleanCard.toLowerCase() || a.cardNumber?.includes(cleanCard));
+    const matched = kccApplications.find((a) => {
+      const aPhone = (a.phone || "").replace(/\D/g, "").slice(-10);
+      const aAadhaar = (a.aadhaar || "").replace(/\s+/g, "");
+      const aCard = (a.cardNumber || "").trim().toLowerCase();
+      const matchPhone = Boolean(cleanPhone && aPhone && (aPhone === cleanPhone || aPhone.includes(cleanPhone)));
+      const matchAadhaar = Boolean(cleanAadhaar && aAadhaar && (aAadhaar === cleanAadhaar || aAadhaar.includes(cleanAadhaar)));
+      const matchCard = Boolean(cleanCard && aCard && (aCard === cleanCard || aCard.includes(cleanCard)));
       return matchPhone || matchAadhaar || matchCard;
     });
 
@@ -2013,48 +2092,169 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const getFarmerProfileByDetails = (query: { kccNum?: string; aadhaar?: string; phone?: string }) => {
     const cleanKcc = (query.kccNum || "").trim();
     const cleanAadhaar = (query.aadhaar || "").trim().replace(/\s+/g, "");
-    const cleanPhone = (query.phone || "").trim();
+    const cleanPhone = (query.phone || "").replace(/\D/g, "").slice(-10);
 
     if (!cleanKcc && !cleanAadhaar && !cleanPhone) {
       return { exists: false };
     }
 
     // 1. Search in kccApplications
-    const matchedApp = kccApplications.find(a => 
-      (cleanKcc && (a.cardNumber === cleanKcc || a.cardNumber?.includes(cleanKcc))) ||
-      (cleanAadhaar && (a.aadhaar.replace(/\s+/g, "") === cleanAadhaar || a.aadhaar.includes(cleanAadhaar))) ||
-      (cleanPhone && (a.phone === cleanPhone || a.phone.includes(cleanPhone)))
-    );
+    const matchedApp = kccApplications.find((a) => {
+      const aCard = (a.cardNumber || "").trim();
+      const aAadhaar = (a.aadhaar || "").replace(/\s+/g, "");
+      const aPhone = (a.phone || "").replace(/\D/g, "").slice(-10);
+      return (
+        (cleanKcc && (aCard === cleanKcc || aCard.includes(cleanKcc))) ||
+        (cleanAadhaar && (aAadhaar === cleanAadhaar || aAadhaar.includes(cleanAadhaar))) ||
+        (cleanPhone && aPhone && (aPhone === cleanPhone || aPhone.includes(cleanPhone)))
+      );
+    });
 
     // 2. Search in registeredFarmers
-    const matchedRegistered = registeredFarmers.find(r =>
-      (cleanAadhaar && (r.aadhaar.replace(/\s+/g, "") === cleanAadhaar || r.aadhaar.includes(cleanAadhaar))) ||
-      (cleanPhone && (r.phone === cleanPhone || r.phone.includes(cleanPhone)))
-    );
+    const matchedRegistered = registeredFarmers.find((r) => {
+      const rAadhaar = (r.aadhaar || "").replace(/\s+/g, "");
+      const rPhone = (r.phone || "").replace(/\D/g, "").slice(-10);
+      return (
+        (cleanAadhaar && (rAadhaar === cleanAadhaar || rAadhaar.includes(cleanAadhaar))) ||
+        (cleanPhone && rPhone && (rPhone === cleanPhone || rPhone.includes(cleanPhone)))
+      );
+    });
 
-    // 3. Search card balance
-    const cardLookupKey = cleanKcc || (matchedApp?.cardNumber || "");
+    // 3. Search in registeredAccounts
+    const matchedAccount = registeredAccounts.find((u) => {
+      const uPhone = (u.phone || "").replace(/\D/g, "").slice(-10);
+      const uCard = (u.kccCardNumber || "").trim();
+      return (
+        (cleanPhone && uPhone && uPhone === cleanPhone) ||
+        (cleanKcc && uCard && (uCard === cleanKcc || uCard.includes(cleanKcc)))
+      );
+    });
+
+    // 4. Search card balance
+    const cardLookupKey = cleanKcc || matchedApp?.cardNumber || matchedAccount?.kccCardNumber || "";
     const cardInfo = checkFarmerCardBalance(cardLookupKey);
 
-    if (matchedApp || matchedRegistered || cardInfo?.exists) {
-      const activeLimit = matchedApp?.creditLimit || matchedApp?.paymentAmount || 50000;
+    if (matchedApp || matchedRegistered || matchedAccount || cardInfo?.exists) {
+      const activeLimit = matchedApp?.creditLimit || matchedApp?.paymentAmount || matchedAccount?.kccCreditLimit || 50000;
       return {
         exists: true,
         kccApp: matchedApp,
-        cardInfo: cardInfo?.exists ? cardInfo : { exists: true, cardHolder: matchedApp?.fullName || matchedRegistered?.name || "Farmer Account", balance: activeLimit, status: "active" },
+        cardInfo: cardInfo?.exists ? cardInfo : { exists: true, cardHolder: matchedApp?.fullName || matchedRegistered?.name || matchedAccount?.fullName || "Farmer Account", balance: activeLimit, status: "active" },
         profile: {
-          name: matchedApp?.fullName || matchedRegistered?.name || user?.name || "Kishan Farmer",
-          phone: matchedApp?.phone || matchedRegistered?.phone || user?.phone || cleanPhone || "9876543210",
-          aadhaar: matchedApp?.aadhaar || matchedRegistered?.aadhaar || cleanAadhaar || "1234-5678-9012",
-          district: matchedApp?.district || matchedRegistered?.district || "Patna",
-          village: matchedRegistered?.village || matchedApp?.address || "Bihar Village",
-          landSize: matchedApp?.landSize || matchedRegistered?.landSize || "3.5 Acres",
-          cardNumber: matchedApp?.cardNumber || cardLookupKey || "KCC-BH-2026-9041",
-          kccStatus: matchedApp?.status || "approved",
-        }
+          name: matchedApp?.fullName || matchedRegistered?.name || matchedAccount?.fullName || matchedAccount?.name || user?.name || "Kishan Farmer",
+          phone: matchedApp?.phone || matchedRegistered?.phone || matchedAccount?.phone || user?.phone || cleanPhone || "9876543210",
+          aadhaar: matchedApp?.aadhaar || matchedRegistered?.aadhaar || matchedAccount?.aadhaar || cleanAadhaar || "1234-5678-9012",
+          district: matchedApp?.district || matchedRegistered?.district || matchedAccount?.district || "Patna",
+          village: matchedRegistered?.village || matchedApp?.address || matchedAccount?.village || "Bihar Village",
+          landSize: matchedApp?.landSize || matchedRegistered?.landSize || matchedAccount?.landSize || "3.5 Acres",
+          cardNumber: matchedApp?.cardNumber || matchedAccount?.kccCardNumber || cardLookupKey || "KCC-BH-2026-9041",
+          kccStatus: matchedApp?.status || (matchedAccount?.isKccIssued ? "approved" : "pending"),
+        },
       };
     }
 
+    return { exists: false };
+  };
+
+  // Async lookup: searches local state, and if not found, refreshes from DB to ensure nothing is missed
+  const lookupFarmerProfileAsync = async (query: { kccNum?: string; aadhaar?: string; phone?: string }) => {
+    const local = getFarmerProfileByDetails(query);
+    if (local && local.exists) return local;
+
+    try {
+      const [remoteKcc, remoteFarmers, remoteUsers] = await Promise.allSettled([
+        api.getKccApplications(),
+        api.getRegisteredFarmers(),
+        api.getUsers(),
+      ]);
+
+      if (remoteKcc.status === "fulfilled" && Array.isArray(remoteKcc.value)) {
+        const kccVal = remoteKcc.value as any[];
+        setKccApplications((prev) => {
+          const map = new Map<string, KccApplication>();
+          prev.forEach((item) => map.set(item.id, item));
+          kccVal.forEach((item: any) => map.set(item.id, item));
+          const merged = Array.from(map.values());
+          localStorage.setItem("krivexo_kcc_apps", JSON.stringify(merged));
+          return merged;
+        });
+      }
+
+      if (remoteFarmers.status === "fulfilled" && Array.isArray(remoteFarmers.value)) {
+        const farmersVal = remoteFarmers.value as any[];
+        setRegisteredFarmers((prev) => {
+          const map = new Map<string, RegisteredFarmer>();
+          prev.forEach((item) => map.set(item.id, item));
+          farmersVal.forEach((item: any) => map.set(item.id, item));
+          const merged = Array.from(map.values());
+          localStorage.setItem("krivexo_registered_farmers", JSON.stringify(merged));
+          return merged;
+        });
+      }
+
+      const cleanK = (query.kccNum || "").trim();
+      const cleanA = (query.aadhaar || "").trim().replace(/\s+/g, "");
+      const cleanP = (query.phone || "").replace(/\D/g, "").slice(-10);
+
+      const allK = remoteKcc.status === "fulfilled" && Array.isArray(remoteKcc.value) ? remoteKcc.value : kccApplications;
+      const allF = remoteFarmers.status === "fulfilled" && Array.isArray(remoteFarmers.value) ? remoteFarmers.value : registeredFarmers;
+      const allU = remoteUsers.status === "fulfilled" && Array.isArray(remoteUsers.value) ? remoteUsers.value : registeredAccounts;
+
+      const matchedApp = allK.find((a: any) => {
+        const aCard = (a.cardNumber || "").trim();
+        const aAadhaar = (a.aadhaar || "").replace(/\s+/g, "");
+        const aPhone = (a.phone || "").replace(/\D/g, "").slice(-10);
+        return (
+          (cleanK && (aCard === cleanK || aCard.includes(cleanK))) ||
+          (cleanA && (aAadhaar === cleanA || aAadhaar.includes(cleanA))) ||
+          (cleanP && aPhone && (aPhone === cleanP || aPhone.includes(cleanP)))
+        );
+      });
+
+      const matchedF = allF.find((r: any) => {
+        const rAadhaar = (r.aadhaar || "").replace(/\s+/g, "");
+        const rPhone = (r.phone || "").replace(/\D/g, "").slice(-10);
+        return (
+          (cleanA && (rAadhaar === cleanA || rAadhaar.includes(cleanA))) ||
+          (cleanP && rPhone && (rPhone === cleanP || rPhone.includes(cleanP)))
+        );
+      });
+
+      const matchedU = allU.find((u: any) => {
+        const uPhone = (u.phone || "").replace(/\D/g, "").slice(-10);
+        const uCard = (u.kccCardNumber || "").trim();
+        return (
+          (cleanP && uPhone && uPhone === cleanP) ||
+          (cleanK && uCard && (uCard === cleanK || uCard.includes(cleanK)))
+        );
+      });
+
+      if (matchedApp || matchedF || matchedU) {
+        const activeLimit = matchedApp?.creditLimit || matchedApp?.paymentAmount || matchedU?.kccCreditLimit || 50000;
+        return {
+          exists: true,
+          kccApp: matchedApp,
+          cardInfo: {
+            exists: true,
+            cardHolder: matchedApp?.fullName || matchedF?.name || matchedU?.name || "Farmer Account",
+            balance: activeLimit,
+            status: "active",
+          },
+          profile: {
+            name: matchedApp?.fullName || matchedF?.name || matchedU?.name || matchedU?.fullName || "Kishan Farmer",
+            phone: matchedApp?.phone || matchedF?.phone || matchedU?.phone || cleanP || "9876543210",
+            aadhaar: matchedApp?.aadhaar || matchedF?.aadhaar || matchedU?.aadhaar || cleanA || "1234-5678-9012",
+            district: matchedApp?.district || matchedF?.district || matchedU?.district || "Patna",
+            village: matchedF?.village || matchedApp?.address || matchedU?.village || "Bihar Village",
+            landSize: matchedApp?.landSize || matchedF?.landSize || matchedU?.landSize || "3.5 Acres",
+            cardNumber: matchedApp?.cardNumber || matchedU?.kccCardNumber || cleanK || "KCC-BH-2026-9041",
+            kccStatus: matchedApp?.status || (matchedU?.isKccIssued ? "approved" : "pending"),
+          },
+        };
+      }
+    } catch (err) {
+      console.warn("lookupFarmerProfileAsync error:", err);
+    }
     return { exists: false };
   };
 
@@ -2343,6 +2543,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         checkKccStatusByPhoneAadhaar,
         getFarmerProfileByDetails,
+        lookupFarmerProfileAsync,
 
         updateOrderStatus,
 

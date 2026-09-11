@@ -38,7 +38,7 @@ const LOCATIONS: Record<string, Record<string, string[]>> = {
 };
 
 export default function MandiBhavPage() {
-  const { isKccIssued, setIsKccAppModalOpen, t } = useApp();
+  const { isKccIssued, setIsKccAppModalOpen, t, user } = useApp();
 
   const [selectedState, setSelectedState] = useState<string>("Bihar");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("Samastipur");
@@ -123,8 +123,8 @@ export default function MandiBhavPage() {
       <Navbar />
 
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
-        {/* KCC APPLICATION BANNER */}
-        {!isKccIssued && (
+        {/* KCC APPLICATION BANNER - only for non-dealer farmers */}
+        {!isKccIssued && user?.role !== "dealer" && (
           <div className="mb-6 bg-linear-to-r from-amber-950/90 via-amber-900/60 to-black border-2 border-amber-500/70 rounded-2xl p-4 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400 font-bold text-lg">

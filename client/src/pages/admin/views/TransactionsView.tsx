@@ -96,11 +96,11 @@ export default function TransactionsView({ orders: propOrders }: TransactionsVie
             user: uName,
             userType: uRole,
             avatar,
-            type: "Credit",
-            description: `Platform Deposit Reserve`,
+            type: (p.type === "Debit" || p.type === "debit" || (p.purpose && p.purpose.includes("POS"))) ? "Debit" : "Credit",
+            description: p.purpose || p.notes || p.description || `Platform Deposit Reserve`,
             amount: amt,
             status: isFailed ? "Failed" : isPending ? "Pending" : "Success",
-            method: (p.paymentMethod || p.gateway || "BANK TRANSFER").toUpperCase(),
+            method: (p.method || p.paymentMethod || p.gateway || "BANK TRANSFER").toUpperCase(),
             rawStatus: p.status,
           });
         });

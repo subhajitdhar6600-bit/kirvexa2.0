@@ -76,6 +76,17 @@ router.put('/listings/:id/approve', async (req, res) => {
       { status: 'approved' },
       { new: true }
     );
+    if (updated && updated.type === 'product') {
+      await Product.updateMany(
+        { $or: [{ id: updated.id }, { name: updated.title, dealerId: updated.dealerId }] },
+        {
+          $set: {
+            status: 'ACTIVE',
+            adminApprovalStatus: 'APPROVED'
+          }
+        }
+      ).catch(() => {});
+    }
     return res.json(updated);
   } catch (err) {
     return res.status(500).json({ error: err.message });
@@ -90,6 +101,17 @@ router.put('/listings/:id/reject', async (req, res) => {
       { status: 'rejected' },
       { new: true }
     );
+    if (updated && updated.type === 'product') {
+      await Product.updateMany(
+        { $or: [{ id: updated.id }, { name: updated.title, dealerId: updated.dealerId }] },
+        {
+          $set: {
+            status: 'INACTIVE',
+            adminApprovalStatus: 'REJECTED'
+          }
+        }
+      ).catch(() => {});
+    }
     return res.json(updated);
   } catch (err) {
     return res.status(500).json({ error: err.message });

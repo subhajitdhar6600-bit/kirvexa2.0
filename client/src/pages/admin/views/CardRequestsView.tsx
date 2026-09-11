@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search, Eye, Check, X, ChevronLeft, ChevronRight, Filter,
   Download, CheckCircle, XCircle, Clock, MapPin, Phone,
@@ -21,7 +21,14 @@ interface CardRequestsViewProps {
 }
 
 export default function CardRequestsView({ kccApplications: propKcc }: CardRequestsViewProps) {
-  const { kccApplications: contextKcc, approveKccApplication, rejectKccApplication } = useApp();
+  const { kccApplications: contextKcc, approveKccApplication, rejectKccApplication, loadAllKccApplications } = useApp();
+
+  useEffect(() => {
+    if (loadAllKccApplications) {
+      loadAllKccApplications();
+    }
+  }, [loadAllKccApplications]);
+
   const rawList = (propKcc && propKcc.length > 0 ? propKcc : contextKcc) || [];
 
   const requests = rawList.map((k: any) => ({
@@ -36,6 +43,7 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
     status: (k.status?.toLowerCase() === "approved" ? "Approved" : k.status?.toLowerCase() === "rejected" ? "Rejected" : "Pending") as "Pending" | "Approved" | "Rejected",
     appliedOn: k.createdAt ? new Date(k.createdAt).toLocaleDateString("en-IN") : "Today",
     idProof: k.aadhaar ? "Aadhaar Card" : "Government ID",
+    appliedByDealer: k.appliedByDealer || k.dealerName || "",
     avatar: (k.fullName || "KC").slice(0, 2).toUpperCase(),
   }));
 
@@ -249,7 +257,14 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
                             {r.avatar}
                           </div>
                           <div>
-                            <p className="font-bold text-gray-900">{r.name}</p>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="font-bold text-gray-900">{r.name}</p>
+                              {r.appliedByDealer && (
+                                <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 font-semibold text-[9px] border border-emerald-300">
+                                  Dealer: {r.appliedByDealer}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px] text-gray-400">{r.phone} • {r.address}</p>
                           </div>
                         </div>
@@ -363,6 +378,7 @@ export default function CardRequestsView({ kccApplications: propKcc }: CardReque
                   { label: "Card Type", value: selected.cardType },
                   { label: "Credit Requested", value: `₹ ${selected.creditRequested.toLocaleString("en-IN")}` },
                   { label: "ID Proof", value: selected.idProof },
+                  ...(selected.appliedByDealer ? [{ label: "Applied By Dealer", value: selected.appliedByDealer }] : []),
                   { label: "Applied On", value: selected.appliedOn },
                 ].map((row, i) => (
                   <div key={i} className="flex items-start justify-between gap-2">

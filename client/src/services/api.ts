@@ -131,6 +131,13 @@ export const api = {
   approveKccApplication: (id: string, cardNumber?: string, creditLimit?: number) => apiFetch<any>(`/kcc/${id}/approve`, { method: 'PUT', body: JSON.stringify({ cardNumber, creditLimit }) }),
   rejectKccApplication: (id: string) => apiFetch<any>(`/kcc/${id}/reject`, { method: 'PUT' }),
   updateKccLimit: (data: { cardNumber?: string; phone?: string; id?: string; creditLimit: number }) => apiFetch<any>('/kcc/update-limit', { method: 'PUT', body: JSON.stringify(data) }),
+  searchKcc: (query: { phone?: string; aadhaar?: string; cardNumber?: string }) => {
+    const params = new URLSearchParams();
+    if (query.phone) params.append('phone', query.phone);
+    if (query.aadhaar) params.append('aadhaar', query.aadhaar);
+    if (query.cardNumber) params.append('cardNumber', query.cardNumber);
+    return apiFetch<any>(`/kcc/search?${params.toString()}`);
+  },
 
   // Categories
   getCategories: () => apiFetch<any>('/categories'),

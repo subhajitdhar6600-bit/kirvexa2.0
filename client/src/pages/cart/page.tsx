@@ -132,8 +132,8 @@ export default function CartPage() {
         {/* Content Container */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           
-          {/* KCC APPLICATION BANNER */}
-          {!isKccIssued && (
+          {/* KCC APPLICATION BANNER - only for non-dealer farmers */}
+          {!isKccIssued && user?.role !== "dealer" && (
             <div className="mb-6 bg-linear-to-r from-amber-950/90 via-amber-900/60 to-black border-2 border-amber-500/70 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-400 font-bold">
